@@ -1,0 +1,12 @@
+node_modules/
+build/
+.svelte-kit/
+bin/*.js
+config.json
+*.log
+*.tgz
+.DS_Store
+
+# Local tooling state (not part of the project)
+.claude/
+.omc/

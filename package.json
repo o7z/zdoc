@@ -1,0 +1,58 @@
+{
+  "name": "@o7z/zdoc",
+  "version": "1.0.0",
+  "description": "Zero-config Markdown docs site with password protection, auto sidebar, Mermaid, search, and dark mode.",
+  "license": "MIT",
+  "author": "o7z",
+  "type": "module",
+  "bin": {
+    "zdoc": "./bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "build",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "docs",
+    "documentation",
+    "markdown",
+    "sveltekit",
+    "mermaid",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/o7z/zdoc"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build && tsc -p tsconfig.bin.json && node -e \"import('node:fs').then(m=>m.chmodSync('bin/cli.js',0o755))\"",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build",
+    "start": "node bin/cli.js"
+  },
+  "dependencies": {
+    "@sveltejs/adapter-node": "^5.2.12",
+    "@sveltejs/kit": "^2.22.0",
+    "@sveltejs/vite-plugin-svelte": "^6.0.0",
+    "mermaid": "^11.12.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "svelte": "^5.0.0",
+    "unified": "^11.0.5",
+    "vite": "^7.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

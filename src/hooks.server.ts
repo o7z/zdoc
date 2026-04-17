@@ -1,0 +1,116 @@
+import { createHash, randomBytes } from 'node:crypto';
+import type { Handle } from '@sveltejs/kit';
+import { getConfig, getSessionEpoch } from '$lib/config.js';
+
+const SESSION_SECRET = randomBytes(32).toString('hex');
+
+const validSessions = new Map<string, number>();
+
+function hashToken(token: string): string {
+	return createHash('sha256').update(token + SESSION_SECRET).digest('hex');
+}
+
+function isValidSession(token: string): boolean {
+	const hash = hashToken(token);
+	const epoch = validSessions.get(hash);
+	if (epoch === undefined) return false;
+	if (epoch !== getSessionEpoch()) {
+		validSessions.delete(hash);
+		return false;
+	}
+	return true;
+}
+
+export const handle: Handle = async ({ event, resolve }) => {
+	const password = getConfig().password;
+
+	if (!password) {
+		return resolve(event);
+	}
+
+	if (event.url.pathname === '/login' && event.request.method === 'POST') {
+		const form = await event.request.formData();
+		const pwd = form.get('password');
+
+		if (pwd === password) {
+			const token = randomBytes(24).toString('hex');
+			validSessions.set(hashToken(token), getSessionEpoch());
+
+			return new Response(null, {
+				status: 303,
+				headers: {
+					'Set-Cookie': `docs_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`,
+					Location: event.url.searchParams.get('redirect') || '/',
+				},
+			});
+		}
+
+		return new Response(loginPage(true, event.url.searchParams.get('redirect') || '/'), {
+			status: 401,
+			headers: { 'Content-Type': 'text/html; charset=utf-8' },
+		});
+	}
+
+	const cookieHeader = event.request.headers.get('cookie') || '';
+	const match = cookieHeader.match(/docs_session=([^;]+)/);
+	if (match && isValidSession(match[1])) {
+		return resolve(event);
+	}
+
+	if (event.url.pathname === '/login') {
+		return new Response(loginPage(false, event.url.searchParams.get('redirect') || '/'), {
+			headers: { 'Content-Type': 'text/html; charset=utf-8' },
+		});
+	}
+
+	const redirect = encodeURIComponent(event.url.pathname + event.url.search);
+	return new Response(null, {
+		status: 303,
+		headers: { Location: `/login?redirect=${redirect}` },
+	});
+};
+
+function loginPage(error: boolean, redirect: string): string {
+	return `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC",sans-serif;
+display:flex;align-items:center;justify-content:center;min-height:100vh;
+background:#f9fafb;color:#1a1a2e}
+.card{background:#fff;padding:48px 40px;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.08);
+width:100%;max-width:380px;text-align:center}
+h1{font-size:24px;margin-bottom:8px;font-weight:700}
+p.sub{color:#6b7280;margin-bottom:32px;font-size:14px}
+input{width:100%;padding:12px 16px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;
+outline:none;transition:border-color .2s}
+input:focus{border-color:#6366f1}
+button{width:100%;padding:12px;margin-top:16px;background:#4f46e5;color:#fff;border:none;
+border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
+button:hover{background:#4338ca}
+.error{color:#dc2626;font-size:13px;margin-top:12px}
+@media(prefers-color-scheme:dark){
+body{background:#111;color:#e5e7eb}
+.card{background:#1a1a2e;box-shadow:0 4px 24px rgba(0,0,0,0.3)}
+input{background:#111;color:#e5e7eb;border-color:#374151}
+input:focus{border-color:#818cf8}
+}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Docs</h1>
+<p class="sub">Enter password to continue</p>
+<form method="POST" action="/login?redirect=${encodeURIComponent(redirect)}">
+<input type="password" name="password" placeholder="Password" autofocus required>
+<button type="submit">Enter</button>
+${error ? '<p class="error">Incorrect password</p>' : ''}
+</form>
+</div>
+</body>
+</html>`;
+}
