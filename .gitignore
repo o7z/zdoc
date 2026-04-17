@@ -10,3 +10,6 @@ config.json
 # Local tooling state (not part of the project)
 .claude/
 .omc/
+
+# zdoc runtime SQLite (created on first auth use in the demo)
+demo/.zdoc/

@@ -1,0 +1,11 @@
+title: 示例
+order: 1
+
+pages:
+  long-page:
+    title: 长页面（演示 TOC）
+    order: 1
+    description: 故意写得很长，用来演示右侧 h1–h3 目录树和滚动高亮。
+    version: 1.0.0
+    author: o7z
+    modified: 2026-04-18

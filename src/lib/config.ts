@@ -1,4 +1,4 @@
-import { readFileSync, existsSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 export interface DocsConfig {
@@ -47,28 +47,8 @@ function loadConfig(): DocsConfig {
 	};
 }
 
-let state: DocsConfig = loadConfig();
-let sessionEpoch = 0;
+const state: DocsConfig = loadConfig();
 
 export function getConfig(): DocsConfig {
 	return state;
-}
-
-export function getSessionEpoch(): number {
-	return sessionEpoch;
-}
-
-export function setPassword(next: string): void {
-	state = { ...state, password: next };
-	sessionEpoch += 1;
-
-	if (existsSync(configPath)) {
-		try {
-			const current = readFileConfig();
-			current.password = next;
-			writeFileSync(configPath, JSON.stringify(current, null, 2) + '\n', 'utf-8');
-		} catch {
-			// Best-effort persistence; in-memory update still succeeded.
-		}
-	}
 }

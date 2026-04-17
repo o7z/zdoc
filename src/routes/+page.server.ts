@@ -72,7 +72,7 @@ export const load: PageServerLoad = async () => {
 		}
 	}
 
-	const html = body ? await renderMarkdown(body) : '';
+	const html = body ? (await renderMarkdown(body)).html : '';
 	const title = hero?.name || rootTitle;
 
 	return { title, html, hero };

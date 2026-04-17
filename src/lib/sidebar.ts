@@ -39,14 +39,12 @@ function scanDir(dir: string, root: string): SidebarGroup[] {
 		if (!meta || !meta.title || !visible(meta)) continue;
 
 		const children = scanDir(fullPath, root);
-		const hasGuide = existsSync(join(fullPath, 'index.md'));
 
 		items.push({
 			order: meta.order ?? 999,
 			text: meta.title,
 			item: {
 				text: meta.title,
-				link: hasGuide ? '/' + relative(root, fullPath).replace(/\\/g, '/') : undefined,
 				collapsed: false,
 				items: children.length > 0 ? children : undefined,
 			},
@@ -62,7 +60,7 @@ function scanDir(dir: string, root: string): SidebarGroup[] {
 		if (!existsSync(targetPath) || !statSync(targetPath).isFile()) continue;
 
 		const rel = relative(root, targetPath).replace(/\\/g, '/');
-		const link = key.endsWith('.pdf') ? '/' + rel : '/' + rel.replace(/\.md$/, '');
+		const link = '/' + rel;
 
 		items.push({
 			order: meta.order ?? 999,

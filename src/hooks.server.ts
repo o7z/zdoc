@@ -1,25 +1,6 @@
-import { createHash, randomBytes } from 'node:crypto';
 import type { Handle } from '@sveltejs/kit';
-import { getConfig, getSessionEpoch } from '$lib/config.js';
-
-const SESSION_SECRET = randomBytes(32).toString('hex');
-
-const validSessions = new Map<string, number>();
-
-function hashToken(token: string): string {
-	return createHash('sha256').update(token + SESSION_SECRET).digest('hex');
-}
-
-function isValidSession(token: string): boolean {
-	const hash = hashToken(token);
-	const epoch = validSessions.get(hash);
-	if (epoch === undefined) return false;
-	if (epoch !== getSessionEpoch()) {
-		validSessions.delete(hash);
-		return false;
-	}
-	return true;
-}
+import { getConfig } from '$lib/config.js';
+import { createSession, validateSession } from '$lib/sessions.js';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const password = getConfig().password;
@@ -33,13 +14,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 		const pwd = form.get('password');
 
 		if (pwd === password) {
-			const token = randomBytes(24).toString('hex');
-			validSessions.set(hashToken(token), getSessionEpoch());
+			const { token, maxAge } = createSession();
 
 			return new Response(null, {
 				status: 303,
 				headers: {
-					'Set-Cookie': `docs_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`,
+					'Set-Cookie': `docs_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`,
 					Location: event.url.searchParams.get('redirect') || '/',
 				},
 			});
@@ -53,7 +33,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const cookieHeader = event.request.headers.get('cookie') || '';
 	const match = cookieHeader.match(/docs_session=([^;]+)/);
-	if (match && isValidSession(match[1])) {
+	if (match && validateSession(match[1])) {
 		return resolve(event);
 	}
 

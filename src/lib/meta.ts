@@ -5,6 +5,9 @@ export interface PageMeta {
 	order?: number;
 	modified?: string;
 	env?: string;
+	description?: string;
+	version?: string;
+	author?: string;
 }
 
 export interface DirMeta extends PageMeta {
@@ -138,6 +141,9 @@ function coercePageMeta(raw: unknown): PageMeta {
 		order: Number.isFinite(order) ? (order as number) : undefined,
 		modified: typeof r.modified === 'string' ? r.modified : undefined,
 		env: typeof r.env === 'string' ? r.env : undefined,
+		description: typeof r.description === 'string' ? r.description : undefined,
+		version: typeof r.version === 'string' ? r.version : undefined,
+		author: typeof r.author === 'string' ? r.author : undefined,
 	};
 }
 

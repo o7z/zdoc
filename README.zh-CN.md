@@ -5,7 +5,8 @@
 零配置的 Markdown 文档站。把 `zdoc` 指向一个存放 `.md` 的目录，立刻获得一个带完整功能的文档站：
 
 - 由每个目录的 `_meta.yaml` 自动生成侧边栏
-- 服务端密码保护，浏览器中可直接修改密码
+- 右侧自动生成的目录树（h1–h3）+ 当前节自动高亮
+- 服务端密码保护，会话跨进程重启保持
 - Mermaid 图表 + 代码高亮
 - 暗色模式 + `Ctrl+K` 搜索
 - 响应式布局
@@ -62,7 +63,7 @@ zdoc -w hunter2 -p 8080 -d ./site   # 全参数覆盖
 
 优先级：**CLI 参数 > `config.json` > 默认值**。
 
-如果 `config.json` 存在，浏览器里的 **修改密码** 也会持久化写回这个文件；否则只存内存，重启后重置。
+密码在启动时由 CLI / `config.json` / `ZDOC_PASSWORD` 决定。浏览器里没有改密码界面 —— 如要换密码，请改源头并重启。
 
 ## 撰写文档
 
@@ -82,6 +83,9 @@ pages:
     title: 安装             # 必填，没有则该文件隐藏
     order: 1
     modified: 2026-04-18
+    version: 1.0.1
+    description: npm、bun 以及全局安装的分步指南。
+    author: o7z
   config:
     title: 配置
     order: 2
@@ -94,25 +98,26 @@ pages:
 
 ### 单文档字段
 
-| 字段       | 必填 | 说明                                                                    |
-|------------|------|------------------------------------------------------------------------|
-| `title`    | 是   | 侧边栏显示名。没有 `title` 的文件隐藏。                                      |
-| `order`    | 否   | 排序权重，默认 `999`。                                                      |
-| `modified` | 否   | 信息性字段：最后修改时间字符串。                                              |
-| `env`      | 否   | 设为 `prod` 表示仅生产环境显示（开发模式下 `NODE_ENV !== 'production'` 时隐藏）。|
+| 字段          | 必填 | 说明                                                                          |
+|---------------|------|------------------------------------------------------------------------------|
+| `title`       | 是   | 侧边栏显示名。没有 `title` 的文件隐藏。                                           |
+| `order`       | 否   | 排序权重，默认 `999`。                                                            |
+| `modified`    | 否   | 最后修改时间字符串，会出现在文档顶部的元数据条上。                                    |
+| `description` | 否   | 简短描述，渲染在正文上方。                                                         |
+| `version`     | 否   | 文档版本（如 `1.0.1`），作为 chip 出现在元数据条上。                                  |
+| `author`      | 否   | 作者名，作为 chip 出现在元数据条上。                                                |
+| `env`         | 否   | 设为 `prod` 表示仅生产环境显示（开发模式下 `NODE_ENV !== 'production'` 时隐藏）。      |
 
-### 目录引导页（`index.md`）
-
-任意目录下放一个 `index.md`，点击侧边栏目录标题时打开的就是它。`index.md` 是纯 Markdown——无元数据、无 frontmatter（站点首页的 hero 块例外，见下）。
-
-目录的标题来自 `_meta.yaml`，所以 `index.md` 自身不需要声明标题。
+`description`、`version`、`author`、`modified` 对 `.md` 和 `.pdf` 都生效；只要其中任意一个有值，页面顶部就会渲染一个小型元数据条。
 
 ### 站点首页
 
-根目录用同样的方式：
+根目录 `<docsDir>/index.md` 会被渲染为站点首页：
 
 - `<docsDir>/_meta.yaml` 声明站点标题
-- `<docsDir>/index.md` 即站点首页
+- `<docsDir>/index.md` 即站点首页（纯 Markdown，另支持下文可选的 hero frontmatter）
+
+侧边栏上的目录节点只负责折叠/展开，不会跳转。如果你想让某个目录下有一个单独的入口页面，请在该目录的 `_meta.yaml` 的 `pages` 里加一个条目。
 
 ### 目录结构示例
 
@@ -122,7 +127,6 @@ docs/
 ├── index.md                # 站点首页（纯 Markdown）
 ├── getting-started/
 │   ├── _meta.yaml          # title: 快速开始; order: 1; pages: {install:…, config:…}
-│   ├── index.md            # 目录引导页（可选）
 │   ├── install.md          # 纯内容，在 _meta.yaml 里列出
 │   └── config.md
 ├── guide/
@@ -146,7 +150,7 @@ tagline: 零配置，暗色模式，Mermaid，搜索。
 actions:
   - theme: brand
     text: 快速开始
-    link: /getting-started/install
+    link: /getting-started/install.md
   - theme: alt
     text: GitHub
     link: https://github.com/…
@@ -164,11 +168,12 @@ frontmatter 之后的 Markdown 正常渲染。
 
 ## 功能细节
 
+- **右侧目录**：每个 Markdown 页面会在视口宽度 ≥ 1280px 时，在右侧固定区域自动生成一棵 h1–h3 目录树。滚动时自动高亮当前章节，点击条目平滑滚动到对应位置。
 - **Mermaid**：围栏代码块 ```` ```mermaid ```` 会渲染成 SVG。
 - **语法高亮**：`rehype-highlight`，自动识别语言。
 - **搜索**：按 `Ctrl+K`（Mac：`Cmd+K`）模糊匹配侧边栏条目。
 - **暗色模式**：自动检测系统偏好 + 手动切换，状态持久化到 `localStorage`。
-- **密码保护**：服务端 HttpOnly 会话 cookie；传空密码（`-w ""`）或不传 `-w` 即禁用鉴权。
+- **密码保护**：服务端 HttpOnly 会话 cookie；传空密码（`-w ""`）或不传 `-w` 即禁用鉴权。会话信息持久化在 `<docsDir>/.zdoc/zdoc.db` 这个小型 SQLite 文件里，所以重启 `zdoc` 后已登录的 cookie 仍然有效。会话在 7 天 TTL 到期时失效；删除 `<docsDir>/.zdoc/` 即可让所有人下线。
 - **PDF**：在 `_meta.yaml` 的 `pages` 里列出后，会通过浏览器原生 PDF 查看器嵌入 iframe。
 
 ## 开发（贡献者）

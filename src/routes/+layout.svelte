@@ -8,13 +8,6 @@
 	let darkMode = $state(false);
 	let searchOpen = $state(false);
 	let searchQuery = $state('');
-	let pwdOpen = $state(false);
-	let pwdCurrent = $state('');
-	let pwdNext = $state('');
-	let pwdConfirm = $state('');
-	let pwdError = $state('');
-	let pwdSuccess = $state(false);
-	let pwdBusy = $state(false);
 	/** @type {Set<string>} */
 	let collapsedGroups = $state(new Set());
 	let searchResults = $derived.by(() => {
@@ -53,55 +46,6 @@
 	function navigateToResult(link) {
 		closeSearch();
 		goto(link);
-	}
-
-	function openPwdModal() {
-		pwdOpen = true;
-		pwdCurrent = '';
-		pwdNext = '';
-		pwdConfirm = '';
-		pwdError = '';
-		pwdSuccess = false;
-	}
-
-	function closePwdModal() {
-		pwdOpen = false;
-	}
-
-	async function submitPwdChange(e) {
-		e.preventDefault();
-		pwdError = '';
-
-		if (!pwdNext) {
-			pwdError = '新密码不能为空';
-			return;
-		}
-		if (pwdNext !== pwdConfirm) {
-			pwdError = '两次输入的新密码不一致';
-			return;
-		}
-
-		pwdBusy = true;
-		try {
-			const res = await fetch('/api/change-password', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ current: pwdCurrent, next: pwdNext }),
-			});
-			const json = await res.json().catch(() => ({}));
-			if (!res.ok || !json.ok) {
-				pwdError = json.error === 'wrong_password' ? '当前密码不正确' : '修改失败';
-				return;
-			}
-			pwdSuccess = true;
-			setTimeout(() => {
-				pwdOpen = false;
-			}, 1000);
-		} catch {
-			pwdError = '网络错误';
-		} finally {
-			pwdBusy = false;
-		}
 	}
 
 	function handleSearchKeydown(e) {
@@ -151,11 +95,6 @@
 			<kbd>Ctrl+K</kbd>
 		</button>
 		<div class="header-actions">
-			{#if data.hasPassword}
-				<button class="icon-btn" onclick={openPwdModal} aria-label="Change password" title="修改密码">
-					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-				</button>
-			{/if}
 			<button class="icon-btn" onclick={toggleDark} aria-label="Toggle dark mode">
 				{#if darkMode}
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -217,67 +156,21 @@
 	</div>
 {/if}
 
-<!-- Password change modal -->
-{#if pwdOpen}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="search-overlay" onclick={closePwdModal}>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="search-modal pwd-modal" onclick={(e) => e.stopPropagation()}>
-			<div class="pwd-header">
-				<h2>修改密码</h2>
-				<button class="search-close" onclick={closePwdModal} aria-label="关闭">
-					<kbd>Esc</kbd>
-				</button>
-			</div>
-			<form class="pwd-form" onsubmit={submitPwdChange}>
-				<label>
-					<span>当前密码</span>
-					<input type="password" bind:value={pwdCurrent} autocomplete="current-password" required />
-				</label>
-				<label>
-					<span>新密码</span>
-					<input type="password" bind:value={pwdNext} autocomplete="new-password" required />
-				</label>
-				<label>
-					<span>确认新密码</span>
-					<input type="password" bind:value={pwdConfirm} autocomplete="new-password" required />
-				</label>
-				{#if pwdError}
-					<p class="pwd-error">{pwdError}</p>
-				{/if}
-				{#if pwdSuccess}
-					<p class="pwd-success">密码已修改</p>
-				{/if}
-				<div class="pwd-actions">
-					<button type="button" class="btn-secondary" onclick={closePwdModal} disabled={pwdBusy}>取消</button>
-					<button type="submit" class="btn-primary" disabled={pwdBusy}>{pwdBusy ? '保存中…' : '保存'}</button>
-				</div>
-			</form>
-		</div>
-	</div>
-{/if}
-
 {#snippet sidebarGroup(group, depth)}
 	{#if group.items && group.items.length > 0}
-		{@const groupKey = group.link || group.text}
-		{@const isCollapsed = collapsedGroups.has(groupKey)}
+		{@const isCollapsed = collapsedGroups.has(group.text)}
 		<div class="sidebar-group" class:nested={depth > 0}>
 			<button
 				class="group-toggle"
-				class:active={group.link && $page.url.pathname === group.link}
 				onclick={() => {
 					const next = new Set(collapsedGroups);
-					if (next.has(groupKey)) next.delete(groupKey);
-					else next.add(groupKey);
+					if (next.has(group.text)) next.delete(group.text);
+					else next.add(group.text);
 					collapsedGroups = next;
 				}}
 			>
 				<svg class="chevron" class:collapsed={isCollapsed} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-				{#if group.link}
-					<a href={group.link} class="group-title-link" onclick={(e) => e.stopPropagation()}>{group.text}</a>
-				{:else}
-					<span>{group.text}</span>
-				{/if}
+				<span>{group.text}</span>
 			</button>
 			{#if !isCollapsed}
 				<div class="group-items">
@@ -346,9 +239,6 @@
 		letter-spacing: 0.02em; text-align: left; font-family: inherit;
 	}
 	.group-toggle:hover { color: var(--brand); }
-	.group-toggle.active { color: var(--brand); }
-	.group-title-link { color: inherit; text-decoration: none; }
-	.group-title-link:hover { text-decoration: underline; }
 	.chevron { transition: transform 0.15s; flex-shrink: 0; }
 	.chevron.collapsed { transform: rotate(-90deg); }
 	.group-items { margin-bottom: 8px; }
@@ -411,33 +301,6 @@
 		padding: 1px 5px; background: var(--bg-soft); border: 1px solid var(--border);
 		border-radius: 3px; font-size: 11px; font-family: var(--font-mono);
 	}
-
-	.pwd-modal { padding: 0; }
-	.pwd-header {
-		display: flex; align-items: center; justify-content: space-between;
-		padding: 16px 20px; border-bottom: 1px solid var(--border);
-	}
-	.pwd-header h2 { font-size: 16px; font-weight: 600; color: var(--text); margin: 0; }
-	.pwd-form { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-	.pwd-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-muted); }
-	.pwd-form input {
-		padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
-		background: var(--bg); color: var(--text); font-size: 14px; font-family: inherit;
-		outline: none; transition: border-color 0.15s;
-	}
-	.pwd-form input:focus { border-color: var(--brand); }
-	.pwd-error { color: #dc2626; font-size: 13px; margin: 0; }
-	.pwd-success { color: #16a34a; font-size: 13px; margin: 0; }
-	.pwd-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
-	.btn-primary, .btn-secondary {
-		padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
-		cursor: pointer; font-family: inherit; border: 1px solid transparent;
-	}
-	.btn-primary { background: var(--brand); color: #fff; }
-	.btn-primary:hover:not(:disabled) { opacity: 0.9; }
-	.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-	.btn-secondary { background: var(--bg-soft); color: var(--text); border-color: var(--border); }
-	.btn-secondary:hover:not(:disabled) { border-color: var(--brand); }
 
 	@media (max-width: 768px) {
 		.menu-toggle { display: flex; }

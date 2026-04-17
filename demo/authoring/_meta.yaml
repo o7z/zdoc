@@ -1,0 +1,17 @@
+title: 编写文档
+order: 2
+
+pages:
+  meta-yaml:
+    title: _meta.yaml
+    order: 1
+    description: 每个目录的元数据文件，决定该目录如何出现在侧边栏。
+  page-fields:
+    title: 单文档字段
+    order: 2
+    description: title / order / description / version / author / modified / env。
+  mermaid:
+    title: Mermaid 与代码块
+    order: 3
+    description: 演示流程图与代码高亮。
+    version: 0.1.0

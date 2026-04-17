@@ -8,6 +8,5 @@ export const load: LayoutServerLoad = () => {
 	return {
 		sidebar,
 		siteTitle: config.title,
-		hasPassword: Boolean(config.password),
 	};
 };

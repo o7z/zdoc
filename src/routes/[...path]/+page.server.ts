@@ -8,10 +8,26 @@ import type { PageServerLoad } from './$types';
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 
+interface DocMeta {
+	description?: string;
+	version?: string;
+	author?: string;
+	modified?: string;
+}
+
 function visible(meta: PageMeta): boolean {
 	if (!meta.title) return false;
 	if (meta.env === 'prod' && !IS_PROD) return false;
 	return true;
+}
+
+function extractDocMeta(meta: PageMeta): DocMeta | undefined {
+	const out: DocMeta = {};
+	if (meta.description) out.description = meta.description;
+	if (meta.version) out.version = meta.version;
+	if (meta.author) out.author = meta.author;
+	if (meta.modified) out.modified = meta.modified;
+	return Object.keys(out).length > 0 ? out : undefined;
 }
 
 function safeJoin(root: string, slug: string): string | null {
@@ -45,11 +61,16 @@ export const load: PageServerLoad = async ({ params }) => {
 			title: pageMeta.title!,
 			pdfUrl: '/api/pdf/' + slug.split('/').map(encodeURIComponent).join('/'),
 			path: slug,
+			meta: extractDocMeta(pageMeta),
 		};
 	}
 
-	const asFile = safeJoin(docsDir, slug + '.md');
-	if (asFile && existsSync(asFile) && statSync(asFile).isFile()) {
+	if (/\.md$/i.test(slug)) {
+		const asFile = safeJoin(docsDir, slug);
+		if (!asFile || !existsSync(asFile) || !statSync(asFile).isFile()) {
+			error(404, `Page not found: ${slug}`);
+		}
+
 		const key = basename(asFile).replace(/\.md$/, '');
 		const parentMeta = readDirMeta(join(dirname(asFile), '_meta.yaml'));
 		const pageMeta = parentMeta?.pages?.[key];
@@ -58,20 +79,15 @@ export const load: PageServerLoad = async ({ params }) => {
 		}
 
 		const raw = readFileSync(asFile, 'utf-8');
-		const html = await renderMarkdown(raw);
-		return { kind: 'md' as const, title: pageMeta.title!, html, path: slug };
-	}
-
-	const asIndex = safeJoin(docsDir, join(slug, 'index.md'));
-	const asMeta = safeJoin(docsDir, join(slug, '_meta.yaml'));
-	if (asIndex && asMeta && existsSync(asIndex) && existsSync(asMeta)) {
-		const dirMeta = readDirMeta(asMeta);
-		if (!dirMeta || !visible(dirMeta)) {
-			error(404, `Page not found: ${slug}`);
-		}
-		const raw = readFileSync(asIndex, 'utf-8');
-		const html = await renderMarkdown(raw);
-		return { kind: 'md' as const, title: dirMeta.title!, html, path: slug };
+		const { html, headings } = await renderMarkdown(raw);
+		return {
+			kind: 'md' as const,
+			title: pageMeta.title!,
+			html,
+			headings,
+			path: slug,
+			meta: extractDocMeta(pageMeta),
+		};
 	}
 
 	error(404, `Page not found: ${slug}`);
