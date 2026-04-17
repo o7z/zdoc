@@ -63,18 +63,19 @@ const pkgPath = join(repoRoot, 'package.json');
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
 console.log(`current version: ${pkg.version}  (bumping: ${arg})`);
 
-// 4. build first — fail before mutating git state
-run('bun run build');
-
-// 5. commit any pending changes first (npm version refuses a non-clean tree)
+// 4. clean working tree (commit first so the release commit stays focused)
 const dirty = capture('git status --porcelain');
 if (dirty) {
-	console.log('\nstaging + committing pending changes…');
-	run('git add -A');
-	run('git commit -m "chore: pre-release changes"');
+	console.error('\nrelease aborted: working tree has uncommitted changes:');
+	console.error(dirty.split('\n').map((l) => '  ' + l).join('\n'));
+	console.error('\nCommit (or stash) them first, then re-run `bun run release`.');
+	process.exit(1);
 }
 
-// 6. bump version (creates its own commit + tag on top of the clean tree)
+// 5. build — fail before mutating git state
+run('bun run build');
+
+// 6. bump version (commits package.json + tags vX.Y.Z)
 run(`npm version ${arg} -m "release: v%s"`);
 
 // 7. publish
