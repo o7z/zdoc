@@ -1,6 +1,6 @@
 {
   "name": "@o7z/zdoc",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Zero-config Markdown docs site with password protection, auto sidebar, Mermaid, search, and dark mode.",
   "license": "MIT",
   "author": "o7z",
@@ -42,7 +42,6 @@
     "@sveltejs/adapter-node": "^5.2.12",
     "@sveltejs/kit": "^2.22.0",
     "@sveltejs/vite-plugin-svelte": "^6.0.0",
-    "better-sqlite3": "^12.9.0",
     "mermaid": "^11.12.0",
     "rehype-highlight": "^7.0.2",
     "rehype-slug": "^6.0.0",
@@ -55,7 +54,6 @@
     "vite": "^7.0.4"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.0.0",
     "svelte-check": "^4.0.0",
     "typescript": "^5.0.0"
