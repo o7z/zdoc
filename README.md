@@ -1,5 +1,7 @@
 # @o7z/zdoc
 
+[English](./README.md) · [简体中文](./README.zh-CN.md)
+
 Zero-config Markdown docs server. Point `zdoc` at a folder of `.md` files, get a polished docs site with:
 
 - Automatic sidebar from directory structure (`_meta.md` + HTML-comment metadata)
