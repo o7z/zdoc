@@ -1,15 +1,15 @@
 # @o7z/zdoc
 
-[English](./README.md) · [简体中文](./README.zh-CN.md)
+[English](./README.md) · **简体中文**
 
 零配置的 Markdown 文档站。把 `zdoc` 指向一个存放 `.md` 的目录，立刻获得一个带完整功能的文档站：
 
-- 依据目录结构自动生成侧边栏（`_meta.md` + HTML 注释元数据）
+- 由每个目录的 `_meta.yaml` 自动生成侧边栏
 - 服务端密码保护，浏览器中可直接修改密码
-- Mermaid 图表
+- Mermaid 图表 + 代码高亮
 - 暗色模式 + `Ctrl+K` 搜索
 - 响应式布局
-- 自动渲染 PDF（作为侧边栏条目）
+- 自动渲染 PDF
 
 ## 快速开始
 
@@ -66,82 +66,77 @@ zdoc -w hunter2 -p 8080 -d ./site   # 全参数覆盖
 
 ## 撰写文档
 
-### 文件元数据
+`zdoc` 每个目录用一个元数据文件：**`_meta.yaml`**。所有 `.md` 文件都是纯内容——没有 frontmatter、没有 HTML 注释。
 
-每个 `.md` 文件顶部放一行 `<!-- zdoc: {...} -->` 注释。大括号里是 **YAML flow** 语法——紧凑、解析严格，但套在 HTML 注释里，GitHub / Gitee / 任何 Markdown 渲染器都不会显示出来。
+### `_meta.yaml`
 
-```markdown
-<!-- zdoc: {title: 快速上手, order: 1, modified: 2026-04-18, env: prod} -->
+每个想出现在侧边栏的目录都需要一个 `_meta.yaml`。它声明目录自身的标题/排序，并列出该目录下要出现在侧边栏的文档（`.md` 和 `.pdf`）：
 
-# 快速上手
+```yaml
+title: 快速开始              # 必填 —— 侧边栏显示的目录名
+order: 1                    # 可选 —— 排序权重（越小越靠前），默认 999
+env: prod                   # 可选 —— 设为 "prod" 表示仅生产环境显示
 
-正文内容…
+pages:
+  install:                  # key = 去掉 .md 的文件名
+    title: 安装             # 必填，没有则该文件隐藏
+    order: 1
+    modified: 2026-04-18
+  config:
+    title: 配置
+    order: 2
+  report.pdf:               # PDF 文件：key 保留完整文件名（含扩展名）
+    title: 第四季度报告
+    order: 3
 ```
 
-字段说明：
+没有 `_meta.yaml` 的目录**不会显示**。没有列在 `pages` 里的 `.md` 文件既不能被路由访问（404），也不出现在侧边栏。
 
-| 字段       | 必填 | 说明                                                                       |
-|------------|------|---------------------------------------------------------------------------|
-| `title`    | 是   | 侧边栏显示名。没有 `title` 的文件不会出现在侧边栏，也无法通过 URL 访问（404）。     |
-| `order`    | 否   | 排序权重，数字越小越靠前。默认 `999`。                                         |
-| `modified` | 否   | 信息性字段，最后修改时间字符串。                                                |
-| `env`      | 否   | 设为 `prod` 表示仅生产环境显示（开发模式下 `NODE_ENV !== 'production'` 时隐藏）。 |
+### 单文档字段
 
-字符串含空格不需要引号；如果值中包含 `,` `:` `{` `}` 等特殊字符，用引号包起来：`{title: "前端, 后端"}`。
+| 字段       | 必填 | 说明                                                                    |
+|------------|------|------------------------------------------------------------------------|
+| `title`    | 是   | 侧边栏显示名。没有 `title` 的文件隐藏。                                      |
+| `order`    | 否   | 排序权重，默认 `999`。                                                      |
+| `modified` | 否   | 信息性字段：最后修改时间字符串。                                              |
+| `env`      | 否   | 设为 `prod` 表示仅生产环境显示（开发模式下 `NODE_ENV !== 'production'` 时隐藏）。|
 
-> **向后兼容：** 老格式 `<!-- title: 快速上手 -->` / `<!-- order: 1 -->`（每个注释一个字段）仍然支持。两种格式并存时，`zdoc:` 优先。
+### 目录引导页（`index.md`）
 
-### 目录元数据 + 引导页（`_meta.md`）
+任意目录下放一个 `index.md`，点击侧边栏目录标题时打开的就是它。`index.md` 是纯 Markdown——无元数据、无 frontmatter（站点首页的 hero 块例外，见下）。
 
-每个想出现在侧边栏的目录都需要一个 `_meta.md`。其中的元数据注释控制侧边栏条目；**注释之后的 Markdown 正文会被渲染为该目录的引导页**（点击侧边栏目录标题时展示的落地页）。
+目录的标题来自 `_meta.yaml`，所以 `index.md` 自身不需要声明标题。
 
-```markdown
-<!-- zdoc: {title: 使用指南, order: 2} -->
+### 站点首页
 
-# 使用指南
+根目录用同样的方式：
 
-欢迎。建议从 [基础](./basics) 开始。
-```
-
-- 若 `_meta.md` 有非空正文 → 该正文就是引导页；此时该目录下的文档不需要再各自声明 `title` 就能作为默认落地页（不过每个文件要想单独出现在侧边栏，仍需要自己的 `title`）。
-- 若 `_meta.md` 只有元数据、没有正文 → 回退到同目录下的 `index.md`（若存在），保留老版布局。
-- 没有 `_meta.md` 的目录完全隐藏。磁盘上的目录名**从不**影响 UI，标题完全由 `_meta.md` 决定。
-
-### 根目录 `_meta.md` = 站点首页
-
-docs 根目录本身也可以放 `_meta.md`。其正文会成为整个站点的首页（替代传统的顶层 `index.md`）：
-
-```markdown
-<!-- zdoc: {title: 我的文档} -->
-
-# 我的文档
-
-欢迎，从左侧挑一个话题开始。
-```
-
-如果你需要完整的 hero 区块（`name` / `text` / `tagline` / `features` / `actions`），继续用 `index.md` + YAML frontmatter——老路径仍然有效。
+- `<docsDir>/_meta.yaml` 声明站点标题
+- `<docsDir>/index.md` 即站点首页
 
 ### 目录结构示例
 
 ```
 docs/
-├── _meta.md                # 站点首页：<!-- zdoc: {title: 我的文档} --> + 正文
+├── _meta.yaml              # title: 我的文档
+├── index.md                # 站点首页（纯 Markdown）
 ├── getting-started/
-│   ├── _meta.md            # 目录引导页：<!-- zdoc: {title: 快速开始, order: 1} --> + 正文
-│   ├── install.md          # <!-- zdoc: {title: 安装, order: 1} -->
-│   └── config.md           # <!-- zdoc: {title: 配置, order: 2} -->
+│   ├── _meta.yaml          # title: 快速开始; order: 1; pages: {install:…, config:…}
+│   ├── index.md            # 目录引导页（可选）
+│   ├── install.md          # 纯内容，在 _meta.yaml 里列出
+│   └── config.md
 ├── guide/
-│   ├── _meta.md            # <!-- zdoc: {title: 指南, order: 2} -->（无正文 → 回退到 index.md）
-│   ├── index.md            # 老式落地页
-│   └── basics.md           # <!-- zdoc: {title: 基础用法} -->
-├── internal.md             # 没有 zdoc 注释 → 侧边栏不显示
-└── api/
-    └── reference.md        # 这个目录没有 _meta.md → 整个目录隐藏
+│   ├── _meta.yaml          # title: 指南; order: 2; pages: {basics:…, advanced:…}
+│   ├── basics.md
+│   └── advanced.md
+└── reports/
+    ├── _meta.yaml          # title: 报告; order: 3; pages: {Q4.pdf: {title: Q4 报告}}
+    └── Q4.pdf
 ```
 
-### 首页 hero 区块（可选）
+### 首页 hero 块（可选）
 
-`index.md` 支持 YAML frontmatter 形式的 hero：
+根目录 `index.md` 支持 YAML frontmatter 形式的 hero：
 
 ```markdown
 ---
@@ -167,16 +162,6 @@ features:
 frontmatter 之后的 Markdown 正常渲染。
 ```
 
-### PDF 文档
-
-把任意 `.pdf` 文件放进文档目录，侧边栏会自动出现对应条目——标题默认用文件名（去掉后缀），点击后在 iframe 里用浏览器原生 PDF 查看器打开。
-
-要覆盖标题或排序，放一个同名的 `<文件名>.pdf.meta.md`：
-
-```markdown
-<!-- zdoc: {title: 第四季度报告, order: 3} -->
-```
-
 ## 功能细节
 
 - **Mermaid**：围栏代码块 ```` ```mermaid ```` 会渲染成 SVG。
@@ -184,6 +169,7 @@ frontmatter 之后的 Markdown 正常渲染。
 - **搜索**：按 `Ctrl+K`（Mac：`Cmd+K`）模糊匹配侧边栏条目。
 - **暗色模式**：自动检测系统偏好 + 手动切换，状态持久化到 `localStorage`。
 - **密码保护**：服务端 HttpOnly 会话 cookie；传空密码（`-w ""`）或不传 `-w` 即禁用鉴权。
+- **PDF**：在 `_meta.yaml` 的 `pages` 里列出后，会通过浏览器原生 PDF 查看器嵌入 iframe。
 
 ## 开发（贡献者）
 

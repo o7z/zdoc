@@ -1,6 +1,6 @@
-import { readdirSync, readFileSync, existsSync } from 'node:fs';
+import { readdirSync, existsSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { extractMeta, hasBody, type DocMeta } from './meta.js';
+import { readDirMeta, type PageMeta } from './meta.js';
 
 export interface SidebarGroup {
 	text: string;
@@ -11,7 +11,10 @@ export interface SidebarGroup {
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 
-export type { DocMeta };
+function visible(meta: PageMeta): boolean {
+	if (meta.env === 'prod' && !IS_PROD) return false;
+	return true;
+}
 
 export function buildSidebar(docsDir: string): SidebarGroup[] {
 	if (!existsSync(docsDir)) return [];
@@ -21,42 +24,26 @@ export function buildSidebar(docsDir: string): SidebarGroup[] {
 interface SortableItem {
 	item: SidebarGroup;
 	order: number;
+	text: string;
 }
 
 function scanDir(dir: string, root: string): SidebarGroup[] {
-	const entries = readdirSync(dir, { withFileTypes: true })
-		.filter((e) => !e.name.startsWith('.'))
-		.sort((a, b) => a.name.localeCompare(b.name));
-
 	const items: SortableItem[] = [];
 
+	const entries = readdirSync(dir, { withFileTypes: true }).filter((e) => !e.name.startsWith('.'));
 	const dirs = entries.filter((e) => e.isDirectory());
-	const mdFiles = entries.filter(
-		(e) =>
-			e.isFile() &&
-			e.name.endsWith('.md') &&
-			e.name !== '_meta.md' &&
-			e.name !== 'index.md' &&
-			!e.name.endsWith('.pdf.meta.md'),
-	);
-	const pdfFiles = entries.filter((e) => e.isFile() && e.name.endsWith('.pdf'));
 
 	for (const d of dirs) {
 		const fullPath = join(dir, d.name);
-		const metaPath = join(fullPath, '_meta.md');
-
-		if (!existsSync(metaPath)) continue;
-
-		const rawMeta = readFileSync(metaPath, 'utf-8');
-		const meta = extractMeta(rawMeta);
-		if (!meta.title) continue;
-		if (meta.env === 'prod' && !IS_PROD) continue;
+		const meta = readDirMeta(join(fullPath, '_meta.yaml'));
+		if (!meta || !meta.title || !visible(meta)) continue;
 
 		const children = scanDir(fullPath, root);
-		const hasGuide = hasBody(rawMeta) || existsSync(join(fullPath, 'index.md'));
+		const hasGuide = existsSync(join(fullPath, 'index.md'));
 
 		items.push({
 			order: meta.order ?? 999,
+			text: meta.title,
 			item: {
 				text: meta.title,
 				link: hasGuide ? '/' + relative(root, fullPath).replace(/\\/g, '/') : undefined,
@@ -66,51 +53,24 @@ function scanDir(dir: string, root: string): SidebarGroup[] {
 		});
 	}
 
-	for (const f of mdFiles) {
-		const fullPath = join(dir, f.name);
-		const meta = parseDocMeta(fullPath);
+	const dirMeta = readDirMeta(join(dir, '_meta.yaml'));
+	const pages = dirMeta?.pages ?? {};
+	for (const [key, meta] of Object.entries(pages)) {
+		if (!meta.title || !visible(meta)) continue;
 
-		if (!meta.title) continue;
-		if (meta.env === 'prod' && !IS_PROD) continue;
+		const targetPath = join(dir, key.endsWith('.pdf') ? key : key + '.md');
+		if (!existsSync(targetPath) || !statSync(targetPath).isFile()) continue;
 
-		const rel = relative(root, fullPath).replace(/\\/g, '/').replace(/\.md$/, '');
-
-		items.push({
-			order: meta.order ?? 999,
-			item: {
-				text: meta.title,
-				link: '/' + rel,
-			},
-		});
-	}
-
-	for (const f of pdfFiles) {
-		const fullPath = join(dir, f.name);
-		const metaFile = join(dir, f.name + '.meta.md');
-		const meta = existsSync(metaFile) ? parseDocMeta(metaFile) : {};
-
-		if (meta.env === 'prod' && !IS_PROD) continue;
-
-		const title = meta.title ?? f.name.replace(/\.pdf$/i, '');
-		const rel = relative(root, fullPath).replace(/\\/g, '/');
+		const rel = relative(root, targetPath).replace(/\\/g, '/');
+		const link = key.endsWith('.pdf') ? '/' + rel : '/' + rel.replace(/\.md$/, '');
 
 		items.push({
 			order: meta.order ?? 999,
-			item: {
-				text: title,
-				link: '/' + rel,
-			},
+			text: meta.title,
+			item: { text: meta.title, link },
 		});
 	}
 
-	items.sort((a, b) => a.order - b.order || a.item.text.localeCompare(b.item.text));
+	items.sort((a, b) => a.order - b.order || a.text.localeCompare(b.text));
 	return items.map((i) => i.item);
-}
-
-export function parseDocMeta(filePath: string): DocMeta {
-	try {
-		return extractMeta(readFileSync(filePath, 'utf-8'));
-	} catch {
-		return {};
-	}
 }

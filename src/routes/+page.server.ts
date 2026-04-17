@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { renderMarkdown } from '$lib/markdown.js';
 import { getDocsDir } from '$lib/docs-dir.js';
-import { extractMeta, hasBody, stripMetaComments } from '$lib/meta.js';
+import { readDirMeta } from '$lib/meta.js';
 import type { PageServerLoad } from './$types';
 
 interface HeroAction {
@@ -27,21 +27,14 @@ interface Hero {
 export const load: PageServerLoad = async () => {
 	const docsDir = getDocsDir();
 
-	const metaPath = join(docsDir, '_meta.md');
-	if (existsSync(metaPath)) {
-		const raw = readFileSync(metaPath, 'utf-8');
-		if (hasBody(raw)) {
-			const meta = extractMeta(raw);
-			const html = await renderMarkdown(stripMetaComments(raw));
-			return { title: meta.title ?? 'Docs', html, hero: null };
-		}
-	}
+	const rootMeta = readDirMeta(join(docsDir, '_meta.yaml'));
+	const rootTitle = rootMeta?.title ?? 'Docs';
 
 	const indexPath = join(docsDir, 'index.md');
 	if (!existsSync(indexPath)) {
 		return {
-			title: 'Docs',
-			html: '<h1>Welcome</h1><p>No index.md or _meta.md body found in docs directory.</p>',
+			title: rootTitle,
+			html: `<h1>${rootTitle}</h1><p>Create an <code>index.md</code> in your docs directory to replace this placeholder.</p>`,
 			hero: null,
 		};
 	}
@@ -80,7 +73,7 @@ export const load: PageServerLoad = async () => {
 	}
 
 	const html = body ? await renderMarkdown(body) : '';
-	const title = hero?.name || 'Docs';
+	const title = hero?.name || rootTitle;
 
 	return { title, html, hero };
 };

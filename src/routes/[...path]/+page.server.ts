@@ -1,11 +1,18 @@
 import { readFileSync, existsSync, statSync } from 'node:fs';
-import { join, resolve, sep } from 'node:path';
+import { dirname, basename, join, resolve, sep } from 'node:path';
 import { error } from '@sveltejs/kit';
 import { renderMarkdown } from '$lib/markdown.js';
 import { getDocsDir } from '$lib/docs-dir.js';
-import { parseDocMeta } from '$lib/sidebar.js';
-import { extractMeta, hasBody, stripMetaComments } from '$lib/meta.js';
+import { readDirMeta, type PageMeta } from '$lib/meta.js';
 import type { PageServerLoad } from './$types';
+
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+function visible(meta: PageMeta): boolean {
+	if (!meta.title) return false;
+	if (meta.env === 'prod' && !IS_PROD) return false;
+	return true;
+}
 
 function safeJoin(root: string, slug: string): string | null {
 	const normRoot = resolve(root);
@@ -26,57 +33,45 @@ export const load: PageServerLoad = async ({ params }) => {
 			error(404, `Page not found: ${slug}`);
 		}
 
-		const metaFile = pdfPath + '.meta.md';
-		const meta = existsSync(metaFile) ? parseDocMeta(metaFile) : {};
-		const title = meta.title ?? slug.split('/').pop()!.replace(/\.pdf$/i, '');
+		const filename = basename(pdfPath);
+		const parentMeta = readDirMeta(join(dirname(pdfPath), '_meta.yaml'));
+		const pageMeta = parentMeta?.pages?.[filename];
+		if (!pageMeta || !visible(pageMeta)) {
+			error(404, `Page not found: ${slug}`);
+		}
 
 		return {
 			kind: 'pdf' as const,
-			title,
+			title: pageMeta.title!,
 			pdfUrl: '/api/pdf/' + slug.split('/').map(encodeURIComponent).join('/'),
 			path: slug,
 		};
 	}
 
 	const asFile = safeJoin(docsDir, slug + '.md');
-	const asMeta = safeJoin(docsDir, join(slug, '_meta.md'));
-	const asIndex = safeJoin(docsDir, join(slug, 'index.md'));
+	if (asFile && existsSync(asFile) && statSync(asFile).isFile()) {
+		const key = basename(asFile).replace(/\.md$/, '');
+		const parentMeta = readDirMeta(join(dirname(asFile), '_meta.yaml'));
+		const pageMeta = parentMeta?.pages?.[key];
+		if (!pageMeta || !visible(pageMeta)) {
+			error(404, `Page not found: ${slug}`);
+		}
 
-	if (!asFile || !asMeta || !asIndex) {
-		error(404, `Page not found: ${slug}`);
-	}
-
-	if (existsSync(asFile)) {
 		const raw = readFileSync(asFile, 'utf-8');
-		const meta = extractMeta(raw);
-		if (!meta.title) error(404, `Page not found: ${slug}`);
 		const html = await renderMarkdown(raw);
-		return { kind: 'md' as const, title: meta.title, html, path: slug };
+		return { kind: 'md' as const, title: pageMeta.title!, html, path: slug };
 	}
 
-	if (existsSync(asMeta)) {
-		const raw = readFileSync(asMeta, 'utf-8');
-		const meta = extractMeta(raw);
-		if (!meta.title) error(404, `Page not found: ${slug}`);
-
-		if (hasBody(raw)) {
-			const html = await renderMarkdown(stripMetaComments(raw));
-			return { kind: 'md' as const, title: meta.title, html, path: slug };
+	const asIndex = safeJoin(docsDir, join(slug, 'index.md'));
+	const asMeta = safeJoin(docsDir, join(slug, '_meta.yaml'));
+	if (asIndex && asMeta && existsSync(asIndex) && existsSync(asMeta)) {
+		const dirMeta = readDirMeta(asMeta);
+		if (!dirMeta || !visible(dirMeta)) {
+			error(404, `Page not found: ${slug}`);
 		}
-
-		if (existsSync(asIndex)) {
-			const raw2 = readFileSync(asIndex, 'utf-8');
-			const html = await renderMarkdown(raw2);
-			return { kind: 'md' as const, title: meta.title, html, path: slug };
-		}
-	}
-
-	if (existsSync(asIndex)) {
 		const raw = readFileSync(asIndex, 'utf-8');
-		const meta = extractMeta(raw);
-		if (!meta.title) error(404, `Page not found: ${slug}`);
 		const html = await renderMarkdown(raw);
-		return { kind: 'md' as const, title: meta.title, html, path: slug };
+		return { kind: 'md' as const, title: dirMeta.title!, html, path: slug };
 	}
 
 	error(404, `Page not found: ${slug}`);

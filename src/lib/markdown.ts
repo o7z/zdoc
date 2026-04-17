@@ -14,7 +14,6 @@ const processor = unified()
 
 export async function renderMarkdown(md: string): Promise<string> {
 	md = md.replace(/^---\n[\s\S]*?\n---\n/, '');
-	md = md.replace(/<!--\s*\w+\s*:\s*.+?\s*-->\n?/g, '');
 
 	const mermaidBlocks: string[] = [];
 	const placeholder = '___MERMAID_PLACEHOLDER___';
