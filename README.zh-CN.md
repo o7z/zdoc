@@ -178,10 +178,16 @@ frontmatter 之后的 Markdown 正常渲染。
 
 ## 开发（贡献者）
 
+本仓库 **dogfood zdoc**：`docs/` 目录就是官方文档，直接由 zdoc 自己渲染。
+另一个 `demo/` 目录是故意畸形的回归样本（超长页、边界 `_meta.yaml` 等），
+仅用于压测渲染器，**不是给人读的文档**。
+
 ```bash
 bun install
-bun run dev     # vite 开发服务器
-bun run build   # 生成 build/ 和 bin/cli.js
+bun run dev        # zdoc 渲染自己的 docs/（官方站点）
+bun run dev:demo   # zdoc 渲染 demo/（只是回归样本）
+bun run dev:vite   # 裸跑 vite，不预设 ZDOC_DIR
+bun run build      # 生成 build/ 和 bin/cli.js
 node bin/cli.js -d ./some/docs
 ```
 

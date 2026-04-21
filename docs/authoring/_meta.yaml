@@ -15,3 +15,8 @@ pages:
     order: 3
     description: 演示流程图与代码高亮。
     version: 0.1.0
+  choose-a-structure:
+    title: 选一套文档结构
+    order: 4
+    description: zdoc 不强制结构，但给三套经过实践验证的分层方案供参考。
+    modified: 2026-04-21

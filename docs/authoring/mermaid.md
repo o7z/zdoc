@@ -7,7 +7,7 @@ flowchart LR
     A[浏览器] -->|GET /intro/install| B(SvelteKit)
     B --> C{hasPassword?}
     C -->|no| D[直接渲染]
-    C -->|yes| E[查 sessions 表]
+    C -->|yes| E[查 sessions Map]
     E -->|有效| D
     E -->|无效/过期| F[跳 /login]
 ```
@@ -18,28 +18,24 @@ flowchart LR
 sequenceDiagram
     participant U as 用户
     participant Z as zdoc
-    participant D as SQLite
     U->>Z: POST /login (password)
-    Z->>D: INSERT sessions (token_hash, epoch, expires_at)
+    Z->>Z: sessions.set(sha256(token+secret), expiresAt)
     Z-->>U: Set-Cookie docs_session; 303
     U->>Z: GET /intro/install (Cookie)
-    Z->>D: SELECT sessions WHERE token_hash
-    D-->>Z: row
+    Z->>Z: sessions.get(sha256(token+secret))
     Z-->>U: 200 HTML
 ```
 
 ## 代码高亮
 
 ```ts
-import Database from 'better-sqlite3';
-
-const db = new Database('zdoc.db');
-db.exec('PRAGMA journal_mode = WAL');
-db.prepare('INSERT INTO sessions VALUES (?, ?, ?)').run(hash, epoch, expiresAt);
+const sessions = new Map<string, number>();
+const hash = sha256(token + secret);
+sessions.set(hash, Date.now() + 7 * 24 * 3600 * 1000);
 ```
 
 ```bash
-bun run dev:demo
+bun run dev
 # Local:   http://localhost:5173
 ```
 

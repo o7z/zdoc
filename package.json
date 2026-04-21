@@ -30,8 +30,9 @@
     "node": ">=18"
   },
   "scripts": {
-    "dev": "vite dev",
+    "dev": "node scripts/dev-docs.mjs",
     "dev:demo": "node scripts/dev-demo.mjs",
+    "dev:vite": "vite dev",
     "build": "vite build && tsc -p tsconfig.bin.json && node -e \"import('node:fs').then(m=>m.chmodSync('bin/cli.js',0o755))\"",
     "preview": "vite preview",
     "prepublishOnly": "npm run build",

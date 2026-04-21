@@ -178,10 +178,17 @@ Any Markdown below the frontmatter renders normally.
 
 ## Development (for contributors)
 
+This repo **dogfoods zdoc**: the `docs/` directory IS the official documentation,
+and is served by zdoc itself. The `demo/` directory is a separate collection of
+intentionally-malformed samples used to stress-test the renderer (long pages,
+edge-case `_meta.yaml`, etc.) — not meant for humans to read.
+
 ```bash
 bun install
-bun run dev     # vite dev server
-bun run build   # produce build/ + bin/cli.js
+bun run dev        # zdoc rendering its own docs/ (the official site)
+bun run dev:demo   # zdoc rendering demo/ (regression samples only)
+bun run dev:vite   # raw vite dev, no ZDOC_DIR preset
+bun run build      # produce build/ + bin/cli.js
 node bin/cli.js -d ./some/docs
 ```
 
