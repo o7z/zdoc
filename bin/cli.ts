@@ -8,6 +8,7 @@ interface Args {
 	dir: string;
 	port: number;
 	password: string;
+	title: string;
 	help: boolean;
 	version: boolean;
 }
@@ -23,6 +24,7 @@ const DEFAULTS = {
 	dir: process.cwd(),
 	port: 8888,
 	password: '',
+	title: 'Docs',
 };
 
 function printHelp(): void {
@@ -34,12 +36,13 @@ Usage:
 Options:
   -d, --dir <path>       Markdown docs directory (default: current working directory)
   -p, --port <number>    Port to listen on (default: 8888, auto-increments if busy)
+  -t, --title <string>   Site title (default: Docs)
   -w, --password <pwd>   Access password (default: none, docs are public; set to enable auth)
   -h, --help             Show this help message
   -v, --version          Show version
 
-Configuration precedence: CLI flags > config.json (cwd) > defaults.
-A config.json in the current directory may define: title, docsDir, password, port.
+Configuration precedence: CLI flags > zdoc.config.json (cwd) > defaults.
+A zdoc.config.json in the current directory may define: title, docsDir, password, port.
 `;
 	process.stdout.write(msg);
 }
@@ -49,12 +52,14 @@ function parseArgs(argv: string[]): Args {
 		dir: DEFAULTS.dir,
 		port: DEFAULTS.port,
 		password: DEFAULTS.password,
+		title: DEFAULTS.title,
 		help: false,
 		version: false,
 	};
 	let dirSet = false;
 	let portSet = false;
 	let passwordSet = false;
+	let titleSet = false;
 
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
@@ -95,6 +100,14 @@ function parseArgs(argv: string[]): Args {
 				passwordSet = true;
 				break;
 			}
+			case '-t':
+			case '--title': {
+				const v = argv[++i];
+				if (!v) throw new Error(`Missing value for ${a}`);
+				args.title = v;
+				titleSet = true;
+				break;
+			}
 			default:
 				throw new Error(`Unknown argument: ${a}`);
 		}
@@ -103,11 +116,12 @@ function parseArgs(argv: string[]): Args {
 	(args as unknown as Record<string, boolean>).__dirSet = dirSet;
 	(args as unknown as Record<string, boolean>).__portSet = portSet;
 	(args as unknown as Record<string, boolean>).__passwordSet = passwordSet;
+	(args as unknown as Record<string, boolean>).__titleSet = titleSet;
 	return args;
 }
 
 function readConfigJson(cwd: string): FileConfig {
-	const p = resolve(cwd, 'config.json');
+	const p = resolve(cwd, 'zdoc.config.json');
 	if (!existsSync(p)) return {};
 	try {
 		return JSON.parse(readFileSync(p, 'utf-8')) as FileConfig;
@@ -169,6 +183,7 @@ async function main(): Promise<void> {
 	const dirSet = (args as unknown as Record<string, boolean>).__dirSet;
 	const portSet = (args as unknown as Record<string, boolean>).__portSet;
 	const passwordSet = (args as unknown as Record<string, boolean>).__passwordSet;
+	const titleSet = (args as unknown as Record<string, boolean>).__titleSet;
 
 	const cwd = process.cwd();
 	const fileConfig = readConfigJson(cwd);
@@ -184,7 +199,7 @@ async function main(): Promise<void> {
 			? fileConfig.password
 			: DEFAULTS.password;
 
-	const title = fileConfig.title ?? 'Docs';
+	const title = titleSet ? args.title : fileConfig.title ?? DEFAULTS.title;
 
 	if (!existsSync(docsDir)) {
 		process.stderr.write(`Error: docs directory not found: ${docsDir}\n`);

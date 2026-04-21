@@ -15,7 +15,7 @@ interface FileConfig {
 	port?: number;
 }
 
-const configPath = resolve(process.cwd(), 'config.json');
+const configPath = resolve(process.cwd(), 'zdoc.config.json');
 
 function readFileConfig(): FileConfig {
 	if (!existsSync(configPath)) return {};

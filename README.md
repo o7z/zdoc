@@ -32,6 +32,7 @@ zdoc [options]
 Options:
   -d, --dir <path>       Markdown docs directory (default: current working directory)
   -p, --port <number>    Port to listen on (default: 8888, auto-increments if busy)
+  -t, --title <string>   Site title (default: Docs)
   -w, --password <pwd>   Access password (default: none, docs are public; set to enable auth)
   -h, --help             Show help
   -v, --version          Show version
@@ -42,15 +43,16 @@ Examples:
 ```bash
 zdoc                                # cwd, port 8888, no password (public)
 zdoc -d ./docs -p 3000              # custom dir and port
+zdoc -t "My Docs"                   # custom site title
 zdoc -w hunter2                     # enable password protection
 zdoc -w hunter2 -p 8080 -d ./site   # full override
 ```
 
 If the chosen port is busy, `zdoc` automatically picks the next available port.
 
-## Configuration (`config.json`)
+## Configuration (`zdoc.config.json`)
 
-Create a `config.json` in the directory where you run `zdoc` to set defaults:
+Create a `zdoc.config.json` in the directory where you run `zdoc` to set defaults:
 
 ```json
 {
@@ -61,9 +63,9 @@ Create a `config.json` in the directory where you run `zdoc` to set defaults:
 }
 ```
 
-Precedence: **CLI flags > `config.json` > defaults**.
+Precedence: **CLI flags > `zdoc.config.json` > defaults**.
 
-The password is set at boot from CLI / `config.json` / `ZDOC_PASSWORD`. There is no in-browser change-password UI — to rotate the password, edit the source and restart.
+The password is set at boot from CLI / `zdoc.config.json` / `ZDOC_PASSWORD`. There is no in-browser change-password UI — to rotate the password, edit the source and restart.
 
 ## Authoring docs
 

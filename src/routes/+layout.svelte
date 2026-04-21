@@ -190,12 +190,12 @@
 {/snippet}
 
 <style>
-	.layout { display: flex; flex-direction: column; min-height: 100vh; }
+	.layout { display: flex; flex-direction: column; height: 100%; }
 
 	header {
 		display: flex; align-items: center; gap: 12px;
 		padding: 12px 24px; border-bottom: 1px solid var(--border);
-		background: var(--bg); position: sticky; top: 0; z-index: 100;
+		background: var(--bg); flex-shrink: 0; z-index: 100;
 	}
 	.logo { font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
 	.header-actions { display: flex; gap: 8px; }
@@ -222,13 +222,12 @@
 	.icon-btn:hover { background: var(--bg-soft); color: var(--text); }
 	.menu-toggle { display: none; background: none; border: none; cursor: pointer; color: var(--text); padding: 4px; }
 
-	.body { display: flex; flex: 1; }
+	.body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 
 	.sidebar {
 		width: 280px; min-width: 280px; padding: 16px 0;
 		border-right: 1px solid var(--border); overflow-y: auto;
-		height: calc(100vh - 49px); position: sticky; top: 49px;
-		background: var(--bg);
+		background: var(--bg); flex-shrink: 0;
 	}
 	.sidebar-group { margin-bottom: 4px; }
 	.sidebar-group.nested { margin-left: 12px; }
@@ -254,7 +253,7 @@
 		background: var(--brand-soft); font-weight: 500;
 	}
 
-	main { flex: 1; padding: 32px 48px 96px; max-width: 900px; min-width: 0; }
+	main { flex: 1; display: flex; min-width: 0; overflow: hidden; }
 
 	/* Search modal */
 	.search-overlay {
@@ -307,8 +306,8 @@
 		.search-trigger span, .search-trigger kbd { display: none; }
 		.search-trigger { min-width: auto; padding: 8px; }
 		.sidebar {
-			position: fixed; left: -280px; top: 49px; z-index: 99;
-			transition: left 0.2s; height: calc(100vh - 49px);
+			position: fixed; left: -280px; top: 0; z-index: 99;
+			transition: left 0.2s; height: 100vh;
 			box-shadow: 2px 0 8px rgba(0,0,0,0.1);
 		}
 		.sidebar.open { left: 0; }

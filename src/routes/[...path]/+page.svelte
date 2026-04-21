@@ -3,6 +3,7 @@
 
 	let { data } = $props();
 	let activeId = $state('');
+	let mainEl = $state(null);
 
 	/** @type {() => void} */
 	let cleanupSpy = () => {};
@@ -30,6 +31,9 @@
 		const headings = data.headings ?? [];
 		if (headings.length < 2) return;
 
+		const container = mainEl;
+		if (!container) return;
+
 		const offset = 100;
 
 		function update() {
@@ -37,15 +41,17 @@
 			for (const h of headings) {
 				const el = document.getElementById(h.slug);
 				if (!el) continue;
-				if (el.getBoundingClientRect().top < offset) current = h.slug;
+				const rect = el.getBoundingClientRect();
+				const containerRect = container.getBoundingClientRect();
+				if (rect.top - containerRect.top < offset) current = h.slug;
 				else break;
 			}
 			activeId = current;
 		}
 
 		update();
-		window.addEventListener('scroll', update, { passive: true });
-		cleanupSpy = () => window.removeEventListener('scroll', update);
+		container.addEventListener('scroll', update, { passive: true });
+		cleanupSpy = () => container.removeEventListener('scroll', update);
 	}
 
 	async function initMermaid() {
@@ -81,49 +87,50 @@
 	<title>{data.title}</title>
 </svelte:head>
 
-{#if data.meta}
-	{@const m = data.meta}
-	{@const chips = [m.version && `v${m.version}`, m.modified, m.author].filter(Boolean)}
-	<div class="doc-meta">
-		{#if m.description}
-			<p class="doc-desc">{m.description}</p>
-		{/if}
-		{#if chips.length > 0}
-			<div class="doc-chips">
-				{#each chips as chip, i}
-					{#if i > 0}<span class="sep">·</span>{/if}
-					<span>{chip}</span>
-				{/each}
-			</div>
-		{/if}
-	</div>
-{/if}
-
 {#if data.kind === 'pdf'}
 	<div class="pdf-frame">
 		<iframe src={data.pdfUrl} title={data.title}></iframe>
 	</div>
 {:else}
-	<article class="doc-content">
-		{@html data.html}
-	</article>
-	{#if data.headings && data.headings.length >= 2}
-		<aside class="toc" aria-label="On this page">
-			<div class="toc-title">本页目录</div>
-			<ul class="toc-list">
-				{#each data.headings as h}
-					<li class="toc-item depth-{h.depth}" class:active={activeId === h.slug}>
-						<a href={`#${h.slug}`}>{h.text}</a>
-					</li>
-				{/each}
-			</ul>
-		</aside>
-	{/if}
+	<div class="content-wrap" bind:this={mainEl}>
+		<article class="doc-content">
+			{#if data.meta}
+				{@const m = data.meta}
+				{@const chips = [m.version && `v${m.version}`, m.modified, m.author].filter(Boolean)}
+				<div class="doc-meta">
+					{#if m.description}
+						<p class="doc-desc">{m.description}</p>
+					{/if}
+					{#if chips.length > 0}
+						<div class="doc-chips">
+							{#each chips as chip, i}
+								{#if i > 0}<span class="sep">·</span>{/if}
+								<span>{chip}</span>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{/if}
+			{@html data.html}
+		</article>
+		{#if data.headings && data.headings.length >= 2}
+			<aside class="toc" aria-label="On this page">
+				<div class="toc-title">本页目录</div>
+				<ul class="toc-list">
+					{#each data.headings as h}
+						<li class="toc-item depth-{h.depth}" class:active={activeId === h.slug}>
+							<a href={`#${h.slug}`}>{h.text}</a>
+						</li>
+					{/each}
+				</ul>
+			</aside>
+		{/if}
+	</div>
 {/if}
 
 <style>
-	:global(html) { scroll-padding-top: 70px; scroll-behavior: smooth; }
-	:global(.doc-content :is(h1, h2, h3)) { scroll-margin-top: 70px; }
+	:global(html) { scroll-behavior: smooth; }
+	:global(.doc-content :is(h1, h2, h3)) { scroll-margin-top: 20px; }
 
 	.doc-meta {
 		margin: 0 0 24px;
@@ -151,8 +158,7 @@
 	.doc-chips .sep { opacity: 0.5; }
 
 	.pdf-frame {
-		position: absolute;
-		inset: 49px 0 0 280px;
+		flex: 1;
 		background: var(--bg-soft);
 	}
 	.pdf-frame iframe {
@@ -162,6 +168,21 @@
 		display: block;
 	}
 
+	.content-wrap {
+		display: flex;
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+	}
+
+	.doc-content {
+		flex: 1;
+		min-width: 0;
+		padding: 32px 48px 96px;
+		max-width: 900px;
+		overflow-y: auto;
+	}
+
 	.toc {
 		display: none;
 	}
@@ -169,13 +190,10 @@
 	@media (min-width: 1280px) {
 		.toc {
 			display: block;
-			position: fixed;
-			top: 70px;
-			right: 24px;
 			width: 220px;
-			max-height: calc(100vh - 90px);
+			flex-shrink: 0;
 			overflow-y: auto;
-			padding-left: 14px;
+			padding: 32px 14px 32px 14px;
 			border-left: 1px solid var(--border);
 			font-size: 13px;
 			line-height: 1.5;
@@ -214,7 +232,10 @@
 
 	@media (max-width: 768px) {
 		.pdf-frame {
-			inset: 49px 0 0 0;
+			flex: 1;
+		}
+		.doc-content {
+			padding: 24px 16px 64px;
 		}
 	}
 </style>

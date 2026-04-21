@@ -14,6 +14,7 @@ zdoc [options]
 |----|----------------|------------|-----------|------------------------------------------------|
 | `-d` | `--dir`      | `<path>`   | 当前目录  | Markdown 文档目录                              |
 | `-p` | `--port`     | `<number>` | `8888`    | 监听端口，被占用时**自动递增**到下一个可用端口 |
+| `-t` | `--title`    | `<string>` | `Docs`    | 站点标题（浏览器标签、侧边栏顶部）             |
 | `-w` | `--password` | `<pwd>`    | *（无）*  | 访问密码，不传或传空串即关闭鉴权               |
 | `-h` | `--help`     | —          | —         | 显示帮助                                        |
 | `-v` | `--version`  | —          | —         | 显示版本号                                      |
@@ -27,11 +28,14 @@ zdoc
 # 自定义目录与端口
 zdoc -d ./docs -p 3000
 
+# 自定义站点标题
+zdoc -t "我的文档"
+
 # 启用密码保护
 zdoc -w hunter2
 
 # 全参数覆盖
-zdoc -w hunter2 -p 8080 -d ./site
+zdoc -w hunter2 -p 8080 -d ./site -t "My Docs"
 ```
 
 ## 端口占用
@@ -40,4 +44,4 @@ zdoc -w hunter2 -p 8080 -d ./site
 
 ## 优先级
 
-CLI 参数优先于 `config.json`，后者优先于默认值。细节见「参考 / config.json 配置」。
+CLI 参数优先于 `zdoc.config.json`，后者优先于默认值。细节见「参考 / zdoc.config.json 配置」。
