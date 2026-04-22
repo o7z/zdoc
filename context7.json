@@ -4,7 +4,7 @@
   "public_key": "pk_Hw32G9rFJMsFoMOrmjUB1",
   "projectTitle": "Zdoc",
   "description": "Zero-configuration Markdown documentation server with password protection, automatic sidebar generation, and dark mode",
-  "folders": [],
+  "folders": ["docs/"],
   "excludeFolders": [
     "archive", "archived", "old", "docs/old", "deprecated", "legacy",
     "previous", "outdated", "superseded",
