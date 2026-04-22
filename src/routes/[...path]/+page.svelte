@@ -174,14 +174,12 @@
 		min-width: 0;
 		min-height: 0;
 		overflow: hidden;
-		justify-content: center;
 	}
 
 	.doc-content {
 		flex: 1;
 		min-width: 0;
 		padding: 32px 48px 96px;
-		max-width: 900px;
 		overflow-y: auto;
 	}
 

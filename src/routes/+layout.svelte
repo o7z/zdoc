@@ -79,6 +79,28 @@
 		$page.url.pathname;
 		sidebarOpen = false;
 	});
+
+	// Code block copy
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+		const handler = (e) => {
+			const btn = e.target.closest('.code-copy');
+			if (!btn) return;
+			const block = btn.closest('.code-block');
+			const code = block?.querySelector('code');
+			if (!code) return;
+			navigator.clipboard.writeText(code.textContent || '').then(() => {
+				btn.textContent = 'Copied!';
+				btn.classList.add('copied');
+				setTimeout(() => {
+					btn.textContent = 'Copy';
+					btn.classList.remove('copied');
+				}, 2000);
+			});
+		};
+		document.addEventListener('click', handler);
+		return () => document.removeEventListener('click', handler);
+	});
 </script>
 
 <div class="layout">

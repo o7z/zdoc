@@ -41,6 +41,33 @@ const collectHeadings: Plugin<[{ out: Heading[] }], Root> = ({ out }) => {
 	};
 };
 
+const rehypeCodeCopy: Plugin<[], Root> = () => {
+	return (tree) => {
+		visit(tree, 'element', (node, index, parent) => {
+			if (node.tagName !== 'pre' || !parent || index === null) return;
+			const codeChild = node.children.find(
+				(c): c is Element => c.type === 'element' && c.tagName === 'code',
+			);
+			if (!codeChild) return;
+			const wrapper: Element = {
+				type: 'element',
+				tagName: 'div',
+				properties: { className: ['code-block'] },
+				children: [
+					{
+						type: 'element',
+						tagName: 'button',
+						properties: { className: ['code-copy'], title: 'Copy' },
+						children: [{ type: 'text', value: 'Copy' }],
+					},
+					node,
+				],
+			};
+			parent.children[index] = wrapper;
+		});
+	};
+};
+
 export async function renderMarkdown(md: string): Promise<RenderResult> {
 	md = md.replace(/^---\n[\s\S]*?\n---\n/, '');
 
@@ -59,6 +86,7 @@ export async function renderMarkdown(md: string): Promise<RenderResult> {
 		.use(rehypeSlug)
 		.use(collectHeadings, { out: headings })
 		.use(rehypeHighlight, { detect: true, ignoreMissing: true })
+		.use(rehypeCodeCopy)
 		.use(rehypeStringify, { allowDangerousHtml: true });
 
 	const result = await processor.process(processed);
