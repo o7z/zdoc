@@ -6,41 +6,51 @@
 	<title>{data.title}</title>
 </svelte:head>
 
-{#if data.hero}
-	<div class="hero">
-		<h1 class="hero-name">{data.hero.name}</h1>
-		<p class="hero-text">{data.hero.text}</p>
-		{#if data.hero.tagline}
-			<p class="hero-tagline">{data.hero.tagline}</p>
-		{/if}
-		{#if data.hero.actions.length > 0}
-			<div class="hero-actions">
-				{#each data.hero.actions as action}
-					<a href={action.link} class="hero-btn" class:brand={action.theme === 'brand'}>{action.text}</a>
+<div class="content-wrap">
+	{#if data.hero}
+		<div class="hero">
+			<h1 class="hero-name">{data.hero.name}</h1>
+			<p class="hero-text">{data.hero.text}</p>
+			{#if data.hero.tagline}
+				<p class="hero-tagline">{data.hero.tagline}</p>
+			{/if}
+			{#if data.hero.actions.length > 0}
+				<div class="hero-actions">
+					{#each data.hero.actions as action}
+						<a href={action.link} class="hero-btn" class:brand={action.theme === 'brand'}>{action.text}</a>
+					{/each}
+				</div>
+			{/if}
+		</div>
+
+		{#if data.hero.features.length > 0}
+			<div class="features">
+				{#each data.hero.features as feature}
+					<div class="feature-card">
+						<h3>{feature.title}</h3>
+						<p>{feature.details}</p>
+					</div>
 				{/each}
 			</div>
 		{/if}
-	</div>
+	{/if}
 
-	{#if data.hero.features.length > 0}
-		<div class="features">
-			{#each data.hero.features as feature}
-				<div class="feature-card">
-					<h3>{feature.title}</h3>
-					<p>{feature.details}</p>
-				</div>
-			{/each}
+	{#if data.html}
+		<div class="page-body">
+			<article class="doc-content">
+				{@html data.html}
+			</article>
 		</div>
 	{/if}
-{/if}
-
-{#if data.html}
-	<article class="doc-content">
-		{@html data.html}
-	</article>
-{/if}
+</div>
 
 <style>
+	.content-wrap {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+	}
+
 	.hero {
 		text-align: center;
 		padding: 64px 24px 48px;
@@ -127,5 +137,11 @@
 		color: var(--text-muted);
 		line-height: 1.6;
 		margin: 0;
+	}
+
+	.page-body {
+		padding: 32px 48px 96px;
+		max-width: 900px;
+		margin: 0 auto;
 	}
 </style>
