@@ -145,18 +145,22 @@ body {
 	position: absolute;
 	top: 8px;
 	right: 8px;
-	padding: 4px 10px;
+	padding: 6px;
 	border: 1px solid var(--border);
 	border-radius: 6px;
 	background: var(--bg);
 	color: var(--text-muted);
-	font-size: 12px;
-	font-family: var(--font-sans);
 	cursor: pointer;
 	opacity: 0;
 	transition: opacity 0.15s, color 0.15s;
 	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 .code-block:hover .code-copy { opacity: 1; }
 .code-copy:hover { color: var(--text); }
 .code-copy.copied { color: var(--brand); border-color: var(--brand); }
+.code-copy-check { display: none; }
+.code-copy.copied .code-copy-icon { display: none; }
+.code-copy.copied .code-copy-check { display: block; }

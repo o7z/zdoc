@@ -90,10 +90,8 @@
 			const code = block?.querySelector('code');
 			if (!code) return;
 			navigator.clipboard.writeText(code.textContent || '').then(() => {
-				btn.textContent = 'Copied!';
 				btn.classList.add('copied');
 				setTimeout(() => {
-					btn.textContent = 'Copy';
 					btn.classList.remove('copied');
 				}, 2000);
 			});
