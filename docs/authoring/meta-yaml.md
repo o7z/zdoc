@@ -25,6 +25,8 @@ pages:
 | `order` | 否   | 排序权重，越小越靠前，默认 999        |
 | `env`   | 否   | 设为 `prod` 表示开发模式下隐藏        |
 
+> **只有这三个字段是目录级有效字段。** 在目录级写 `description`、`version`、`password` 等其他字段会被静默忽略，不会报错也不会生效。`description` 和 `version` 是 **`pages` 里单文档的字段**，不是目录级的。
+
 ### `pages` 里的 key
 
 - 普通 Markdown 用文件名去掉 `.md` —— 例如 `install.md` 的 key 是 `install`

@@ -10,13 +10,17 @@ pages:
     title: 单文档字段
     order: 2
     description: title / order / description / version / author / modified / env。
+  links-and-routes:
+    title: 链接与路由
+    order: 3
+    description: Markdown 内部链接的写法 —— 绝对路径、不带 .md 后缀。
   mermaid:
     title: Mermaid 与代码块
-    order: 3
+    order: 4
     description: 演示流程图与代码高亮。
     version: 0.1.0
   choose-a-structure:
     title: 选一套文档结构
-    order: 4
+    order: 5
     description: zdoc 不强制结构，但给三套经过实践验证的分层方案供参考。
     modified: 2026-04-21

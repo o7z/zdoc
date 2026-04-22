@@ -7,10 +7,10 @@ hero:
   actions:
     - theme: brand
       text: 立即上手
-      link: /intro/what-is-zdoc.md
+      link: /intro/what-is-zdoc
     - theme: alt
       text: 选一套文档结构
-      link: /authoring/choose-a-structure.md
+      link: /authoring/choose-a-structure
 
 features:
   - title: 零配置
