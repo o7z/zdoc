@@ -58,10 +58,9 @@
 	$effect(() => {
 		if (typeof window !== 'undefined') {
 			const saved = localStorage.getItem('docs-dark');
-			if (saved === '1' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-				darkMode = true;
-				document.documentElement.classList.add('dark');
-			}
+			const isDark = saved === '1' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+			darkMode = isDark;
+			document.documentElement.classList.toggle('dark', isDark);
 			// Ctrl+K / Cmd+K to open search
 			const handler = (e) => {
 				if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
