@@ -62,6 +62,7 @@
 		mermaid.initialize({
 			startOnLoad: false,
 			theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+			securityLevel: 'loose',
 		});
 
 		for (const block of blocks) {
@@ -75,6 +76,17 @@
 				const container = document.createElement('div');
 				container.className = 'mermaid-rendered';
 				container.innerHTML = svg;
+				
+				const svgEl = container.querySelector('svg');
+				if (svgEl) {
+					const viewBox = svgEl.getAttribute('viewBox');
+					if (viewBox) {
+						const parts = viewBox.split(/\s+/);
+						const vbHeight = parseFloat(parts[3]);
+						svgEl.setAttribute('height', String(vbHeight));
+					}
+				}
+				
 				block.replaceWith(container);
 			} catch (e) {
 				console.error('Mermaid render error:', e);

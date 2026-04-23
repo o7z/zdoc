@@ -41,10 +41,32 @@ const collectHeadings: Plugin<[{ out: Heading[] }], Root> = ({ out }) => {
 	};
 };
 
+const rehypeMermaid: Plugin<[], Root> = () => {
+	return (tree) => {
+		visit(tree, 'element', (node, index, parent) => {
+			if (node.tagName !== 'pre' || !parent || index == null) return;
+			const codeChild = node.children.find(
+				(c): c is Element => c.type === 'element' && c.tagName === 'code',
+			);
+			if (!codeChild) return;
+			const classes = (codeChild.properties?.className as string[]) ?? [];
+			if (!classes.some((c) => c === 'language-mermaid')) return;
+			const code = textOf(codeChild);
+			parent.children[index as number] = {
+				type: 'element',
+				tagName: 'pre',
+				properties: { className: ['mermaid'] },
+				children: [{ type: 'text', value: code }],
+			};
+		});
+	};
+};
+
 const rehypeCodeCopy: Plugin<[], Root> = () => {
 	return (tree) => {
 		visit(tree, 'element', (node, index, parent) => {
-			if (node.tagName !== 'pre' || !parent || index === null) return;
+			if (node.tagName !== 'pre' || !parent || index == null) return;
+			if ((node.properties?.className as string[])?.includes('mermaid')) return;
 			const codeChild = node.children.find(
 				(c): c is Element => c.type === 'element' && c.tagName === 'code',
 			);
@@ -101,20 +123,13 @@ const rehypeCodeCopy: Plugin<[], Root> = () => {
 					node,
 				],
 			};
-			parent.children[index] = wrapper;
+			parent.children[index as number] = wrapper;
 		});
 	};
 };
 
 export async function renderMarkdown(md: string): Promise<RenderResult> {
 	md = md.replace(/^---\n[\s\S]*?\n---\n/, '');
-
-	const mermaidBlocks: string[] = [];
-	const placeholder = '___MERMAID_PLACEHOLDER___';
-	const processed = md.replace(/```mermaid\n([\s\S]*?)```/g, (_: string, code: string) => {
-		mermaidBlocks.push(code.trim());
-		return placeholder;
-	});
 
 	const headings: Heading[] = [];
 	const processor = unified()
@@ -124,21 +139,12 @@ export async function renderMarkdown(md: string): Promise<RenderResult> {
 		.use(rehypeSlug)
 		.use(collectHeadings, { out: headings })
 		.use(rehypeHighlight, { detect: true, ignoreMissing: true })
+		.use(rehypeMermaid)
 		.use(rehypeCodeCopy)
 		.use(rehypeStringify, { allowDangerousHtml: true });
 
-	const result = await processor.process(processed);
-	let html = String(result);
-
-	let i = 0;
-	html = html.replace(new RegExp(`<p>${placeholder}</p>`, 'g'), () => {
-		const code = mermaidBlocks[i++] || '';
-		return `<pre class="mermaid">${escapeHtml(code)}</pre>`;
-	});
+	const result = await processor.process(md);
+	const html = String(result);
 
 	return { html, headings };
-}
-
-function escapeHtml(s: string): string {
-	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }

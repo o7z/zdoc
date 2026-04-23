@@ -125,6 +125,72 @@ body {
 	border: 1px solid var(--border);
 	border-radius: 12px;
 	text-align: center;
+	overflow: visible;
+}
+.doc-content .mermaid-rendered {
+	width: 100%;
+	overflow: visible;
+}
+.doc-content .mermaid-rendered svg {
+	width: 100%;
+	height: auto;
+	max-width: 100%;
+	overflow: visible;
+	font-family: var(--font-sans) !important;
+	font-size: 14px !important;
+}
+.doc-content .mermaid-rendered svg,
+.doc-content .mermaid-rendered .label,
+.doc-content .mermaid-rendered .label text,
+.doc-content .mermaid-rendered .label span {
+	fill: var(--text) !important;
+	color: var(--text) !important;
+}
+.doc-content .mermaid-rendered .node rect,
+.doc-content .mermaid-rendered .node circle,
+.doc-content .mermaid-rendered .node ellipse,
+.doc-content .mermaid-rendered .node polygon,
+.doc-content .mermaid-rendered .node path {
+	fill: var(--bg) !important;
+	stroke: var(--brand) !important;
+	stroke-width: 1.5px !important;
+}
+.doc-content .mermaid-rendered .node .label {
+	text-align: center;
+}
+.doc-content .mermaid-rendered .edgePath .path,
+.doc-content .mermaid-rendered .flowchart-link {
+	stroke: var(--text-muted) !important;
+	stroke-width: 1px !important;
+}
+.doc-content .mermaid-rendered .marker {
+	fill: var(--text-muted) !important;
+	stroke: var(--text-muted) !important;
+}
+.doc-content .mermaid-rendered .edgeLabel .labelBkg {
+	padding: 3px 12px;
+	border-radius: 6px;
+	background: var(--bg) !important;
+	border: 1px solid var(--border) !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	transform: translate(-12px, -3px);
+}
+.doc-content .mermaid-rendered .edgeLabel {
+	display: block;
+	min-width: fit-content;
+	min-height: fit-content;
+}
+.doc-content .mermaid-rendered .edgeLabel span,
+.doc-content .mermaid-rendered .edgeLabel p {
+	background: transparent !important;
+	margin: 0;
+}
+.doc-content .mermaid-rendered .edgeLabel text {
+	text-align: center;
+	fill: var(--text) !important;
+}
+.doc-content .mermaid-rendered foreignObject {
+	overflow: visible;
 }
 
 /* highlight.js theme override for dark mode */

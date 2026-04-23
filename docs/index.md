@@ -28,3 +28,11 @@ features:
 这是 zdoc 的官方文档。整个站点由 zdoc 自己渲染本仓库的 `docs/` 目录得到 —— 这也是我们对 zdoc 能力的最诚实展示。
 
 左侧点「简介」开始上手，点「编写文档」学如何组织自己的 docs，点「参考」查 CLI 与配置。
+
+---
+
+<div style="text-align: center; margin-top: 48px; opacity: 0.6;">
+
+<img src="/assets/z-cyberpunk.svg" alt="zdoc cyberpunk Z" style="max-width: 200px; height: auto;">
+
+</div>
