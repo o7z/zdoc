@@ -3,7 +3,16 @@ import { createServer } from 'node:net';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { checkForUpdate, performUpdate } from './update.js';
+import { getLatestVersion, getCurrentVersion } from './update.js';
+
+// Detect package manager name roughly based on argv/user-agent
+function getPmName(): string {
+	const user = process.env.npm_config_user_agent ?? '';
+	if (user.startsWith('pnpm')) return 'pnpm';
+	if (user.startsWith('yarn')) return 'yarn';
+	if (user.startsWith('bun')) return 'bun';
+	return 'npm';
+}
 
 interface Args {
 	dir: string;
@@ -230,24 +239,25 @@ async function main(): Promise<void> {
 	process.stdout.write(`  ➜  Local:    http://localhost:${port}\n`);
 	process.stdout.write(`  ➜  Password: ${password ? 'enabled' : 'disabled'}\n`);
 
-	const update = await checkForUpdate();
-	if (update.needsUpdate && update.latest) {
+	// Check for updates
+	const latest = await getLatestVersion();
+	const current = getCurrentVersion();
+
+	if (latest && current !== latest) {
+		// Check if the user is running inside a project that has zdoc as dependency
+		const pkgPath = join(cwd, 'package.json');
+		let isLocalDep = false;
+		try {
+			const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { dependencies?: Record<string, string>, devDependencies?: Record<string, string> };
+			isLocalDep = !!(pkg.dependencies?.['@o7z/zdoc'] || pkg.devDependencies?.['@o7z/zdoc']);
+		} catch {}
+
+		const pm = getPmName();
+		const flag = isLocalDep ? 'add @o7z/zdoc' : 'add -g @o7z/zdoc';
+
 		process.stdout.write(`\n  ─────────────────────────────────────\n`);
-		process.stdout.write(`  Update available ${update.current} → ${update.latest}\n`);
-		if (update.pm) {
-			process.stdout.write(`  Upgrading via ${update.pm.pm}...\n`);
-			const ok = await performUpdate(update.pm);
-			if (ok) {
-				process.stdout.write(`  ✔ Updated ${update.current} → ${update.latest}\n`);
-				process.stdout.write(`  Restart zdoc to use the new version.\n`);
-			} else {
-				process.stdout.write(`  ✘ Update failed. Run manually:\n`);
-				process.stdout.write(`    ${update.pm.installCmd}\n`);
-			}
-		} else {
-			process.stdout.write(`  Cannot auto-detect package manager.\n`);
-			process.stdout.write(`  Run manually: npm i -g @o7z/zdoc  or  pnpm add -g @o7z/zdoc  or  bun add -g @o7z/zdoc\n`);
-		}
+		process.stdout.write(`  Update available ${current} → ${latest}\n`);
+		process.stdout.write(`  Run: ${pm} ${flag}\n`);
 	}
 	process.stdout.write('\n');
 
