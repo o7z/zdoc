@@ -168,26 +168,29 @@ body {
 	stroke: var(--text-muted) !important;
 }
 .doc-content .mermaid-rendered .edgeLabel .labelBkg {
-	padding: 3px 12px;
-	border-radius: 6px;
+	padding: 2px 8px;
+	border-radius: 4px;
 	background: var(--bg) !important;
 	border: 1px solid var(--border) !important;
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-	transform: translate(-12px, -3px);
+	transform: translate(-8px, -2px);
 }
 .doc-content .mermaid-rendered .edgeLabel {
 	display: block;
 	min-width: fit-content;
 	min-height: fit-content;
+	font-size: 11px !important;
 }
 .doc-content .mermaid-rendered .edgeLabel span,
 .doc-content .mermaid-rendered .edgeLabel p {
 	background: transparent !important;
 	margin: 0;
+	font-size: 11px !important;
 }
 .doc-content .mermaid-rendered .edgeLabel text {
 	text-align: center;
-	fill: var(--text) !important;
+	fill: var(--text-muted) !important;
+	font-size: 11px !important;
 }
 .doc-content .mermaid-rendered foreignObject {
 	overflow: visible;

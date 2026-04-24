@@ -8,6 +8,7 @@
 	let darkMode = $state(false);
 	let searchOpen = $state(false);
 	let searchQuery = $state('');
+	let aboutDialogEl = $state(null);
 	/** @type {Set<string>} */
 	let collapsedGroups = $state(new Set());
 	let searchResults = $derived.by(() => {
@@ -116,6 +117,9 @@
 			<kbd>Ctrl+K</kbd>
 		</button>
 		<div class="header-actions">
+			<button class="icon-btn" onclick={() => aboutDialogEl?.showModal()} aria-label="About zdoc">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+			</button>
 			<button class="icon-btn" onclick={toggleDark} aria-label="Toggle dark mode">
 				{#if darkMode}
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -148,6 +152,30 @@
 		</main>
 	</div>
 </div>
+
+<dialog class="about-dialog" bind:this={aboutDialogEl} onclick={(e) => { if (e.target === aboutDialogEl) aboutDialogEl.close(); }}>
+		<div class="about-content">
+			<button class="about-close" onclick={() => aboutDialogEl.close()} aria-label="Close">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+			</button>
+			<div class="about-body">
+				<div class="about-logo">
+					<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+				</div>
+				<h2 class="about-title">zdoc</h2>
+				<p class="about-desc">Zero-config Markdown docs site</p>
+				{#if data.version}
+					<div class="about-version">v{data.version}</div>
+				{/if}
+				<div class="about-links">
+					{#if data.repoUrl}
+						<a href={data.repoUrl} target="_blank" rel="noopener">GitHub</a>
+					{/if}
+					<a href="https://www.npmjs.com/package/@o7z/zdoc" target="_blank" rel="noopener">npm</a>
+				</div>
+			</div>
+		</div>
+	</dialog>
 
 <!-- Search modal -->
 {#if searchOpen}
@@ -297,6 +325,54 @@
 	}
 
 	main { flex: 1; display: flex; min-width: 0; overflow: hidden; }
+
+	/* About dialog */
+	.about-dialog {
+		border: none; padding: 0; margin: auto;
+		width: 320px; max-width: 90vw;
+		background: transparent;
+	}
+	.about-dialog::backdrop {
+		background: rgba(0,0,0,0.5);
+	}
+	.about-content {
+		background: var(--bg); border: 1px solid var(--border);
+		border-radius: 12px; width: 100%;
+		box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+		position: relative; padding: 32px 24px 24px;
+	}
+	.about-close {
+		position: absolute; top: 12px; right: 12px;
+		background: none; border: none; cursor: pointer;
+		color: var(--text-muted); padding: 4px; display: flex;
+	}
+	.about-close:hover { color: var(--text); }
+	.about-body { text-align: center; }
+	.about-logo { margin-bottom: 12px; }
+	.about-title {
+		font-size: 20px; font-weight: 700; color: var(--text);
+		margin: 0 0 4px;
+	}
+	.about-desc {
+		font-size: 14px; color: var(--text-muted); margin: 0 0 16px;
+	}
+	.about-version {
+		display: inline-block; padding: 4px 12px;
+		background: var(--bg-soft); border: 1px solid var(--border);
+		border-radius: 6px; font-size: 13px; font-family: var(--font-mono);
+		color: var(--text-muted); margin-bottom: 16px;
+	}
+	.about-links {
+		display: flex; gap: 12px; justify-content: center;
+	}
+	.about-links a {
+		padding: 6px 16px; border: 1px solid var(--border); border-radius: 6px;
+		font-size: 13px; color: var(--text-muted); text-decoration: none;
+		transition: all 0.15s;
+	}
+	.about-links a:hover {
+		color: var(--brand); border-color: var(--brand); background: var(--brand-soft);
+	}
 
 	/* Search modal */
 	.search-overlay {
