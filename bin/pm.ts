@@ -80,16 +80,35 @@ export interface DetectResult {
 }
 
 export function detectPM(cwd?: string): DetectResult | null {
+	const binPath = resolve(process.argv[1] ?? '');
+	const userAgent = process.env.npm_config_user_agent ?? '';
 	const dir = cwd ?? process.cwd();
 	const global = isGlobalInstall();
+
+	// TEMP DEBUG
+	console.error(`[pm debug] argv1: ${binPath}`);
+	console.error(`[pm debug] user-agent: ${userAgent}`);
+	console.error(`[pm debug] global: ${global}`);
 
 	let pm: PackageManager | null = null;
 
 	if (global) {
-		pm = detectFromUserAgent() ?? detectFromArgv1();
+		const ua = detectFromUserAgent();
+		const arg = detectFromArgv1();
+		console.error(`[pm debug] detectFromUserAgent: ${ua}`);
+		console.error(`[pm debug] detectFromArgv1: ${arg}`);
+		pm = ua ?? arg;
 	} else {
-		pm = detectFromPackageManagerField(dir) ?? detectFromLockFile(dir) ?? detectFromUserAgent() ?? detectFromArgv1();
+		const pkgMan = detectFromPackageManagerField(dir);
+		const lock = detectFromLockFile(dir);
+		const ua = detectFromUserAgent();
+		const arg = detectFromArgv1();
+		console.error(`[pm debug] project: pkgField=${pkgMan} lock=${lock} ua=${ua} arg=${arg}`);
+		pm = pkgMan ?? lock ?? ua ?? arg;
 	}
+
+	console.error(`[pm debug] final result: ${pm ?? 'null'}`);
+	// END TEMP DEBUG
 
 	if (!pm) return null;
 

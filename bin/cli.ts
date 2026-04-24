@@ -231,17 +231,22 @@ async function main(): Promise<void> {
 	process.stdout.write(`  ➜  Password: ${password ? 'enabled' : 'disabled'}\n`);
 
 	const update = await checkForUpdate();
-	if (update.needsUpdate && update.pm && update.latest) {
+	if (update.needsUpdate && update.latest) {
 		process.stdout.write(`\n  ─────────────────────────────────────\n`);
 		process.stdout.write(`  Update available ${update.current} → ${update.latest}\n`);
-		process.stdout.write(`  Upgrading via ${update.pm.pm}...\n`);
-		const ok = await performUpdate(update.pm);
-		if (ok) {
-			process.stdout.write(`  ✔ Updated ${update.current} → ${update.latest}\n`);
-			process.stdout.write(`  Restart zdoc to use the new version.\n`);
+		if (update.pm) {
+			process.stdout.write(`  Upgrading via ${update.pm.pm}...\n`);
+			const ok = await performUpdate(update.pm);
+			if (ok) {
+				process.stdout.write(`  ✔ Updated ${update.current} → ${update.latest}\n`);
+				process.stdout.write(`  Restart zdoc to use the new version.\n`);
+			} else {
+				process.stdout.write(`  ✘ Update failed. Run manually:\n`);
+				process.stdout.write(`    ${update.pm.installCmd}\n`);
+			}
 		} else {
-			process.stdout.write(`  ✘ Update failed. Run manually:\n`);
-			process.stdout.write(`    ${update.pm.installCmd}\n`);
+			process.stdout.write(`  Cannot auto-detect package manager.\n`);
+			process.stdout.write(`  Run manually: npm i -g @o7z/zdoc  or  pnpm add -g @o7z/zdoc  or  bun add -g @o7z/zdoc\n`);
 		}
 	}
 	process.stdout.write('\n');

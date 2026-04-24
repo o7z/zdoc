@@ -56,10 +56,6 @@ export interface UpdateCheckResult {
 
 export async function checkForUpdate(): Promise<UpdateCheckResult> {
 	const pm = detectPM();
-	if (!pm) {
-		return { needsUpdate: false, current: getCurrentVersion(), latest: null, pm: null };
-	}
-
 	const latest = await fetchLatestVersion();
 	const current = getCurrentVersion();
 
