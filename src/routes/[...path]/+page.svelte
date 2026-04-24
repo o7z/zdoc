@@ -202,7 +202,7 @@
 	@media (min-width: 1280px) {
 		.toc {
 			display: block;
-			width: 220px;
+			width: 220px; min-width: 180px; max-width: 300px;
 			flex-shrink: 0;
 			overflow-y: auto;
 			padding: 32px 14px 32px 14px;

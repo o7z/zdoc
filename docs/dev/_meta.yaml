@@ -1,2 +1,10 @@
 title: 开发者
 order: 2
+
+pages:
+  reference:
+    title: 参考
+    order: 1
+  release:
+    title: 发布规范
+    order: 2

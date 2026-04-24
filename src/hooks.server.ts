@@ -1,8 +1,43 @@
 import type { Handle } from '@sveltejs/kit';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { getConfig } from '$lib/config.js';
+import { getDocsDir } from '$lib/docs-dir.js';
 import { createSession, validateSession } from '$lib/sessions.js';
 
+const FAVICON_NAMES = ['favicon.ico', 'favicon.png', 'favicon.svg', 'favicon.gif'];
+
+const MIME: Record<string, string> = {
+	'.ico': 'image/x-icon',
+	'.png': 'image/png',
+	'.svg': 'image/svg+xml',
+	'.gif': 'image/gif',
+};
+
+function tryFavicon(): Response | null {
+	const docsDir = getDocsDir();
+	for (const name of FAVICON_NAMES) {
+		const filePath = join(docsDir, name);
+		if (existsSync(filePath)) {
+			const ext = name.slice(name.lastIndexOf('.'));
+			return new Response(readFileSync(filePath), {
+				headers: {
+					'Content-Type': MIME[ext] ?? 'application/octet-stream',
+					'Cache-Control': 'public, max-age=86400',
+				},
+			});
+		}
+	}
+	return null;
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
+	// Favicon — public, no auth needed
+	if (FAVICON_NAMES.some((n) => event.url.pathname === '/' + n)) {
+		const resp = tryFavicon();
+		if (resp) return resp;
+	}
+
 	const password = getConfig().password;
 
 	if (!password) {
