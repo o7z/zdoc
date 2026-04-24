@@ -1,6 +1,6 @@
 {
   "name": "@o7z/zdoc",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Zero-config Markdown docs site with password protection, auto sidebar, Mermaid, search, and dark mode.",
   "license": "MIT",
   "author": "o7z",
