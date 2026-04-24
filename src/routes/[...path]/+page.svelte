@@ -4,6 +4,22 @@
 	let { data } = $props();
 	let activeId = $state('');
 	let mainEl = $state(null);
+	let isLoading = $state(true);
+	let isTimeout = $state(false);
+
+	$effect(() => {
+		const html = data.html ?? '';
+		if (html.length > 0) {
+			isLoading = false;
+			isTimeout = false;
+			return;
+		}
+
+		isLoading = true;
+		isTimeout = false;
+		const timer = setTimeout(() => { isLoading = false; isTimeout = true; }, 30000);
+		return () => clearTimeout(timer);
+	});
 
 	/** @type {() => void} */
 	let cleanupSpy = () => {};
@@ -103,6 +119,20 @@
 	<div class="pdf-frame">
 		<iframe src={data.pdfUrl} title={data.title}></iframe>
 	</div>
+{:else if isLoading}
+	<div class="loading-wrap">
+		<div class="loading-box">
+			<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32"><animate attributeName="stroke-dasharray" dur="2s" values="0 32; 16 16; 0 32" repeatCount="indefinite"/></circle></svg>
+			<p>加载中...</p>
+		</div>
+	</div>
+{:else if isTimeout}
+	<div class="loading-wrap">
+		<div class="loading-box error">
+			<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+			<p>加载超时，请刷新页面重试</p>
+		</div>
+	</div>
 {:else}
 	<div class="content-wrap" bind:this={mainEl}>
 		<article class="doc-content">
@@ -179,6 +209,25 @@
 		border: none;
 		display: block;
 	}
+
+	.loading-wrap {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex: 1;
+		min-height: 60vh;
+	}
+	.loading-box {
+		text-align: center;
+		color: var(--text-muted);
+		font-size: 14px;
+	}
+	.loading-box svg {
+		margin-bottom: 12px;
+		opacity: 0.5;
+	}
+	.loading-box.error svg { opacity: 0.3; }
+	.loading-box p { margin: 0; }
 
 	.content-wrap {
 		display: flex;
