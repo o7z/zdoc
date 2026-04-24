@@ -8,5 +8,7 @@ export const load: LayoutServerLoad = () => {
 	return {
 		sidebar,
 		siteTitle: config.title,
+		version: process.env.ZDOC_VERSION ?? '',
+		repoUrl: process.env.ZDOC_REPO_URL ?? '',
 	};
 };

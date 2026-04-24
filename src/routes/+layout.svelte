@@ -88,7 +88,9 @@
 			const block = btn.closest('.code-block');
 			const code = block?.querySelector('code');
 			if (!code) return;
-			navigator.clipboard.writeText(code.textContent || '').then(() => {
+			const text = code.textContent || '';
+			const copyText = text.endsWith('\n') ? text : text + '\n';
+			navigator.clipboard.writeText(copyText).then(() => {
 				btn.classList.add('copied');
 				setTimeout(() => {
 					btn.classList.remove('copied');
@@ -126,9 +128,20 @@
 
 	<div class="body">
 		<nav class="sidebar" class:open={sidebarOpen}>
-			{#each data.sidebar as group}
-				{@render sidebarGroup(group, 0)}
-			{/each}
+			<div class="sidebar-scroll">
+				{#each data.sidebar as group}
+					{@render sidebarGroup(group, 0)}
+				{/each}
+			</div>
+			{#if data.version}
+				<div class="sidebar-footer">
+					{#if data.repoUrl}
+						<a href={data.repoUrl} target="_blank" rel="noopener">v{data.version}</a>
+					{:else}
+						<span>v{data.version}</span>
+					{/if}
+				</div>
+			{/if}
 		</nav>
 		<main>
 			{@render children()}
@@ -244,10 +257,21 @@
 	.body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 
 	.sidebar {
-		width: 280px; min-width: 280px; padding: 16px 0;
+		width: 280px; min-width: 240px; max-width: 360px; padding: 16px 0 0;
 		border-right: 1px solid var(--border); overflow-y: auto;
 		background: var(--bg); flex-shrink: 0;
+		display: flex; flex-direction: column;
 	}
+	.sidebar-scroll { flex: 1; overflow-y: auto; }
+	.sidebar-footer {
+		padding: 12px 24px; border-top: 1px solid var(--border);
+		font-size: 11px; color: var(--text-muted); flex-shrink: 0;
+	}
+	.sidebar-footer a {
+		color: var(--text-muted); text-decoration: none; font-family: var(--font-mono);
+	}
+	.sidebar-footer a:hover { color: var(--brand); }
+	.sidebar-footer span { font-family: var(--font-mono); }
 	.sidebar-group { margin-bottom: 4px; }
 	.sidebar-group.nested { margin-left: 12px; }
 	.group-toggle {
@@ -325,8 +349,8 @@
 		.search-trigger span, .search-trigger kbd { display: none; }
 		.search-trigger { min-width: auto; padding: 8px; }
 		.sidebar {
-			position: fixed; left: -280px; top: 0; z-index: 99;
-			transition: left 0.2s; height: 100vh;
+			position: fixed; left: -360px; top: 0; z-index: 99;
+			transition: left 0.2s; height: 100vh; width: 300px; max-width: 80vw;
 			box-shadow: 2px 0 8px rgba(0,0,0,0.1);
 		}
 		.sidebar.open { left: 0; }

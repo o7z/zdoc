@@ -3,6 +3,7 @@ import { createServer } from 'node:net';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { checkUpdateSync, spawnCheck } from './update.js';
 
 interface Args {
 	dir: string;
@@ -26,6 +27,8 @@ const DEFAULTS = {
 	password: '',
 	title: 'Docs',
 };
+
+const PKG_NAME = '@o7z/zdoc';
 
 function printHelp(): void {
 	const msg = `zdoc — Markdown docs server
@@ -160,7 +163,7 @@ async function main(): Promise<void> {
 	const __filename = fileURLToPath(import.meta.url);
 	const __dirname = dirname(__filename);
 	const pkgPath = resolve(__dirname, '..', 'package.json');
-	const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { version: string };
+	const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { version: string; repository?: { url?: string } };
 
 	let args: Args;
 	try {
@@ -211,6 +214,8 @@ async function main(): Promise<void> {
 	process.env.ZDOC_DIR = docsDir;
 	process.env.ZDOC_PASSWORD = password;
 	process.env.ZDOC_TITLE = title;
+	process.env.ZDOC_VERSION = pkg.version;
+	process.env.ZDOC_REPO_URL = pkg.repository?.url ?? '';
 	process.env.PORT = String(port);
 	process.env.HOST = process.env.HOST || '0.0.0.0';
 
@@ -225,7 +230,17 @@ async function main(): Promise<void> {
 	process.stdout.write(`\n  zdoc v${pkg.version}\n`);
 	process.stdout.write(`  ➜  Docs:     ${docsDir}\n`);
 	process.stdout.write(`  ➜  Local:    http://localhost:${port}\n`);
-	process.stdout.write(`  ➜  Password: ${password ? 'enabled' : 'disabled'}\n\n`);
+	process.stdout.write(`  ➜  Password: ${password ? 'enabled' : 'disabled'}\n`);
+
+	const update = checkUpdateSync();
+	if (update) {
+		process.stdout.write(`\n  ─────────────────────────────────────\n`);
+		process.stdout.write(`  Update available ${update.current} → ${update.latest}\n`);
+		process.stdout.write(`  Run: ${update.pm.installCmd} ${PKG_NAME}\n`);
+	}
+	process.stdout.write('\n');
+
+	spawnCheck();
 
 	await import(pathToFileURL(buildEntry).href);
 }
