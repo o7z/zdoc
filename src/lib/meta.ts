@@ -58,7 +58,7 @@ function parseScalar(s: string): unknown {
 	return s;
 }
 
-const KEY_VALUE_RE = /^([A-Za-z_][A-Za-z0-9_\-.]*|"[^"]*"|'[^']*'):\s*(.*)$/;
+const KEY_VALUE_RE = /^([A-Za-z0-9_][A-Za-z0-9_\-.]*|"[^"]*"|'[^']*'):\s*(.*)$/;
 
 function parseBlock(
 	lines: Line[],
