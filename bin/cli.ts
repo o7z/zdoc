@@ -3,7 +3,7 @@ import { createServer } from 'node:net';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { checkUpdateSync, spawnCheck } from './update.js';
+import { checkForUpdate, performUpdate } from './update.js';
 
 interface Args {
 	dir: string;
@@ -27,8 +27,6 @@ const DEFAULTS = {
 	password: '',
 	title: 'Docs',
 };
-
-const PKG_NAME = '@o7z/zdoc';
 
 function printHelp(): void {
 	const msg = `zdoc — Markdown docs server
@@ -232,15 +230,21 @@ async function main(): Promise<void> {
 	process.stdout.write(`  ➜  Local:    http://localhost:${port}\n`);
 	process.stdout.write(`  ➜  Password: ${password ? 'enabled' : 'disabled'}\n`);
 
-	const update = checkUpdateSync();
-	if (update) {
+	const update = await checkForUpdate();
+	if (update.needsUpdate && update.pm && update.latest) {
 		process.stdout.write(`\n  ─────────────────────────────────────\n`);
 		process.stdout.write(`  Update available ${update.current} → ${update.latest}\n`);
-		process.stdout.write(`  Run: ${update.pm.installCmd} ${PKG_NAME}\n`);
+		process.stdout.write(`  Upgrading via ${update.pm.pm}...\n`);
+		const ok = await performUpdate(update.pm);
+		if (ok) {
+			process.stdout.write(`  ✔ Updated ${update.current} → ${update.latest}\n`);
+			process.stdout.write(`  Restart zdoc to use the new version.\n`);
+		} else {
+			process.stdout.write(`  ✘ Update failed. Run manually:\n`);
+			process.stdout.write(`    ${update.pm.installCmd}\n`);
+		}
 	}
 	process.stdout.write('\n');
-
-	spawnCheck();
 
 	await import(pathToFileURL(buildEntry).href);
 }

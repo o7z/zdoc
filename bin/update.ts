@@ -1,49 +1,13 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawn } from 'node:child_process';
+import { execSync } from 'node:child_process';
 import { detectPM, type DetectResult } from './pm.js';
 
-const ONE_DAY = 24 * 60 * 60 * 1000;
 const PKG_NAME = '@o7z/zdoc';
-
-interface CacheData {
-	lastCheck: number;
-	latest: string | null;
-}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-function cacheDir(): string {
-	const platform = process.platform;
-	if (platform === 'win32') {
-		const base = process.env.LOCALAPPDATA ?? process.env.APPDATA ?? resolve(process.env.HOME ?? '~', 'AppData', 'Local');
-		return resolve(base, 'zdoc');
-	}
-	const base = process.env.XDG_CACHE_HOME ?? resolve(process.env.HOME ?? '~', '.cache');
-	return resolve(base, 'zdoc');
-}
-
-function cachePath(): string {
-	return resolve(cacheDir(), 'update-check.json');
-}
-
-export function readCache(): CacheData | null {
-	const p = cachePath();
-	if (!existsSync(p)) return null;
-	try {
-		return JSON.parse(readFileSync(p, 'utf-8')) as CacheData;
-	} catch {
-		return null;
-	}
-}
-
-function writeCache(data: CacheData): void {
-	const dir = cacheDir();
-	if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-	writeFileSync(cachePath(), JSON.stringify(data));
-}
 
 function getCurrentVersion(): string {
 	const pkgPath = resolve(__dirname, '..', 'package.json');
@@ -83,33 +47,36 @@ async function fetchLatestVersion(): Promise<string | null> {
 	}
 }
 
-export interface UpdateInfo {
+export interface UpdateCheckResult {
+	needsUpdate: boolean;
 	current: string;
-	latest: string;
-	pm: DetectResult;
+	latest: string | null;
+	pm: DetectResult | null;
 }
 
-export function checkUpdateSync(): UpdateInfo | null {
-	const cache = readCache();
-	if (!cache || !cache.latest) return null;
-
-	const current = getCurrentVersion();
-	if (!semverGt(cache.latest, current)) return null;
-
+export async function checkForUpdate(): Promise<UpdateCheckResult> {
 	const pm = detectPM();
-	return { current, latest: cache.latest, pm };
+	if (!pm) {
+		return { needsUpdate: false, current: getCurrentVersion(), latest: null, pm: null };
+	}
+
+	const latest = await fetchLatestVersion();
+	const current = getCurrentVersion();
+
+	if (!latest || !semverGt(latest, current)) {
+		return { needsUpdate: false, current, latest, pm };
+	}
+
+	return { needsUpdate: true, current, latest, pm };
 }
 
-export function spawnCheck(): void {
-	const cache = readCache();
-	if (cache && Date.now() - cache.lastCheck < ONE_DAY) return;
-
-	const child = spawn(
-		process.execPath,
-		[resolve(__dirname, 'update-check.js')],
-		{ detached: true, stdio: 'ignore' },
-	);
-	child.unref();
+export async function performUpdate(pm: DetectResult): Promise<boolean> {
+	try {
+		execSync(pm.installCmd, { stdio: 'inherit', timeout: 60000 });
+		return true;
+	} catch {
+		return false;
+	}
 }
 
-export { fetchLatestVersion, writeCache, getCurrentVersion };
+export { getCurrentVersion };

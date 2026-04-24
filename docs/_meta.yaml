@@ -1,2 +1,7 @@
 title: zdoc
 order: 0
+
+pages:
+  index:
+    title: 首页
+    order: 0

@@ -1,19 +1,20 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { resolve } from 'node:path';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
 
 interface PMInfo {
 	name: PackageManager;
-	global: string;
-	local: string;
+	globalCmd: string;
+	localCmd: string;
+	binCmd: string;
 }
 
 const PM_COMMANDS: Record<PackageManager, PMInfo> = {
-	npm:  { name: 'npm',  global: 'npm i -g',       local: 'npm i'       },
-	pnpm: { name: 'pnpm', global: 'pnpm add -g',     local: 'pnpm add'    },
-	yarn: { name: 'yarn', global: 'yarn global add',  local: 'yarn add'    },
-	bun:  { name: 'bun',  global: 'bun add -g',       local: 'bun add'     },
+	npm:  { name: 'npm',  globalCmd: 'npm i -g @o7z/zdoc',       localCmd: 'npm i @o7z/zdoc',       binCmd: 'npm'  },
+	pnpm: { name: 'pnpm', globalCmd: 'pnpm add -g @o7z/zdoc',     localCmd: 'pnpm add @o7z/zdoc',     binCmd: 'pnpm' },
+	yarn: { name: 'yarn', globalCmd: 'yarn global add @o7z/zdoc',  localCmd: 'yarn add @o7z/zdoc',     binCmd: 'yarn' },
+	bun:  { name: 'bun',  globalCmd: 'bun add -g @o7z/zdoc',       localCmd: 'bun add @o7z/zdoc',      binCmd: 'bun'  },
 };
 
 const LOCK_FILES: Record<string, PackageManager> = {
@@ -38,6 +39,7 @@ function detectFromArgv1(): PackageManager | null {
 	if (/[\\/]\.bun[\\/]/.test(binPath) || /[\\/]bun[\\/]install[\\/]/.test(binPath)) return 'bun';
 	if (/[\\/]\.pnpm[\\/]/.test(binPath) || /[\\/]pnpm[\\/]/.test(binPath)) return 'pnpm';
 	if (/[\\/]\.yarn[\\/]/.test(binPath) || /[\\/]yarn[\\/]/.test(binPath)) return 'yarn';
+	if (/[\\/]npm[\\/]/.test(binPath)) return 'npm';
 	return null;
 }
 
@@ -64,8 +66,7 @@ function detectFromPackageManagerField(cwd: string): PackageManager | null {
 function isGlobalInstall(): boolean {
 	const binPath = resolve(process.argv[1] ?? '');
 	const cwd = process.cwd();
-	const rel = binPath.startsWith(cwd);
-	if (!rel) return true;
+	if (!binPath.startsWith(cwd)) return true;
 	const nodeModulesIdx = binPath.indexOf('node_modules');
 	if (nodeModulesIdx === -1) return true;
 	return !binPath.substring(0, nodeModulesIdx).startsWith(cwd);
@@ -75,9 +76,10 @@ export interface DetectResult {
 	pm: PackageManager;
 	global: boolean;
 	installCmd: string;
+	binCmd: string;
 }
 
-export function detectPM(cwd?: string): DetectResult {
+export function detectPM(cwd?: string): DetectResult | null {
 	const dir = cwd ?? process.cwd();
 	const global = isGlobalInstall();
 
@@ -89,12 +91,13 @@ export function detectPM(cwd?: string): DetectResult {
 		pm = detectFromPackageManagerField(dir) ?? detectFromLockFile(dir) ?? detectFromUserAgent() ?? detectFromArgv1();
 	}
 
-	pm = pm ?? 'npm';
+	if (!pm) return null;
 
 	const info = PM_COMMANDS[pm];
 	return {
 		pm,
 		global,
-		installCmd: global ? info.global : info.local,
+		installCmd: global ? info.globalCmd : info.localCmd,
+		binCmd: info.binCmd,
 	};
 }
