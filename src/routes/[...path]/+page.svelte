@@ -2,7 +2,6 @@
 	import { onMount, onDestroy } from 'svelte';
 
 	let { data } = $props();
-	let html = $derived(data.html ?? '');
 	let activeId = $state('');
 	let mainEl = $state(null);
 
@@ -15,7 +14,7 @@
 	});
 
 	$effect(() => {
-		html;
+		data.html;
 		if (typeof window !== 'undefined' && data.kind === 'md') {
 			requestAnimationFrame(() => {
 				initMermaid();
@@ -124,7 +123,7 @@
 					{/if}
 				</div>
 			{/if}
-			{@html html}
+			{@html data.html}
 		</article>
 		{#if data.headings && data.headings.length >= 2}
 			<aside class="toc" aria-label="On this page">

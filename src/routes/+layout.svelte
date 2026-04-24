@@ -148,7 +148,9 @@
 			{/if}
 		</nav>
 		<main>
-			{@render children()}
+			{#key $page.url.pathname}
+				{@render children()}
+			{/key}
 		</main>
 	</div>
 </div>
