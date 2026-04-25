@@ -29,7 +29,8 @@ export async function getLatestVersion(): Promise<string | null> {
 	const timeout = setTimeout(() => controller.abort(), 3000); // Reduced to 3s
 
 	try {
-		const res = await fetch(`${registry}/${PKG_NAME.replace(/^@/, '')}`, {
+		const url = `${registry}/${PKG_NAME.replace(/^@/, '%40')}`;
+		const res = await fetch(url, {
 			signal: controller.signal,
 		});
 		if (!res.ok) return null;
