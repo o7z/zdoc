@@ -447,7 +447,7 @@
 	.sidebar-scroll { flex: 1; }
 	
 	/* About dialog */
-	.about-dialog { border: none; background: var(--bg); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); padding: 24px; color: var(--text); width: 280px; max-width: 90vw; }
+	.about-dialog { border: none; background: var(--bg); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); padding: 24px; color: var(--text); width: 280px; max-width: 90vw; margin: auto; }
 	.about-dialog::backdrop { background: rgba(0,0,0,0.5); }
 	.about-content { position: relative; }
 	.about-close { position: absolute; top: 0; right: 0; background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 4px; }
