@@ -1,12 +1,12 @@
 title: 参考
-order: 1
+order: 10
 
 pages:
   cli:
     title: 命令行参数
-    order: 1
+    order: 10
     description: zdoc 所有 CLI 选项、默认值与典型组合。
   config:
     title: config.json 配置
-    order: 2
+    order: 20
     description: 配置文件字段、优先级、环境变量。

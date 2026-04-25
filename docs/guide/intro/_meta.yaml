@@ -1,15 +1,15 @@
 title: 简介
-order: 1
+order: 10
 
 pages:
   what-is-zdoc:
     title: 什么是 zdoc
-    order: 1
+    order: 10
     description: 一句话解释 zdoc 是干什么的，适合谁用。
     version: 1.0.4
     modified: 2026-04-21
     author: o7z
   install:
     title: 安装与运行
-    order: 2
+    order: 20
     modified: 2026-04-21

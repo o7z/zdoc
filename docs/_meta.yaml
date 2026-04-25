@@ -7,5 +7,5 @@ pages:
     order: 0
   glossary:
     title: 术语表
-    order: 3
+    order: 30
     description: zdoc 专有术语与约定 —— 链接预览、SPA 路由、_meta.yaml、零配置等。

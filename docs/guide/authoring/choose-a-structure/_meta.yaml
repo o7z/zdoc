@@ -1,18 +1,18 @@
 title: 选一套文档结构
-order: 5
+order: 50
 description: 按目标人群选择：建设者、使用者、知识库读者。
 modified: 2026-04-24
 
 pages:
   structure-builder:
     title: 面向建设者
-    order: 1
+    order: 10
     description: 5 层建设者视角 —— 按系统被构建的顺序分层，适合开发团队和 AI 协作。
   structure-user:
     title: 面向使用者
-    order: 2
+    order: 20
     description: Diátaxis 四象限 —— 按读者意图分类，适合已稳定的产品文档。
   structure-knowledge:
     title: 面向知识库
-    order: 3
+    order: 30
     description: 扁平 + 搜索 —— 不分层，靠搜索和标签导航，适合零散知识。
