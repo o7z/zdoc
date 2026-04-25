@@ -1,6 +1,6 @@
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, basename, join, resolve, sep } from 'node:path';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { renderMarkdown } from '$lib/markdown.js';
 import { getDocsDir } from '$lib/docs-dir.js';
 import { readDirMeta, type PageMeta } from '$lib/meta.js';
@@ -88,6 +88,17 @@ export const load: PageServerLoad = async ({ params }) => {
 			path: slug,
 			meta: extractDocMeta(pageMeta),
 		};
+	}
+
+	const mdSlug = slug + '.md';
+	const asFile = safeJoin(docsDir, mdSlug);
+	if (asFile && existsSync(asFile) && statSync(asFile).isFile()) {
+		const key = basename(asFile).replace(/\.md$/, '');
+		const parentMeta = readDirMeta(join(dirname(asFile), '_meta.yaml'));
+		const pageMeta = parentMeta?.pages?.[key];
+		if (pageMeta && visible(pageMeta)) {
+			throw redirect(301, '/' + mdSlug);
+		}
 	}
 
 	error(404, `Page not found: ${slug}`);

@@ -35,8 +35,8 @@ docs/
 ## 不适合
 
 - 单文件 CLI、纯前端 App —— `3-contract/` 会空掉
-- 文档内容主要是"用户怎么用"（而不是"系统怎么造") —— 用[方案 B](./structure-user)
-- 知识零散、主题不聚焦 —— 用[方案 C](./structure-knowledge)
+- 文档内容主要是"用户怎么用"（而不是"系统怎么造") —— 用[方案 B](./structure-user.md)
+- 知识零散、主题不聚焦 —— 用[方案 C](./structure-knowledge.md)
 - 团队极小且术语无歧义 —— `0-glossary/` 可省略
 
 ## 0-glossary/ 的两类术语

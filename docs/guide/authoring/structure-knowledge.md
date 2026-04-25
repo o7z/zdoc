@@ -39,8 +39,8 @@ docs/
 
 ## 不适合
 
-- 需要读者按固定顺序读完的内容 —— 用[方案 A](./structure-builder) 的渐进路径
-- 文档量小（< 30 篇）—— 随便分都不会腐烂，[方案 B](./structure-user) 更像文档
+- 需要读者按固定顺序读完的内容 —— 用[方案 A](./structure-builder.md) 的渐进路径
+- 文档量小（< 30 篇）—— 随便分都不会腐烂，[方案 B](./structure-user.md) 更像文档
 
 ## AGENTS.md 建议
 

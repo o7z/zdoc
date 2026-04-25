@@ -1,7 +1,10 @@
 <script>
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import LinkPreview from '$lib/LinkPreview.svelte';
 	import '../app.css';
+
+	function autofocus(node) { node.focus(); }
 
 	let { data, children } = $props();
 	let sidebarOpen = $state(false);
@@ -9,6 +12,7 @@
 	let searchOpen = $state(false);
 	let searchQuery = $state('');
 	let aboutDialogEl = $state(null);
+	let mainEl = $state(null);
 	/** @type {Set<string>} */
 	let collapsedGroups = $state(new Set());
 	let searchResults = $derived.by(() => {
@@ -147,13 +151,17 @@
 				</div>
 			{/if}
 		</nav>
-		<main>
+		<main bind:this={mainEl}>
 			{#key $page.url.pathname}
 				{@render children()}
 			{/key}
 		</main>
 	</div>
 </div>
+
+{#if mainEl}
+	<LinkPreview container={mainEl} />
+{/if}
 
 <dialog class="about-dialog" bind:this={aboutDialogEl} onclick={(e) => { if (e.target === aboutDialogEl) aboutDialogEl.close(); }}>
 		<div class="about-content">
@@ -193,7 +201,7 @@
 					placeholder="搜索文档..."
 					bind:value={searchQuery}
 					onkeydown={handleSearchKeydown}
-					autofocus
+					use:autofocus
 				>
 				<button class="search-close" onclick={closeSearch}>
 					<kbd>Esc</kbd>

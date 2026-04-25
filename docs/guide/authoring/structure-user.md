@@ -35,7 +35,7 @@ docs/
 
 ## 不适合
 
-- 还在搭骨架、边写边改的系统 —— 用[方案 A](./structure-builder)
+- 还在搭骨架、边写边改的系统 —— 用[方案 A](./structure-builder.md)
 - 主要是团队内部的决策记录、ADR 集合 —— 这些在 Diátaxis 下会被硬塞进 explanation，挤压到失真
 
 ## AGENTS.md 建议
