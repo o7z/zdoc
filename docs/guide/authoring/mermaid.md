@@ -371,9 +371,9 @@ mindmap
       Markdown 驱动
       Mermaid 图表
     文档结构
-      建设者视角
-      使用者视角
-      知识库视角
+      [建设者视角](choose-a-structure/structure-builder.md)
+      [使用者视角](choose-a-structure/structure-user.md)
+      [知识库视角](choose-a-structure/structure-knowledge.md)
     技术栈
       SvelteKit
       rehype/unified
@@ -472,7 +472,7 @@ C4Container
 
     Container_Boundary(data, "数据层") {
         ContainerDb(pg, "主数据库", "PostgreSQL", "核心数据")
-        ContainerDb(redis, "缓存", "Redis", "会话与缓存")
+        ContainerDb(redis, "缓存", "Redis", "登录态与缓存")
     }
 
     Rel(customer, web, "使用", "HTTPS")

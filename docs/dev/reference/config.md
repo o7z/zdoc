@@ -17,12 +17,12 @@
 
 | 字段       | 类型     | 说明                                                     |
 |------------|----------|----------------------------------------------------------|
-| `title`    | `string` | 站点标题（浏览器标签、侧边栏顶部），默认 `Docs`          |
-| `docsDir`  | `string` | 文档目录，默认当前工作目录                               |
+| `title`    | `string` | 站点标题（浏览器标签、[侧边栏](/glossary.md#侧边栏)顶部），默认 `Docs`          |
+| `docsDir`  | `string` | [文档目录](/glossary.md#文档目录)，默认当前工作目录                               |
 | `password` | `string` | 访问密码，传空串即关闭鉴权                               |
 | `port`     | `number` | 监听端口，默认 8888                                      |
 
-## 优先级
+## 优先级链
 
 ```
 CLI 参数  >  环境变量  >  zdoc.config.json  >  默认值
@@ -32,7 +32,7 @@ CLI 参数  >  环境变量  >  zdoc.config.json  >  默认值
 
 | 项目      | CLI             | 环境变量          | zdoc.config.json | 默认              |
 |-----------|-----------------|-------------------|------------------|-------------------|
-| 文档目录  | `-d / --dir`    | `ZDOC_DIR`        | `docsDir`        | `process.cwd()`   |
+| [文档目录](/glossary.md#文档目录)  | `-d / --dir`    | `ZDOC_DIR`        | `docsDir`        | `process.cwd()`   |
 | 标题      | `-t / --title`  | `ZDOC_TITLE`      | `title`          | `Docs`            |
 | 密码      | `-w / --password` | `ZDOC_PASSWORD` | `password`       | *（无密码）*      |
 | 端口      | `-p / --port`   | `PORT`            | `port`           | `8888`            |

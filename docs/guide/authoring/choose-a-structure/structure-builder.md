@@ -12,8 +12,8 @@ docs/
 ├── 3-contract/      组件间怎么握手
 ├── 4-design/        每个组件怎么实现
 ├── 5-ops/           部署与运维
-├── references/      外部参考项目（旁路）
-└── testing/         测试场景日志（旁路）
+├── references/      外部参考项目（[旁路](/glossary.md#旁路资产)）
+└── testing/         测试场景日志（[旁路](/glossary.md#旁路资产)）
 ```
 
 ## 逻辑
@@ -24,7 +24,7 @@ docs/
 - 读者可以按 0 → 5 的顺序渐进理解项目
 - AI 协作者能用同一条路径快速爬坡（读 glossary 对齐术语 → 读 vision 对齐意图 → 读 architecture 知道拼图 → 读 contract 知道边界 → 改 design → 看 ops）
 - 数字前缀同时表达"顺序"和"依赖"：改 3-contract 要看懂 2-architecture；改 4-design 要看懂 3-contract
-- 非数字目录（`references/`、`testing/`）是服务主干的**旁路资产**，不参与主干编号
+- 非数字目录（`references/`、`testing/`）是服务主干的**[旁路资产](/glossary.md#旁路资产)**，不参与主干编号
 
 ## 适合
 
@@ -79,4 +79,4 @@ docs/
 - 接口变更必须同步更新 `3-contract/`
 ```
 
-按项目实际情况增减即可。`AGENTS.md` 的核心价值是让 AI 在每次会话开始时**零成本**理解"文档在哪里、怎么读、改代码时该看什么"。
+按项目实际情况增减即可。`AGENTS.md` 的核心价值是让 AI 在每次对话开始时**零成本**理解"文档在哪里、怎么读、改代码时该看什么"。

@@ -2,7 +2,7 @@
 
 适合**已稳定、面向终端用户**的产品文档。文档的读者是**用系统的人**——终端用户、SDK 使用者、API 调用者。
 
-[Diátaxis](https://diataxis.fr/) 是 Django / NumPy / Cloudflare 等大项目采用的现成理论。
+[Diátaxis](https://diataxis.fr/) 是 Django / NumPy / Cloudflare 等大项目采用的现成理论。按**读者此刻的意图**分类，不是按信息来源。
 
 ## 目录布局
 
