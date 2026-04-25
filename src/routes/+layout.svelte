@@ -413,8 +413,8 @@
 	:global(.doc-content a:hover) { text-decoration: underline; }
 
 	/* Layout */
-	.layout { display: grid; min-height: 100vh; grid-template-rows: auto 1fr; grid-template-columns: 1fr; }
-	header { display: flex; align-items: center; gap: 8px; padding: 0 16px; height: 56px; border-bottom: 1px solid var(--border); background: var(--bg); z-index: 10; }
+	.layout { display: flex; flex-direction: column; height: 100%; }
+	header { display: flex; align-items: center; gap: 8px; padding: 0 16px; height: 56px; border-bottom: 1px solid var(--border); background: var(--bg); flex-shrink: 0; z-index: 10; }
 	.menu-toggle { display: none; padding: 8px; border: none; background: none; color: var(--text); cursor: pointer; }
 	.logo { font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
 	.search-trigger { display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 8px; padding: 7px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-soft); color: var(--text-muted); cursor: pointer; font-size: 13px; min-width: 240px; transition: border-color 0.15s, color 0.15s; }
@@ -423,9 +423,9 @@
 	.header-actions { display: flex; gap: 8px; align-items: center; }
 	.icon-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: none; background: none; color: var(--text-muted); cursor: pointer; border-radius: 6px; }
 	.icon-btn:hover { background: var(--bg-soft); color: var(--text); }
-	.body { display: grid; grid-template-columns: 240px 1fr; max-width: 100%; overflow: hidden; }
-	.sidebar { border-right: 1px solid var(--border); height: calc(100vh - 56px); overflow-y: auto; padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
-	main { padding: 24px 48px 64px; width: 100%; }
+	.body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+	.sidebar { width: 240px; flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
+	main { flex: 1; display: flex; min-width: 0; overflow: hidden; }
 	
 	/* Sidebar */
 	.sidebar-group { margin-bottom: -4px; }
@@ -490,6 +490,5 @@
 		.search-trigger { min-width: auto; padding: 8px; }
 		.sidebar { position: fixed; left: -360px; top: 0; z-index: 99; transition: left 0.2s; height: 100vh; width: 300px; max-width: 80vw; box-shadow: 2px 0 8px rgba(0,0,0,0.1); }
 		.sidebar.open { left: 0; }
-		main { padding: 24px 16px 64px; }
 	}
 </style>
