@@ -257,15 +257,6 @@
 					{@render sidebarGroup(group, 0)}
 				{/each}
 			</div>
-			{#if data.version}
-				<div class="sidebar-footer">
-					{#if data.repoUrl}
-						<a href={data.repoUrl} target="_blank" rel="noopener">v{data.version}</a>
-					{:else}
-						<span>v{data.version}</span>
-					{/if}
-				</div>
-			{/if}
 		</nav>
 		<main bind:this={mainEl}>
 			{#key $page.url.pathname}
@@ -441,9 +432,6 @@
 	.sidebar-link.active { color: var(--brand); background: var(--brand-soft); font-weight: 500; }
 	.sidebar-link.nested { padding-left: 20px; }
 	.sidebar-label { display: block; padding: 6px 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-	.sidebar-footer { padding: 16px 8px; font-size: 12px; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border); margin-top: auto; }
-	.sidebar-footer a { text-decoration: none; color: var(--text-muted); }
-	.sidebar-footer a:hover { color: var(--brand); }
 	.sidebar-scroll { flex: 1; }
 	
 	/* About dialog */
