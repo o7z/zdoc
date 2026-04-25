@@ -425,7 +425,7 @@
 	.icon-btn:hover { background: var(--bg-soft); color: var(--text); }
 	.body { display: grid; grid-template-columns: 240px 1fr; max-width: 100%; overflow: hidden; }
 	.sidebar { border-right: 1px solid var(--border); height: calc(100vh - 56px); overflow-y: auto; padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
-	main { padding: 24px 48px 64px; max-width: 960px; margin: 0 auto; width: 100%; }
+	main { padding: 24px 48px 64px; width: 100%; }
 	
 	/* Sidebar */
 	.sidebar-group { margin-bottom: -4px; }
