@@ -11,6 +11,8 @@ process.env.ZDOC_TITLE = process.env.ZDOC_TITLE ?? 'zdoc demo';
 process.chdir(repoRoot);
 
 const { createServer } = await import('vite');
-const server = await createServer();
+const server = await createServer({
+	server: { port: Number(process.env.VITE_PORT || 20000) },
+});
 await server.listen();
 server.printUrls();

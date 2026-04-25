@@ -24,7 +24,7 @@ bun install
 bun run dev
 ```
 
-然后浏览器打开 `http://localhost:5173`。这个 dev server 渲染的就是 `docs/` 目录 —— zdoc 用自己渲染自己。
+然后浏览器打开 `http://localhost:20000`。这个 dev server 渲染的就是 `docs/` 目录 —— zdoc 用自己渲染自己。
 
 另一个脚本指向故意畸形的回归样本（超长页、边界 [`_meta.yaml`](/glossary.md#_meta-yaml)），仅用于 UI 压测：
 

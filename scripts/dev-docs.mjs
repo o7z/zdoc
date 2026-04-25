@@ -12,7 +12,7 @@ process.chdir(repoRoot);
 
 const { createServer } = await import('vite');
 const server = await createServer({
-	server: { port: Number(process.env.VITE_PORT || 5173) },
+	server: { port: Number(process.env.VITE_PORT || 20000) },
 });
 await server.listen();
 server.printUrls();

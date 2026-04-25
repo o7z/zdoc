@@ -499,7 +499,7 @@ sessions.set(hash, Date.now() + 7 * 24 * 3600 * 1000);
 
 ```bash
 bun run dev
-# Local:   http://localhost:5173
+# Local:   http://localhost:20000
 ```
 
 ```json
