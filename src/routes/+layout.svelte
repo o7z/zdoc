@@ -1,6 +1,7 @@
 <script>
-	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
+  import { tick } from 'svelte';
   import LinkPreview from '$lib/LinkPreview.svelte';
   import { ExternalLink, Package } from 'lucide-svelte';
 	import '../app.css';
@@ -10,6 +11,7 @@
 	let { data, children } = $props();
 	let sidebarOpen = $state(false);
 	let darkMode = $state(false);
+	let searchDialogEl = $state(null);
 	let searchOpen = $state(false);
 	let searchQuery = $state('');
 	let aboutDialogEl = $state(null);
@@ -42,11 +44,12 @@
 	function openSearch() {
 		searchOpen = true;
 		searchQuery = '';
+		tick().then(() => searchDialogEl?.showModal());
 	}
 
 	function closeSearch() {
 		searchOpen = false;
-		searchQuery = '';
+		searchDialogEl?.close();
 	}
 
 	function navigateToResult(link) {
@@ -55,7 +58,6 @@
 	}
 
 	function handleSearchKeydown(e) {
-		if (e.key === 'Escape') closeSearch();
 		if (e.key === 'Enter' && searchResults.length > 0) {
 			navigateToResult(searchResults[0].link);
 		}
@@ -197,43 +199,39 @@
 	</dialog>
 
 <!-- Search modal -->
-{#if searchOpen}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="search-overlay" onclick={closeSearch} onkeydown={handleSearchKeydown}>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="search-modal" onclick={(e) => e.stopPropagation()}>
-			<div class="search-input-row">
-				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-				<input
-					type="text"
-					placeholder="搜索文档..."
-					bind:value={searchQuery}
-					onkeydown={handleSearchKeydown}
-					use:autofocus
-				>
-				<button class="search-close" onclick={closeSearch}>
-					<kbd>Esc</kbd>
-				</button>
+<dialog class="search-dialog" bind:this={searchDialogEl} onclose={() => { searchOpen = false; searchQuery = ''; }}>
+	<div class="search-modal">
+		<div class="search-input-row">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+			<input
+				type="text"
+				placeholder="搜索文档..."
+				bind:value={searchQuery}
+				onkeydown={handleSearchKeydown}
+				use:autofocus
+			>
+			<button class="search-close" onclick={closeSearch}>
+				<kbd>Esc</kbd>
+			</button>
+		</div>
+		{#if searchResults.length > 0}
+			<div class="search-results">
+				{#each searchResults as result}
+					<button class="search-result" onclick={() => navigateToResult(result.link)}>
+						<span class="result-title">{result.text}</span>
+						<span class="result-path">{result.link}</span>
+					</button>
+				{/each}
 			</div>
-			{#if searchResults.length > 0}
-				<div class="search-results">
-					{#each searchResults as result}
-						<button class="search-result" onclick={() => navigateToResult(result.link)}>
-							<span class="result-title">{result.text}</span>
-							<span class="result-path">{result.link}</span>
-						</button>
-					{/each}
-				</div>
-			{:else if searchQuery.length >= 2}
-				<div class="search-empty">没有找到结果</div>
-			{/if}
-			<div class="search-footer">
-				<span><kbd>Enter</kbd> 选择</span>
-				<span><kbd>Esc</kbd> 关闭</span>
-			</div>
+		{:else if searchQuery.length >= 2}
+			<div class="search-empty">没有找到结果</div>
+		{/if}
+		<div class="search-footer">
+			<span><kbd>Enter</kbd> 选择</span>
+			<span><kbd>Esc</kbd> 关闭</span>
 		</div>
 	</div>
-{/if}
+</dialog>
 
 {#snippet sidebarGroup(group, depth)}
 	{#if group.items && group.items.length > 0}
@@ -395,15 +393,17 @@
 	}
 
 	/* Search modal */
-	.search-overlay {
-		position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-		z-index: 200; display: flex; align-items: flex-start; justify-content: center;
-		padding-top: 15vh;
+	.search-dialog {
+		border: none; background: transparent; position: fixed;
+		top: 15vh; left: 50%; transform: translateX(-50%);
+		width: 560px; max-width: 90vw; max-height: 70vh;
+		padding: 0; margin: 0; z-index: 200; color: var(--text);
+		border-radius: 12px; overflow: hidden;
 	}
+	.search-dialog::backdrop { background: rgba(0,0,0,0.5); }
 	.search-modal {
-		background: var(--bg); border: 1px solid var(--border);
-		border-radius: 12px; width: 560px; max-width: 90vw;
-		box-shadow: 0 16px 48px rgba(0,0,0,0.2); overflow: hidden;
+		display: flex; flex-direction: column; background: var(--bg);
+		max-height: 100%; overflow: hidden;
 	}
 	.search-input-row {
 		display: flex; align-items: center; gap: 12px;
