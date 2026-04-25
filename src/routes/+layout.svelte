@@ -4,7 +4,7 @@
 	import { tick } from 'svelte';
 	import LinkPreview from '$lib/LinkPreview.svelte';
 	import { ExternalLink, Package } from 'lucide-svelte';
-	import { fuzzyScore, highlight } from '$lib/fuzzy.js';
+	import { fuzzyScore, highlight, quickReject, snippet } from '$lib/fuzzy.js';
 	import '../app.css';
 
 	function autofocus(node) { node.focus(); }
@@ -15,6 +15,7 @@
 	let searchDialogEl = $state(null);
 	let searchOpen = $state(false);
 	let searchQuery = $state('');
+	let debouncedQuery = $state('');
 	let activeIdx = $state(0);
 	let aboutDialogEl = $state(null);
 	let mainEl = $state(null);
@@ -27,18 +28,20 @@
 		return flattenSidebar(data.sidebar);
 	});
 
-	let searchResults = $derived.by(() => {
-		const q = searchQuery.trim();
+	let titleResults = $derived.by(() => {
+		const q = debouncedQuery.trim();
 		if (!q) return [];
 		const scored = [];
 		for (const item of flatItems) {
-			const titleMatch = fuzzyScore(item.text, q);
-			const linkMatch = fuzzyScore(item.link, q);
+			if (quickReject(item.text, q) && quickReject(item.link, q)) continue;
+			const titleMatch = quickReject(item.text, q) ? null : fuzzyScore(item.text, q);
+			const linkMatch = quickReject(item.link, q) ? null : fuzzyScore(item.link, q);
 			if (!titleMatch && !linkMatch) continue;
 			const titleScore = titleMatch ? titleMatch.score : -Infinity;
 			const linkScore = linkMatch ? linkMatch.score - 5 : -Infinity;
 			const score = titleScore >= linkScore ? titleScore : linkScore;
 			scored.push({
+				kind: 'title',
 				text: item.text,
 				link: item.link,
 				score,
@@ -50,10 +53,56 @@
 		return scored.slice(0, 12);
 	});
 
+	let contentResults = $derived.by(() => {
+		const q = debouncedQuery.trim();
+		if (!q) return [];
+		const idx = data?.searchIndex;
+		if (!idx || !idx.length) return [];
+		const scored = [];
+		for (const entry of idx) {
+			const headingReject = quickReject(entry.heading, q);
+			const contentReject = quickReject(entry.content, q);
+			if (headingReject && contentReject) continue;
+			const headingMatch = headingReject ? null : fuzzyScore(entry.heading, q);
+			const contentMatch = contentReject ? null : fuzzyScore(entry.content, q);
+			if (!headingMatch && !contentMatch) continue;
+			// +5: heading hits outrank body hits at the same fuzzy score so navigation-style queries surface section landmarks first.
+			const headingScore = headingMatch ? headingMatch.score + 5 : -Infinity;
+			const contentScore = contentMatch ? contentMatch.score : -Infinity;
+			const score = headingScore >= contentScore ? headingScore : contentScore;
+			scored.push({
+				kind: 'content',
+				link: entry.link,
+				pageTitle: entry.pageTitle,
+				heading: entry.heading,
+				score,
+				headingHTML: headingMatch
+					? highlight(entry.heading, headingMatch.indices)
+					: highlight(entry.heading, null),
+				snippetHTML: contentMatch
+					? snippet(entry.content, contentMatch.indices, 60)
+					: snippet(entry.content, null, 60)
+			});
+		}
+		scored.sort((a, b) => b.score - a.score);
+		return scored.slice(0, 12);
+	});
+
+	let allResults = $derived([...titleResults, ...contentResults]);
+
 	// Reset activeIdx when query changes
 	$effect(() => {
-		searchQuery;
+		debouncedQuery;
 		activeIdx = 0;
+	});
+
+	// Debounce searchQuery -> debouncedQuery (150ms)
+	$effect(() => {
+		const q = searchQuery;
+		const id = setTimeout(() => {
+			debouncedQuery = q;
+		}, 150);
+		return () => clearTimeout(id);
 	});
 
 	// Scroll active item into view
@@ -97,6 +146,7 @@
 	function openSearch() {
 		searchOpen = true;
 		searchQuery = '';
+		debouncedQuery = '';
 		activeIdx = 0;
 		tick().then(() => searchDialogEl?.showModal());
 	}
@@ -112,7 +162,7 @@
 	}
 
 	function handleSearchKeydown(e) {
-		const len = searchResults.length;
+		const len = allResults.length;
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
 			activeIdx = len > 0 ? (activeIdx + 1) % len : 0;
@@ -122,7 +172,7 @@
 		} else if (e.key === 'Enter') {
 			e.preventDefault();
 			if (len > 0 && activeIdx >= 0 && activeIdx < len) {
-				navigateToResult(searchResults[activeIdx].link);
+				navigateToResult(allResults[activeIdx].link);
 			}
 		}
 	}
@@ -262,7 +312,7 @@
 	</dialog>
 
 <!-- Search modal -->
-<dialog class="search-dialog" bind:this={searchDialogEl} onclose={() => { searchOpen = false; searchQuery = ''; activeIdx = 0; }}>
+<dialog class="search-dialog" bind:this={searchDialogEl} onclose={() => { searchOpen = false; searchQuery = ''; debouncedQuery = ''; activeIdx = 0; }}>
 	<div class="search-modal">
 		<div class="search-input-row">
 			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -277,21 +327,42 @@
 				<kbd>Esc</kbd>
 			</button>
 		</div>
-		{#if searchResults.length > 0}
+		{#if allResults.length > 0}
 			<div class="search-results">
-				{#each searchResults as result, i}
-					<button
-						class="search-result"
-						class:active={i === activeIdx}
-						onclick={() => navigateToResult(result.link)}
-						onmouseenter={() => activeIdx = i}
-					>
-						<span class="result-title">{@html result.titleHTML}</span>
-						<span class="result-path">{@html result.pathHTML}</span>
-					</button>
-				{/each}
+				{#if titleResults.length > 0}
+					<div class="result-group-label">标题</div>
+					{#each titleResults as result, i}
+						<button
+							class="search-result"
+							class:active={i === activeIdx}
+							onclick={() => navigateToResult(result.link)}
+							onmouseenter={() => activeIdx = i}
+						>
+							<span class="result-title">{@html result.titleHTML}</span>
+							<span class="result-path">{@html result.pathHTML}</span>
+						</button>
+					{/each}
+				{/if}
+				{#if contentResults.length > 0}
+					<div class="result-group-label">正文</div>
+					{#each contentResults as result, j}
+						{@const idx = titleResults.length + j}
+						<button
+							class="search-result content"
+							class:active={idx === activeIdx}
+							onclick={() => navigateToResult(result.link)}
+							onmouseenter={() => activeIdx = idx}
+						>
+							<span class="result-title">
+								{@html result.headingHTML}
+								<span class="result-page">— {result.pageTitle}</span>
+							</span>
+							<span class="result-snippet">{@html result.snippetHTML}</span>
+						</button>
+					{/each}
+				{/if}
 			</div>
-		{:else if searchQuery.trim().length > 0}
+		{:else if debouncedQuery.trim().length > 0}
 			<div class="search-empty">没有找到结果</div>
 		{/if}
 		<div class="search-footer">
@@ -408,6 +479,10 @@
 	.search-footer { display: flex; gap: 16px; padding: 10px 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
 	.search-footer kbd { padding: 1px 5px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 3px; font-size: 11px; font-family: var(--font-mono); }
 	.search-result :global(mark.highlight) { background: var(--brand-soft); color: var(--brand); padding: 0 2px; border-radius: 2px; }
+	.result-group-label { padding: 8px 12px 4px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+	.result-page { color: var(--text-muted); font-weight: 400; font-size: 12px; margin-left: 4px; }
+	.result-snippet { font-size: 12px; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+	.search-result.content .result-title { font-weight: 500; }
 
 	@media (max-width: 768px) {
 		.menu-toggle { display: flex; }
