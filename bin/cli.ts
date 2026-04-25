@@ -4,15 +4,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { getLatestVersion, getCurrentVersion } from './update.js';
-
-// Detect package manager name roughly based on argv/user-agent
-function getPmName(): string {
-	const user = process.env.npm_config_user_agent ?? '';
-	if (user.startsWith('pnpm')) return 'pnpm';
-	if (user.startsWith('yarn')) return 'yarn';
-	if (user.startsWith('bun')) return 'bun';
-	return 'npm';
-}
+import { detectInstallMode, formatUpgradeHint } from './install-mode.js';
 
 interface Args {
 	dir: string;
@@ -239,25 +231,20 @@ async function main(): Promise<void> {
 	process.stdout.write(`  ➜  Local:    http://localhost:${port}\n`);
 	process.stdout.write(`  ➜  Password: ${password ? 'enabled' : 'disabled'}\n`);
 
-	// Check for updates
-	const latest = await getLatestVersion();
-	const current = getCurrentVersion();
+	// Check for updates (skip when ZDOC_NO_UPDATE_CHECK is set)
+	if (!process.env.ZDOC_NO_UPDATE_CHECK) {
+		const latest = await getLatestVersion();
+		const current = getCurrentVersion();
 
-	if (latest && current !== latest) {
-		// Check if the user is running inside a project that has zdoc as dependency
-		const pkgPath = join(cwd, 'package.json');
-		let isLocalDep = false;
-		try {
-			const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { dependencies?: Record<string, string>, devDependencies?: Record<string, string> };
-			isLocalDep = !!(pkg.dependencies?.['@o7z/zdoc'] || pkg.devDependencies?.['@o7z/zdoc']);
-		} catch {}
-
-		const pm = getPmName();
-		const flag = isLocalDep ? 'add @o7z/zdoc' : 'add -g @o7z/zdoc';
-
-		process.stdout.write(`\n  ─────────────────────────────────────\n`);
-		process.stdout.write(`  Update available ${current} → ${latest}\n`);
-		process.stdout.write(`  Run: ${pm} ${flag}\n`);
+		if (latest && current !== latest) {
+			const mode = detectInstallMode({
+				zdocPath: fileURLToPath(import.meta.url),
+				cwd,
+				pkgName: '@o7z/zdoc',
+			});
+			const hint = formatUpgradeHint(mode, '@o7z/zdoc', current, latest);
+			if (hint) process.stdout.write(hint);
+		}
 	}
 	process.stdout.write('\n');
 

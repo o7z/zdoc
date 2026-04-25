@@ -12,5 +12,5 @@
     "rootDir": "bin"
   },
   "include": ["bin/*.ts"],
-  "exclude": ["bin/*.js"]
+  "exclude": ["bin/*.js", "bin/*.test.ts"]
 }
