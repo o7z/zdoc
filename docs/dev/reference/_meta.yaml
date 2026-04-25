@@ -10,7 +10,3 @@ pages:
     title: config.json 配置
     order: 2
     description: 配置文件字段、优先级、环境变量。
-  glossary:
-    title: 术语表
-    order: 3
-    description: zdoc 专有术语与约定 —— 链接预览、SPA 路由、_meta.yaml、零配置等。
