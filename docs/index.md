@@ -10,7 +10,7 @@ hero:
       link: /guide/intro/what-is-zdoc.md
     - theme: alt
       text: 选一套文档结构
-      link: /guide/authoring/choose-a-structure.md
+      link: /guide/authoring/choose-a-structure/index.md
 
 features:
   - title: 零配置

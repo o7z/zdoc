@@ -19,20 +19,3 @@ pages:
     order: 4
     description: 覆盖流程图、时序图、类图、ER 图、状态图、甘特图、饼图、Git 图、用户旅程、思维导图、时间线、架构图、C4 模型等全部图表类型。
     version: 0.1.0
-  choose-a-structure:
-    title: 选一套文档结构
-    order: 5
-    description: 按目标人群选择：建设者、使用者、知识库读者。
-    modified: 2026-04-24
-  structure-builder:
-    title: 面向建设者
-    order: 6
-    description: 5 层建设者视角 —— 按系统被构建的顺序分层，适合开发团队和 AI 协作。
-  structure-user:
-    title: 面向使用者
-    order: 7
-    description: Diátaxis 四象限 —— 按读者意图分类，适合已稳定的产品文档。
-  structure-knowledge:
-    title: 面向知识库
-    order: 8
-    description: 扁平 + 搜索 —— 不分层，靠搜索和标签导航，适合零散知识。
