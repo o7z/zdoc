@@ -15,9 +15,9 @@ pages:
     order: 3
     description: Markdown 内部链接的写法 —— 绝对路径、不带 .md 后缀。
   mermaid:
-    title: Mermaid 与代码块
+    title: Mermaid 图表全集
     order: 4
-    description: 演示流程图与代码高亮。
+    description: 覆盖流程图、时序图、类图、ER 图、状态图、甘特图、饼图、Git 图、用户旅程、思维导图、时间线、架构图、C4 模型等全部图表类型。
     version: 0.1.0
   choose-a-structure:
     title: 选一套文档结构

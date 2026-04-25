@@ -113,6 +113,7 @@
 		function onMouseOver(e: MouseEvent) {
 			const anchor = (e.target as HTMLElement).closest('a');
 			if (!anchor) return;
+			if (!anchor.closest('.doc-content')) return;
 			const href = anchor.getAttribute('href');
 			if (!href) return;
 
@@ -136,6 +137,7 @@
 		function onMouseOut(e: MouseEvent) {
 			const anchor = (e.target as HTMLElement).closest('a');
 			if (!anchor) return;
+			if (!anchor.closest('.doc-content')) return;
 			isOverLink = false;
 			if (hoverTimer) {
 				clearTimeout(hoverTimer);

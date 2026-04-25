@@ -62,6 +62,23 @@ const rehypeMermaid: Plugin<[], Root> = () => {
 	};
 };
 
+const rehypeExternalLinks: Plugin<[], Root> = () => {
+	return (tree) => {
+		visit(tree, 'element', (node) => {
+			if (node.tagName !== 'a') return;
+			const href = (node.properties?.href as string) ?? '';
+			if (!href) return;
+			if (href.startsWith('/') || href.startsWith('#') || href.startsWith('mailto:')) return;
+			try {
+				const url = new URL(href);
+				if (url.protocol === 'http:' || url.protocol === 'https:') {
+					node.properties = { ...node.properties, target: '_blank', rel: 'noopener noreferrer' };
+				}
+			} catch {}
+		});
+	};
+};
+
 const rehypeCodeCopy: Plugin<[], Root> = () => {
 	return (tree) => {
 		visit(tree, 'element', (node, index, parent) => {
@@ -140,6 +157,7 @@ export async function renderMarkdown(md: string): Promise<RenderResult> {
 		.use(collectHeadings, { out: headings })
 		.use(rehypeHighlight, { detect: true, ignoreMissing: true })
 		.use(rehypeMermaid)
+		.use(rehypeExternalLinks)
 		.use(rehypeCodeCopy)
 		.use(rehypeStringify, { allowDangerousHtml: true });
 
