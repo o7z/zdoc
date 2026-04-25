@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+
 	let { container }: { container: HTMLElement } = $props();
 
 	let visible = $state(false);
@@ -106,6 +108,11 @@
 			hideTimer = null;
 		}
 	}
+
+	$effect(() => {
+		$page.url.pathname;
+		hide();
+	});
 
 	$effect(() => {
 		if (!container) return;
