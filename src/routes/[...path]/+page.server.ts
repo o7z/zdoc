@@ -10,7 +10,6 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 interface DocMeta {
 	description?: string;
-	version?: string;
 	author?: string;
 	modified?: string;
 }
@@ -24,7 +23,6 @@ function visible(meta: PageMeta): boolean {
 function extractDocMeta(meta: PageMeta): DocMeta | undefined {
 	const out: DocMeta = {};
 	if (meta.description) out.description = meta.description;
-	if (meta.version) out.version = meta.version;
 	if (meta.author) out.author = meta.author;
 	if (meta.modified) out.modified = meta.modified;
 	return Object.keys(out).length > 0 ? out : undefined;

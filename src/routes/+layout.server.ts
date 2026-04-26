@@ -11,7 +11,6 @@ export const load: LayoutServerLoad = async () => {
 		sidebar,
 		searchIndex,
 		siteTitle: config.title,
-		version: process.env.ZDOC_VERSION ?? '',
 		repoUrl: process.env.ZDOC_REPO_URL ?? '',
 	};
 };

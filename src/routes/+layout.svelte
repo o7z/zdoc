@@ -281,9 +281,6 @@
 				</div>
 				<h2 class="about-title">zdoc</h2>
 				<p class="about-desc">Zero-config Markdown docs site</p>
-				{#if data.version}
-					<div class="about-version">v{data.version}</div>
-				{/if}
 				<div class="about-links">
 					<a href="https://github.com/o7z/zdoc" target="_blank" rel="noopener" class="about-link">
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
@@ -444,7 +441,6 @@
 	.about-logo { margin-bottom: 12px; }
 	.about-title { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
 	.about-desc { font-size: 13px; color: var(--text-muted); margin: 0 0 4px; }
-	.about-version { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-bottom: 16px; }
 	.about-links { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 180px; margin: 0 auto; }
 	.about-links a, .about-link { width: 100%; padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text-muted); text-decoration: none; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
 	.about-links a:hover, .about-link:hover { color: var(--brand); border-color: var(--brand); background: var(--brand-soft); }

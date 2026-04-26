@@ -108,7 +108,7 @@
 		<article class="doc-content">
 			{#if data.meta}
 				{@const m = data.meta}
-				{@const chips = [m.version && `v${m.version}`, m.modified, m.author].filter(Boolean)}
+				{@const chips = [m.modified, m.author].filter(Boolean)}
 				<div class="doc-meta">
 					{#if m.description}
 						<p class="doc-desc">{m.description}</p>

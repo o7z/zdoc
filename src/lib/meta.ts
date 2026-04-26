@@ -6,7 +6,6 @@ export interface PageMeta {
 	modified?: string;
 	env?: string;
 	description?: string;
-	version?: string;
 	author?: string;
 }
 
@@ -142,7 +141,6 @@ function coercePageMeta(raw: unknown): PageMeta {
 		modified: typeof r.modified === 'string' ? r.modified : undefined,
 		env: typeof r.env === 'string' ? r.env : undefined,
 		description: typeof r.description === 'string' ? r.description : undefined,
-		version: typeof r.version === 'string' ? r.version : undefined,
 		author: typeof r.author === 'string' ? r.author : undefined,
 	};
 }
