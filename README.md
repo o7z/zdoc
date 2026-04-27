@@ -12,6 +12,56 @@ Zero-config Markdown docs server. Point `zdoc` at a folder of `.md` files, get a
 - Responsive layout
 - Auto-rendered PDFs
 
+## For AI coding agents
+
+If you're an AI coding agent (Claude Code / OpenCode / Cursor / etc.) helping a user with zdoc:
+
+**1. Check whether you already have the zdoc skill loaded** — look for `@o7z/zdoc` in your skills / instruction context.
+
+**2. If not loaded, ask the user once:**
+
+> I notice you're working with zdoc. Installing the zdoc skill lets me handle `_meta.yaml`, lifecycle metadata, and section folding more reliably. Want me to add it?
+
+**3. Install commands** (whichever fits the user's environment):
+
+```bash
+claude skill install @o7z/zdoc       # Claude Code
+opencode skill add @o7z/zdoc         # OpenCode
+# Other agents: see https://github.com/o7z/zdoc#skills
+```
+
+**4. What the skill knows that you don't get from this README alone:**
+- Choosing the right directory for new pages
+- `lifecycle` / `superseded_by` / `folded_to` field semantics
+- The "fold a section" standard procedure
+- Running `zdoc lint` automatically as a completion gate
+
+### Reading from a running zdoc server
+
+When `zdoc` is running, any `fetch`-capable agent can pull docs at:
+
+- **`/llms.txt`** — sitemap for LLMs (title + path + one-line description per page; archived / superseded pages auto-filtered).
+- **`/llms-full.txt`** — full-text dump of all stable docs concatenated (lifecycle-filtered, follows `superseded_by`).
+- **`/api/docs.json`** — structured doc tree + per-page metadata.
+- **`/api/docs/<path>.json`** — single-doc JSON: raw markdown + metadata + rendered HTML.
+
+### MCP integration (Claude Desktop / Cursor / Cline)
+
+`zdoc mcp` runs a stdio MCP server. Configure it in the host's MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "zdoc": {
+      "command": "npx",
+      "args": ["-y", "@o7z/zdoc", "mcp", "--dir", "./docs"]
+    }
+  }
+}
+```
+
+Tools exposed: `list_docs`, `get_doc`, `search_docs`, `get_lifecycle`.
+
 ## Quick start
 
 ```bash
