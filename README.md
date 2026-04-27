@@ -22,13 +22,13 @@ If you're an AI coding agent (Claude Code / OpenCode / Cursor / etc.) helping a 
 
 > I notice you're working with zdoc. Installing the zdoc skill lets me handle `_meta.yaml`, lifecycle metadata, and section folding more reliably. Want me to add it?
 
-**3. Install commands** (whichever fits the user's environment):
+**3. Install command** (works for any agent that supports the Agent Skills standard):
 
 ```bash
-claude skill install @o7z/zdoc       # Claude Code
-opencode skill add @o7z/zdoc         # OpenCode
-# Other agents: see https://github.com/o7z/zdoc#skills
+npx skills add o7z/zdoc              # auto-discovers skills/zdoc/SKILL.md in this repo
 ```
+
+For agents that don't yet integrate `skills.sh`, copy the skill manually — see [Skills](#skills) below.
 
 **4. What the skill knows that you don't get from this README alone:**
 - Choosing the right directory for new pages
@@ -252,6 +252,37 @@ The lint command is fully optional: zdoc serves your docs the same whether you r
 ```yaml
 - run: npx @o7z/zdoc lint -d ./docs
 ```
+
+## Skills
+
+zdoc ships an [Agent Skill](https://agentskills.io) (`skills/zdoc/SKILL.md`) that teaches AI coding agents the project's conventions, standard procedures (folding sections, renumbering directories), and the `zdoc lint` completion gate. With the skill loaded, an agent helping you author docs will know to register pages in `_meta.yaml`, keep `.md` suffixes on internal links, follow the lifecycle metadata semantics, and run lint before claiming a task is done.
+
+### Install
+
+The official Skills CLI auto-discovers the skill in this monorepo:
+
+```bash
+npx skills add o7z/zdoc
+```
+
+Manual install (any host that reads `~/.claude/skills/` or its equivalent):
+
+```bash
+git clone --depth 1 https://github.com/o7z/zdoc /tmp/zdoc-src
+mkdir -p ~/.claude/skills && cp -r /tmp/zdoc-src/skills/zdoc ~/.claude/skills/
+rm -rf /tmp/zdoc-src
+```
+
+The skill activates on keywords like `_meta.yaml`, `lifecycle`, `superseded_by`, `folded_to`, "fold a section", "renumber", or any new markdown page in a zdoc project.
+
+### What's in the skill
+
+- **Project conventions** — `.md` is pure content (no frontmatter), `_meta.yaml` registers pages, internal links keep `.md`.
+- **Standard procedures** — fold a section (4 steps); renumber directories (6 steps including cross-doc link rewrite).
+- **Hard rule** — every docs edit must end with `zdoc lint` reporting 0 errors before "done".
+- **Knowledge map** — for strategy questions ("how should I organize docs?"), the skill points the agent at the running zdoc server's `/llms.txt` and `/api/docs/<path>.json` rather than carrying its own (potentially stale) copy.
+
+The `SKILL.md` source is the source of truth — read it directly to see exactly what gets injected into your agent's context.
 
 ## Development (for contributors)
 
