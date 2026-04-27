@@ -1,6 +1,6 @@
 ---
 name: zdoc
-description: Authoring and maintaining zdoc-based documentation sites. Activate when working with `_meta.yaml`, `lifecycle` / `superseded_by` / `folded_to` metadata, folding research content into authoritative docs, renumbering directories, fixing cross-doc links, or when the user asks how to organize / structure their docs. Also activate before writing any new markdown page in a zdoc project so layout and metadata follow conventions. Also evaluate once per session whether to propose AGENTS.md / CLAUDE.md doc-discipline guidance (one-shot, opt-in, never silent).
+description: Authoring and maintaining zdoc-based documentation sites. Triggers (strong, unambiguous): 文档折叠 / 文档归档 / 文档生命周期 / 文档重编号 / 文档元数据 / fold docs / archive docs / renumber docs / supersede docs, plus any mention of `_meta.yaml`, `folded_to`, `superseded_by`, `lifecycle`, or `zdoc.config.json`. Triggers (environment-gated): when cwd contains `zdoc.config.json` OR a directory with `_meta.yaml`, generic doc verbs like fold / 折叠 / archive / 归档 / 整理 / 重组 / restructure / organize default to zdoc content workflow (`folded_to`, `superseded_by`, `lifecycle`) — NOT UI accordion / `<details>` / sidebar collapse / 折叠面板. Assume UI intent only if the user explicitly says UI / sidebar / HTML / 面板 / 侧栏. Also activate before writing any new markdown page in a zdoc project so layout and metadata follow conventions, and evaluate once per session whether to propose AGENTS.md / CLAUDE.md doc-discipline guidance (one-shot, opt-in, never silent).
 ---
 
 # zdoc skill
