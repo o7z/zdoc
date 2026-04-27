@@ -2,7 +2,7 @@ import { test, expect, describe, beforeEach, afterEach } from 'bun:test';
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { walkDocs, searchDocs } from './mcp.ts';
+import { walkDocs, searchDocs, extractHeadings } from './mcp.ts';
 
 let docs: string;
 beforeEach(() => {
@@ -137,5 +137,44 @@ describe('searchDocs', () => {
 		seed();
 		const hits = searchDocs(docs, 'install', 10);
 		expect(hits[0].section).toBe('Site');
+	});
+});
+
+describe('extractHeadings', () => {
+	test('extracts h1/h2/h3 with depth, text, slug', () => {
+		const md = '# Top\n\n## Section A\n\n### Detail\n\nbody\n';
+		const out = extractHeadings(md);
+		expect(out.length).toBe(3);
+		expect(out[0]).toEqual({ depth: 1, text: 'Top', slug: 'top' });
+		expect(out[1]).toEqual({ depth: 2, text: 'Section A', slug: 'section-a' });
+		expect(out[2]).toEqual({ depth: 3, text: 'Detail', slug: 'detail' });
+	});
+
+	test('skips headings inside fenced code blocks', () => {
+		const md = '# Real\n\n```\n# Fake heading\n```\n\n## Also Real\n';
+		const out = extractHeadings(md);
+		expect(out.map((h) => h.text)).toEqual(['Real', 'Also Real']);
+	});
+
+	test('skips frontmatter', () => {
+		const md = '---\ntitle: Foo\n---\n# Real\n';
+		const out = extractHeadings(md);
+		expect(out.length).toBe(1);
+		expect(out[0].text).toBe('Real');
+	});
+
+	test('handles Chinese headings (slug preserves CJK)', () => {
+		const md = '# 数据源 Manifest 接入标准设计\n\n## 1. 背景与动机\n';
+		const out = extractHeadings(md);
+		expect(out[0].text).toBe('数据源 Manifest 接入标准设计');
+		expect(out[0].slug).toContain('数据源');
+		expect(out[1].text).toBe('1. 背景与动机');
+	});
+
+	test('disambiguates duplicate slugs (matching github-slugger)', () => {
+		const md = '## Setup\n\n## Setup\n';
+		const out = extractHeadings(md);
+		expect(out[0].slug).toBe('setup');
+		expect(out[1].slug).toBe('setup-1');
 	});
 });

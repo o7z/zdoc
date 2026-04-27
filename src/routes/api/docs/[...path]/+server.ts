@@ -1,10 +1,12 @@
 // /api/docs/<path>(.json) — single doc as JSON.
 //
 // Returns raw markdown + metadata + rendered HTML + headings.
-// The .json suffix on the URL is optional — both
+// All three URL forms below resolve to the same doc — pick whichever is
+// natural for the caller (the original `.md.json` form is preserved for
+// back-compat, and `.json`-as-extension-replacement matches REST intuition):
 //   /api/docs/guide/intro.md
 //   /api/docs/guide/intro.md.json
-// are accepted.
+//   /api/docs/guide/intro.json     ← .json replaces .md, .md inferred
 
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, basename, join, resolve, sep } from 'node:path';
@@ -25,8 +27,7 @@ export const GET: RequestHandler = async ({ params }) => {
 	const docsDir = getDocsDir();
 	let slug = params.path || '';
 	if (slug.endsWith('.json')) slug = slug.slice(0, -5);
-
-	if (!/\.md$/i.test(slug)) error(400, 'Only markdown files are supported');
+	if (!/\.md$/i.test(slug)) slug += '.md';
 
 	const filePath = safeJoin(docsDir, slug);
 	if (!filePath || !existsSync(filePath) || !statSync(filePath).isFile()) {

@@ -7,19 +7,77 @@
 //
 // Tools exposed:
 //   list_docs      — flat list of pages (lifecycle-filtered by default)
-//   get_doc        — full markdown + metadata for one doc
+//   get_doc        — full markdown + metadata + headings for one doc
 //   search_docs    — substring search across titles / descriptions / content
 //   get_lifecycle  — lifecycle / superseded_by / folded_to for one doc
+//   get_changelog  — docs sorted by recent modification (newest first)
 
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, resolve, relative, sep, dirname, basename } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
 	CallToolRequestSchema,
 	ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import GithubSlugger from 'github-slugger';
 import { readDirMeta, type Lifecycle } from './meta-mini.js';
+
+const SEARCH_LIMIT_MAX = 50;
+
+function getServerVersion(): string {
+	// Walk up from this file to find package.json. Falls back gracefully if
+	// the layout changes — we'd rather report 'unknown' than crash the server.
+	try {
+		let dir = dirname(fileURLToPath(import.meta.url));
+		for (let i = 0; i < 5; i++) {
+			const candidate = join(dir, 'package.json');
+			if (existsSync(candidate)) {
+				const pkg = JSON.parse(readFileSync(candidate, 'utf-8')) as { version?: string };
+				if (pkg.version) return pkg.version;
+			}
+			const parent = dirname(dir);
+			if (parent === dir) break;
+			dir = parent;
+		}
+	} catch {
+		// fall through
+	}
+	return '0.0.0';
+}
+
+interface HeadingInfo {
+	depth: 1 | 2 | 3;
+	text: string;
+	slug: string;
+}
+
+// Mirror the HTTP single-doc API's `headings` field. Walks markdown line by
+// line, skipping fenced code blocks. Slug generation goes through
+// github-slugger to match rehype-slug output (so MCP and HTTP slugs agree).
+export function extractHeadings(md: string): HeadingInfo[] {
+	const stripped = md.replace(/^---\n[\s\S]*?\n---\n/, '');
+	const lines = stripped.split(/\r?\n/);
+	const fenceRe = /^\s*(```|~~~)/;
+	const headingRe = /^(#{1,3})\s+(.+?)\s*#*\s*$/;
+	const slugger = new GithubSlugger();
+	const out: HeadingInfo[] = [];
+	let inFence = false;
+	for (const line of lines) {
+		if (fenceRe.test(line)) {
+			inFence = !inFence;
+			continue;
+		}
+		if (inFence) continue;
+		const m = line.match(headingRe);
+		if (!m) continue;
+		const depth = m[1].length as 1 | 2 | 3;
+		const text = m[2].trim();
+		out.push({ depth, text, slug: slugger.slug(text) });
+	}
+	return out;
+}
 
 interface PageEntry {
 	path: string;
@@ -140,11 +198,12 @@ export function searchDocs(docsDir: string, query: string, limit: number): Searc
 function printHelp(): void {
 	process.stderr.write(`Usage: zdoc mcp [-d <docs-dir>]
 
-Starts a stdio MCP server exposing four tools to MCP-capable AI hosts:
+Starts a stdio MCP server exposing five tools to MCP-capable AI hosts:
   list_docs       List the docs tree (lifecycle-filtered).
-  get_doc         Fetch a single doc's markdown + metadata.
+  get_doc         Fetch a single doc's markdown + metadata + headings.
   search_docs     Substring search across titles / descriptions / content.
   get_lifecycle   Get lifecycle / superseded_by / folded_to for one doc.
+  get_changelog   List docs by recent modification (newest first).
 
 Configure in your AI host's MCP settings, e.g. Claude Desktop:
   {
@@ -186,7 +245,7 @@ export default async function runMcp(argv: string[]): Promise<number> {
 	}
 
 	const server = new Server(
-		{ name: 'zdoc', version: '1.0.0' },
+		{ name: 'zdoc', version: getServerVersion() },
 		{ capabilities: { tools: {} } },
 	);
 
@@ -229,12 +288,17 @@ export default async function runMcp(argv: string[]): Promise<number> {
 			{
 				name: 'search_docs',
 				description:
-					'Substring search across doc titles, descriptions, and content. Returns ranked matches. Excludes archived pages.',
+					'Substring search across doc titles, descriptions, and content. Returns ranked matches (higher score = stronger match; title hits dominate). Excludes archived pages.',
 				inputSchema: {
 					type: 'object',
 					properties: {
 						query: { type: 'string', description: 'Search query (case-insensitive substring).' },
-						limit: { type: 'number', description: 'Max results to return (default: 20).' },
+						limit: {
+							type: 'number',
+							description: `Max results to return (default: 20, capped at ${SEARCH_LIMIT_MAX}).`,
+							minimum: 1,
+							maximum: SEARCH_LIMIT_MAX,
+						},
 					},
 					required: ['query'],
 				},
@@ -242,13 +306,33 @@ export default async function runMcp(argv: string[]): Promise<number> {
 			{
 				name: 'get_lifecycle',
 				description:
-					'Get lifecycle metadata (lifecycle, superseded_by, folded_to) for a single doc. Useful for checking whether a doc is canonical or has been superseded.',
+					'Get lifecycle metadata (lifecycle, superseded_by, folded_to) for a single doc. Useful for checking whether a doc is canonical or has been superseded. Returns lifecycle:null when no lifecycle is declared.',
 				inputSchema: {
 					type: 'object',
 					properties: {
 						path: { type: 'string', description: 'Doc path relative to docsDir.' },
 					},
 					required: ['path'],
+				},
+			},
+			{
+				name: 'get_changelog',
+				description:
+					'List docs by recent modification, newest first. Useful for "what changed since last session" queries at the start of an AI conversation. Reads filesystem mtime; if the docs are in a git repo, also tries to read the last commit message and time. Excludes archived pages.',
+				inputSchema: {
+					type: 'object',
+					properties: {
+						limit: {
+							type: 'number',
+							description: 'Max entries to return (default: 20, capped at 100).',
+							minimum: 1,
+							maximum: 100,
+						},
+						since: {
+							type: 'string',
+							description: 'ISO 8601 timestamp; only return docs modified after this time.',
+						},
+					},
 				},
 			},
 		],
@@ -264,6 +348,7 @@ export default async function runMcp(argv: string[]): Promise<number> {
 				const all = walkDocs(docsDir);
 				const filtered = all.filter((p) => {
 					if (!includeArchived && p.lifecycle === 'archived') return false;
+					if (lifecycle === 'stable') return p.lifecycle === 'stable' || p.lifecycle === undefined;
 					if (lifecycle && p.lifecycle !== lifecycle) return false;
 					return true;
 				});
@@ -293,7 +378,9 @@ export default async function runMcp(argv: string[]): Promise<number> {
 				if (!pageMeta || !pageMeta.title) {
 					throw new Error(`Page not registered in _meta.yaml: ${path}`);
 				}
-				const raw = readFileSync(abs, 'utf-8').replace(/^---\n[\s\S]*?\n---\n/, '');
+				const rawWithFrontmatter = readFileSync(abs, 'utf-8');
+				const raw = rawWithFrontmatter.replace(/^---\n[\s\S]*?\n---\n/, '');
+				const headings = extractHeadings(rawWithFrontmatter);
 				return {
 					content: [
 						{
@@ -308,6 +395,7 @@ export default async function runMcp(argv: string[]): Promise<number> {
 									description: pageMeta.description ?? null,
 									author: pageMeta.author ?? null,
 									modified: pageMeta.modified ?? null,
+									headings,
 									markdown: raw,
 								},
 								null,
@@ -321,7 +409,9 @@ export default async function runMcp(argv: string[]): Promise<number> {
 			if (name === 'search_docs') {
 				const query = paramString(a, 'query');
 				if (!query) throw new Error('query is required');
-				const limit = typeof a.limit === 'number' && a.limit > 0 ? Math.floor(a.limit) : 20;
+				const requested =
+					typeof a.limit === 'number' && a.limit > 0 ? Math.floor(a.limit) : 20;
+				const limit = Math.min(requested, SEARCH_LIMIT_MAX);
 				const hits = searchDocs(docsDir, query, limit);
 				return { content: [{ type: 'text', text: JSON.stringify(hits, null, 2) }] };
 			}
@@ -343,7 +433,7 @@ export default async function runMcp(argv: string[]): Promise<number> {
 								{
 									path,
 									title: pageMeta.title ?? null,
-									lifecycle: pageMeta.lifecycle ?? 'unspecified',
+									lifecycle: pageMeta.lifecycle ?? null,
 									superseded_by: pageMeta.superseded_by ?? null,
 									folded_to: pageMeta.folded_to ?? null,
 								},
@@ -353,6 +443,40 @@ export default async function runMcp(argv: string[]): Promise<number> {
 						},
 					],
 				};
+			}
+
+			if (name === 'get_changelog') {
+				const requested =
+					typeof a.limit === 'number' && a.limit > 0 ? Math.floor(a.limit) : 20;
+				const limit = Math.min(requested, 100);
+				const since = paramString(a, 'since');
+				const sinceMs = since ? Date.parse(since) : NaN;
+				if (since && Number.isNaN(sinceMs)) {
+					throw new Error(`Invalid since timestamp: ${since}`);
+				}
+				const all = walkDocs(docsDir).filter((p) => p.lifecycle !== 'archived');
+				const entries = all
+					.map((p) => {
+						let mtime = 0;
+						try {
+							mtime = statSync(p.absPath).mtimeMs;
+						} catch {
+							// file may have just been removed; skip
+						}
+						return { p, mtime };
+					})
+					.filter((e) => e.mtime > 0)
+					.filter((e) => Number.isNaN(sinceMs) || e.mtime > sinceMs)
+					.sort((a, b) => b.mtime - a.mtime)
+					.slice(0, limit)
+					.map(({ p, mtime }) => ({
+						path: p.path,
+						title: p.title,
+						section: p.parentDirTitles.join(' / '),
+						modified: new Date(mtime).toISOString(),
+						...(p.lifecycle && { lifecycle: p.lifecycle }),
+					}));
+				return { content: [{ type: 'text', text: JSON.stringify(entries, null, 2) }] };
 			}
 
 			throw new Error(`Unknown tool: ${name}`);

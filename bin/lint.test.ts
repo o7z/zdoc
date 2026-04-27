@@ -59,7 +59,7 @@ describe('lintDocs — _meta.yaml consistency', () => {
 });
 
 describe('lintDocs — lifecycle target existence', () => {
-	test('superseded_by target does not exist → warning', () => {
+	test('superseded_by target does not exist → error', () => {
 		writeMeta(
 			docs,
 			`title: Site\npages:\n  legacy:\n    title: Legacy\n    superseded_by: /missing.md\n`,
@@ -69,7 +69,7 @@ describe('lintDocs — lifecycle target existence', () => {
 		expect(r.messages.some((m) => m.message.includes('superseded_by'))).toBe(true);
 	});
 
-	test('superseded_by target exists → no warning', () => {
+	test('superseded_by target exists → no error', () => {
 		writeMeta(
 			docs,
 			`title: Site\npages:\n  legacy:\n    title: Legacy\n    superseded_by: /current.md\n  current:\n    title: Current\n`,
@@ -91,7 +91,7 @@ describe('lintDocs — lifecycle target existence', () => {
 		expect(r.messages.some((m) => m.message.includes('folded_to'))).toBe(false);
 	});
 
-	test('folded_to file missing → warning', () => {
+	test('folded_to file missing → error', () => {
 		writeMeta(
 			docs,
 			`title: Site\npages:\n  research:\n    title: Research\n    folded_to: /missing.md#sec\n`,

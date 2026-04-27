@@ -105,6 +105,11 @@ export function flattenPages(node: DirNode): PageEntry[] {
 // Filter pages by lifecycle. Excludes 'archived' by default (AI consumers
 // generally shouldn't see retired content). Pass `includeArchived: true`
 // to override.
+//
+// `lifecycle: 'stable'` matches pages explicitly marked stable AND pages
+// without any lifecycle declared — `lifecycle` is optional, and an unset
+// page is treated as the default ("stable enough"). Filtering by 'draft'
+// or 'archived' stays strict, since those are explicit author intent.
 export function filterByLifecycle(
 	pages: PageEntry[],
 	opts: { lifecycle?: Lifecycle; includeArchived?: boolean } = {},
@@ -112,6 +117,7 @@ export function filterByLifecycle(
 	const { lifecycle, includeArchived = false } = opts;
 	return pages.filter((p) => {
 		if (!includeArchived && p.lifecycle === 'archived') return false;
+		if (lifecycle === 'stable') return p.lifecycle === 'stable' || p.lifecycle === undefined;
 		if (lifecycle && p.lifecycle !== lifecycle) return false;
 		return true;
 	});

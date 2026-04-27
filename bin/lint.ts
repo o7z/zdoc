@@ -120,7 +120,7 @@ function lintLifecycleTargets(scan: DocsScan): LintMessage[] {
 				const target = resolveDocPath(scan.docsDir, dir, page.superseded_by);
 				if (!target || !existsSync(target)) {
 					out.push({
-						severity: 'warning',
+						severity: 'error',
 						file: rel(scan.docsDir, meta),
 						message: `${key}: superseded_by 目标 ${page.superseded_by} 不存在`,
 					});
@@ -131,7 +131,7 @@ function lintLifecycleTargets(scan: DocsScan): LintMessage[] {
 				const target = resolveDocPath(scan.docsDir, dir, targetPathOnly);
 				if (!target || !existsSync(target)) {
 					out.push({
-						severity: 'warning',
+						severity: 'error',
 						file: rel(scan.docsDir, meta),
 						message: `${key}: folded_to 目标 ${targetPathOnly} 不存在`,
 					});

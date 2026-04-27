@@ -1,6 +1,10 @@
 // /api/docs.json — structured doc tree + per-page metadata.
 // Query params:
 //   ?lifecycle=stable|draft|archived  filter pages by lifecycle
+//     - stable: matches pages with lifecycle:stable AND pages without any
+//       lifecycle declared (treating unset as the default, since lifecycle
+//       is optional and most docs are de facto stable)
+//     - draft / archived: strict match on the explicit value
 //   ?include_archived=1               include archived in output (default: excluded)
 
 import { json } from '@sveltejs/kit';
@@ -35,6 +39,7 @@ const VALID_LIFECYCLES: ReadonlySet<Lifecycle> = new Set(['draft', 'stable', 'ar
 
 function pageMatches(p: PageEntry, lifecycleFilter: Lifecycle | null, includeArchived: boolean): boolean {
 	if (!includeArchived && p.lifecycle === 'archived') return false;
+	if (lifecycleFilter === 'stable') return p.lifecycle === 'stable' || p.lifecycle === undefined;
 	if (lifecycleFilter && p.lifecycle !== lifecycleFilter) return false;
 	return true;
 }

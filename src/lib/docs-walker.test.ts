@@ -112,10 +112,16 @@ describe('filterByLifecycle', () => {
 		expect(out.find((p) => p.title === 'A')).toBeDefined();
 	});
 
-	test('lifecycle: "stable" returns only stable pages', () => {
+	test('lifecycle: "stable" returns stable pages and pages with no lifecycle', () => {
 		const out = filterByLifecycle(seed(), { lifecycle: 'stable' });
+		const titles = out.map((p) => p.title).sort();
+		expect(titles).toEqual(['N', 'S']);
+	});
+
+	test('lifecycle: "draft" stays strict — no-lifecycle pages excluded', () => {
+		const out = filterByLifecycle(seed(), { lifecycle: 'draft' });
 		expect(out.length).toBe(1);
-		expect(out[0].title).toBe('S');
+		expect(out[0].title).toBe('D');
 	});
 
 	test('lifecycle: "archived" + includeArchived: true returns only archived', () => {
