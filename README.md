@@ -43,7 +43,7 @@ When `zdoc` is running, any `fetch`-capable agent can pull docs at:
 - **`/llms.txt`** — sitemap for LLMs (title + path + one-line description per page; archived / superseded pages auto-filtered).
 - **`/llms-full.txt`** — full-text dump of all stable docs concatenated (lifecycle-filtered, follows `superseded_by`).
 - **`/api/docs.json`** — structured doc tree + per-page metadata.
-- **`/api/docs/<path>.json`** — single-doc JSON: raw markdown + metadata + rendered HTML.
+- **`/api/docs/<path>.json`** — single-doc JSON: raw markdown + metadata + rendered HTML + `headings[]`. Both `<path>.md.json` and `<path>.json` are accepted.
 
 ### MCP integration (Claude Desktop / Cursor / Cline)
 
@@ -60,7 +60,7 @@ When `zdoc` is running, any `fetch`-capable agent can pull docs at:
 }
 ```
 
-Tools exposed: `list_docs`, `get_doc`, `search_docs`, `get_lifecycle`.
+Tools exposed: `list_docs`, `get_doc` (returns markdown + `headings[]`), `search_docs`, `get_lifecycle`, `get_changelog` (recent edits, newest first).
 
 ## Quick start
 
