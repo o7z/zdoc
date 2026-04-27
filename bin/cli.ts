@@ -36,6 +36,7 @@ function printHelp(): void {
 Usage:
   zdoc [options]              Start the docs server
   zdoc lint [-d <docs-dir>]   Check docs for broken links and metadata issues
+  zdoc mcp  [-d <docs-dir>]   Start a stdio MCP server (for AI hosts)
 
 Options:
   -d, --dir <path>       Markdown docs directory (default: current working directory)
@@ -170,6 +171,11 @@ async function main(): Promise<void> {
 	if (process.argv[2] === 'lint') {
 		const { default: runLint } = await import('./lint.js');
 		const code = await runLint(process.argv.slice(3));
+		process.exit(code);
+	}
+	if (process.argv[2] === 'mcp') {
+		const { default: runMcp } = await import('./mcp.js');
+		const code = await runMcp(process.argv.slice(3));
 		process.exit(code);
 	}
 
