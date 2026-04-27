@@ -33,7 +33,8 @@ function printHelp(): void {
 	const msg = `zdoc — Markdown docs server
 
 Usage:
-  zdoc [options]
+  zdoc [options]              Start the docs server
+  zdoc lint [-d <docs-dir>]   Check docs for broken links and metadata issues
 
 Options:
   -d, --dir <path>       Markdown docs directory (default: current working directory)
@@ -163,6 +164,13 @@ async function main(): Promise<void> {
 	const __dirname = dirname(__filename);
 	const pkgPath = resolve(__dirname, '..', 'package.json');
 	const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { version: string; repository?: { url?: string } };
+
+	// Subcommand dispatch
+	if (process.argv[2] === 'lint') {
+		const { default: runLint } = await import('./lint.js');
+		const code = await runLint(process.argv.slice(3));
+		process.exit(code);
+	}
 
 	let args: Args;
 	try {

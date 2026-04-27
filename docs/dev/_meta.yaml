@@ -2,9 +2,6 @@ title: 开发者
 order: 20
 
 pages:
-  reference:
-    title: 参考
-    order: 10
   release:
     title: 发布规范
     order: 20

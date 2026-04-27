@@ -181,6 +181,28 @@ Any Markdown below the frontmatter renders normally.
 - **Password protection**: Server-side HttpOnly session cookie. Omit `-w` or pass `-w ""` to disable. Sessions are persisted in a small SQLite file at `<docsDir>/.zdoc/zdoc.db`, so a logged-in cookie keeps working after a `zdoc` restart. Sessions expire after their 7-day TTL; deleting `<docsDir>/.zdoc/` invalidates everyone.
 - **PDFs**: listed in `_meta.yaml` pages, opened in the browser's native PDF viewer via iframe.
 
+## Linting your docs
+
+`zdoc lint` checks your docs tree for common issues without starting the server. It's safe to run anywhere — exits with code 1 only when errors are found, code 0 otherwise (warnings don't fail).
+
+```bash
+zdoc lint                # lint cwd
+zdoc lint -d ./docs      # lint a specific directory
+```
+
+What it checks:
+
+- **`_meta.yaml` consistency** — pages listed under `pages:` must have matching `.md` (or `.pdf`) files; markdown files not listed in any `_meta.yaml` are flagged as orphans (warning).
+- **Internal markdown link health** — `[text](/path.md)` and `[text](./relative.md)` targets must exist. External URLs, `mailto:`, and same-page anchors (`#section`) are ignored. Links inside fenced code blocks (` ``` ` / `~~~`) and inline code (`` ` ``) are skipped (they're documentation examples).
+- **Lifecycle target existence** — `superseded_by` and `folded_to` paths must point to a file that exists (warning if not).
+- **Folded blockquote convention** — lines like `> 已折叠到 [text](/path.md#anchor)` get their target validated.
+
+The lint command is fully optional: zdoc serves your docs the same whether you run it or not. CI integration is straightforward:
+
+```yaml
+- run: npx @o7z/zdoc lint -d ./docs
+```
+
 ## Development (for contributors)
 
 This repo **dogfoods zdoc**: the `docs/` directory IS the official documentation,
