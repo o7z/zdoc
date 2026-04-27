@@ -5,6 +5,7 @@ import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { getLatestVersion, getCurrentVersion } from './update.js';
 import { detectInstallMode, formatUpgradeHint } from './install-mode.js';
+import { detectAiAgent, formatAgentHint } from './agent-detect.js';
 
 interface Args {
 	dir: string;
@@ -238,6 +239,10 @@ async function main(): Promise<void> {
 	process.stdout.write(`  ➜  Docs:     ${docsDir}\n`);
 	process.stdout.write(`  ➜  Local:    http://localhost:${port}\n`);
 	process.stdout.write(`  ➜  Password: ${password ? 'enabled' : 'disabled'}\n`);
+
+	const agent = detectAiAgent();
+	const agentHint = formatAgentHint(agent);
+	if (agentHint) process.stdout.write(agentHint);
 
 	// Check for updates (skip when ZDOC_NO_UPDATE_CHECK is set)
 	if (!process.env.ZDOC_NO_UPDATE_CHECK) {
