@@ -385,8 +385,16 @@
 			{/if}
 		</div>
 	{:else if group.link}
-		<a href={group.link} class="sidebar-link" class:active={$page.url.pathname === group.link} class:nested={depth > 0}>
-			{group.text}
+		<a
+			href={group.link}
+			class="sidebar-link"
+			class:active={$page.url.pathname === group.link}
+			class:nested={depth > 0}
+			class:archived={group.lifecycle === 'archived'}
+		>
+			<span class="sidebar-link-text">{group.text}</span>
+			{#if group.lifecycle === 'archived'}<span class="sidebar-badge sidebar-badge-archived" title="Archived">🗄</span>{/if}
+			{#if group.superseded}<span class="sidebar-badge sidebar-badge-superseded" title="Superseded">↗</span>{/if}
 		</a>
 	{:else}
 		<span class="sidebar-label">{group.text}</span>
@@ -424,10 +432,16 @@
 	.chevron.collapsed { transform: rotate(-90deg); }
 	.group-items { padding-left: 12px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
 	.group-items > .nested { padding-left: 20px; }
-	.sidebar-link { display: block; padding: 6px 8px; border-radius: 4px; text-decoration: none; color: var(--text); font-size: 14px; line-height: 1.5; }
+	.sidebar-link { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 4px; text-decoration: none; color: var(--text); font-size: 14px; line-height: 1.5; }
 	.sidebar-link:hover { background: var(--bg-soft); }
 	.sidebar-link.active { color: var(--brand); background: var(--brand-soft); font-weight: 500; }
 	.sidebar-link.nested { padding-left: 20px; }
+	.sidebar-link.archived { opacity: 0.55; }
+	.sidebar-link.archived:hover { opacity: 0.85; }
+	.sidebar-link-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.sidebar-badge { font-size: 11px; line-height: 1; flex-shrink: 0; opacity: 0.75; }
+	.sidebar-badge-archived { filter: grayscale(1); }
+	.sidebar-badge-superseded { color: var(--brand); }
 	.sidebar-label { display: block; padding: 6px 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 	.sidebar-scroll { flex: 1; }
 	

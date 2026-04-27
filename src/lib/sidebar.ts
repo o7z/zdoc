@@ -1,12 +1,14 @@
 import { readdirSync, existsSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { readDirMeta, type PageMeta } from './meta.js';
+import { readDirMeta, type Lifecycle, type PageMeta } from './meta.js';
 
 export interface SidebarGroup {
 	text: string;
 	link?: string;
 	collapsed?: boolean;
 	items?: SidebarGroup[];
+	lifecycle?: Lifecycle;
+	superseded?: boolean;
 }
 
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -65,7 +67,12 @@ function scanDir(dir: string, root: string): SidebarGroup[] {
 		items.push({
 			order: meta.order ?? 999,
 			text: meta.title,
-			item: { text: meta.title, link },
+			item: {
+				text: meta.title,
+				link,
+				lifecycle: meta.lifecycle,
+				superseded: Boolean(meta.superseded_by),
+			},
 		});
 	}
 

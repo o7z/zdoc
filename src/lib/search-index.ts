@@ -124,6 +124,7 @@ async function scanDir(dir: string, root: string, out: SearchEntry[]): Promise<v
 		const pages = dirMeta.pages ?? {};
 		for (const [key, meta] of Object.entries(pages)) {
 			if (!meta.title || !visible(meta)) continue;
+			if (meta.lifecycle === 'archived') continue;
 			if (key.endsWith('.pdf')) continue;
 			const mdPath = join(dir, key + '.md');
 			if (!existsSync(mdPath) || !statSync(mdPath).isFile()) continue;

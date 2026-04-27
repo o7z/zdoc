@@ -10,6 +10,10 @@ pages:
     title: 单文档字段
     order: 20
     description: title / order / description / version / author / modified / env。
+  lifecycle:
+    title: 文档生命周期
+    order: 25
+    description: lifecycle / superseded_by / folded_to —— 让 docs 跨 30+ 篇仍可读、可搜、对 AI 友好。
   links-and-routes:
     title: 链接与路由
     order: 30

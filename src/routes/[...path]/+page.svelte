@@ -121,6 +121,20 @@
 							{/each}
 						</div>
 					{/if}
+					{#if m.superseded_by}
+						<div class="doc-banner doc-banner-superseded">
+							<span class="doc-banner-icon">⚠</span>
+							<span>本文已被取代 →</span>
+							<a href={m.superseded_by}>{m.superseded_by}</a>
+						</div>
+					{/if}
+					{#if m.folded_to}
+						<div class="doc-banner doc-banner-folded">
+							<span class="doc-banner-icon">📦</span>
+							<span>本节内容已折叠到 →</span>
+							<a href={m.folded_to}>{m.folded_to}</a>
+						</div>
+					{/if}
 				</div>
 			{/if}
 			{@html data.html}
@@ -168,6 +182,38 @@
 	}
 	.doc-desc + .doc-chips { border-top: 1px dashed var(--border); padding-top: 10px; }
 	.doc-chips .sep { opacity: 0.5; }
+
+	.doc-banner {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-top: 10px;
+		padding: 10px 12px;
+		border-radius: 8px;
+		font-size: 13px;
+		line-height: 1.5;
+	}
+	.doc-banner-icon { font-size: 14px; }
+	.doc-banner a {
+		color: var(--brand);
+		text-decoration: none;
+		font-family: var(--font-mono);
+		word-break: break-all;
+	}
+	.doc-banner a:hover { text-decoration: underline; }
+	.doc-banner-superseded {
+		background: color-mix(in srgb, var(--brand) 8%, transparent);
+		border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--border));
+		color: var(--text);
+		font-weight: 500;
+	}
+	.doc-banner-folded {
+		background: var(--bg);
+		border: 1px dashed var(--border);
+		color: var(--text-muted);
+	}
+	.doc-banner-folded a { color: var(--text); }
 
 	.pdf-frame {
 		flex: 1;

@@ -1,5 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 
+export type Lifecycle = 'draft' | 'stable' | 'archived';
+
 export interface PageMeta {
 	title?: string;
 	order?: number;
@@ -7,6 +9,9 @@ export interface PageMeta {
 	env?: string;
 	description?: string;
 	author?: string;
+	lifecycle?: Lifecycle;
+	superseded_by?: string;
+	folded_to?: string;
 }
 
 export interface DirMeta extends PageMeta {
@@ -31,7 +36,9 @@ function stripComment(s: string): string {
 		if (!inDouble && c === "'") inSingle = !inSingle;
 		else if (!inSingle && c === '"') inDouble = !inDouble;
 		else if (!inSingle && !inDouble && c === '#') {
-			return s.slice(0, i).replace(/\s+$/, '');
+			if (i === 0 || /\s/.test(s[i - 1])) {
+				return s.slice(0, i).replace(/\s+$/, '');
+			}
 		}
 	}
 	return s.replace(/\s+$/, '');
@@ -126,6 +133,14 @@ export function parseYaml(input: string): Record<string, unknown> {
 	return result;
 }
 
+const LIFECYCLE_VALUES: ReadonlySet<Lifecycle> = new Set(['draft', 'stable', 'archived']);
+
+function coerceLifecycle(v: unknown): Lifecycle | undefined {
+	return typeof v === 'string' && LIFECYCLE_VALUES.has(v as Lifecycle)
+		? (v as Lifecycle)
+		: undefined;
+}
+
 function coercePageMeta(raw: unknown): PageMeta {
 	if (!raw || typeof raw !== 'object') return {};
 	const r = raw as Record<string, unknown>;
@@ -142,6 +157,9 @@ function coercePageMeta(raw: unknown): PageMeta {
 		env: typeof r.env === 'string' ? r.env : undefined,
 		description: typeof r.description === 'string' ? r.description : undefined,
 		author: typeof r.author === 'string' ? r.author : undefined,
+		lifecycle: coerceLifecycle(r.lifecycle),
+		superseded_by: typeof r.superseded_by === 'string' ? r.superseded_by : undefined,
+		folded_to: typeof r.folded_to === 'string' ? r.folded_to : undefined,
 	};
 }
 

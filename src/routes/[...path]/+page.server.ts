@@ -3,7 +3,7 @@ import { dirname, basename, join, resolve, sep } from 'node:path';
 import { error, redirect } from '@sveltejs/kit';
 import { renderMarkdown } from '$lib/markdown.js';
 import { getDocsDir } from '$lib/docs-dir.js';
-import { readDirMeta, type PageMeta } from '$lib/meta.js';
+import { readDirMeta, type Lifecycle, type PageMeta } from '$lib/meta.js';
 import type { PageServerLoad } from './$types';
 
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -12,6 +12,9 @@ interface DocMeta {
 	description?: string;
 	author?: string;
 	modified?: string;
+	lifecycle?: Lifecycle;
+	superseded_by?: string;
+	folded_to?: string;
 }
 
 function visible(meta: PageMeta): boolean {
@@ -25,6 +28,9 @@ function extractDocMeta(meta: PageMeta): DocMeta | undefined {
 	if (meta.description) out.description = meta.description;
 	if (meta.author) out.author = meta.author;
 	if (meta.modified) out.modified = meta.modified;
+	if (meta.lifecycle) out.lifecycle = meta.lifecycle;
+	if (meta.superseded_by) out.superseded_by = meta.superseded_by;
+	if (meta.folded_to) out.folded_to = meta.folded_to;
 	return Object.keys(out).length > 0 ? out : undefined;
 }
 

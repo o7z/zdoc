@@ -100,15 +100,18 @@ Directories without `_meta.yaml` are hidden entirely. `.md` files not listed und
 
 ### Per-page fields
 
-| Field         | Required | Description                                                              |
-|---------------|----------|--------------------------------------------------------------------------|
-| `title`       | Yes      | Sidebar label. Omitting it hides the page.                               |
-| `order`       | No       | Sort weight. Default `999`.                                              |
-| `modified`    | No       | Last-modified string, shown in the page's metadata bar.                  |
-| `description` | No       | Short summary, shown above the article body.                             |
-| `version`     | No       | Document version (e.g. `1.0.1`), shown as a chip in the metadata bar.    |
-| `author`      | No       | Author name, shown as a chip in the metadata bar.                        |
-| `env`         | No       | Set to `prod` to hide in development (`NODE_ENV !== 'production'`).      |
+| Field           | Required | Description                                                                              |
+|-----------------|----------|------------------------------------------------------------------------------------------|
+| `title`         | Yes      | Sidebar label. Omitting it hides the page.                                               |
+| `order`         | No       | Sort weight. Default `999`.                                                              |
+| `modified`      | No       | Last-modified string, shown in the page's metadata bar.                                  |
+| `description`   | No       | Short summary, shown above the article body.                                             |
+| `version`       | No       | Document version (e.g. `1.0.1`), shown as a chip in the metadata bar.                    |
+| `author`        | No       | Author name, shown as a chip in the metadata bar.                                        |
+| `env`           | No       | Set to `prod` to hide in development (`NODE_ENV !== 'production'`).                      |
+| `lifecycle`     | No       | `draft` / `stable` / `archived`. `archived` greys the sidebar entry and excludes it from search. |
+| `superseded_by` | No       | Path to the doc that replaces this one. Renders a banner at the top + ↗ in sidebar.      |
+| `folded_to`     | No       | Path (with optional `#anchor`) where this doc's content has been folded. Renders a banner. |
 
 `description`, `version`, `author`, and `modified` work for both `.md` and `.pdf` entries; when any of them is set, the page renders a small metadata bar above the content.
 
