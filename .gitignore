@@ -14,3 +14,6 @@ config.json
 
 # zdoc runtime SQLite (created on first auth use in the demo)
 demo/.zdoc/
+
+# Local feedback / draft notes kept by maintainers (never published)
+FEEDBACK-*.md
