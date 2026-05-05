@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getConfig } from '$lib/config.js';
 import { getDocsDir } from '$lib/docs-dir.js';
+import { resolveDocsAsset } from '$lib/docs-asset.js';
 import { createSession, validateSession } from '$lib/sessions.js';
 
 const FAVICON_NAMES = ['favicon.ico', 'favicon.png', 'favicon.svg', 'favicon.gif'];
@@ -31,6 +32,17 @@ function tryFavicon(): Response | null {
 	return null;
 }
 
+function tryServeAsset(pathname: string): Response | null {
+	const asset = resolveDocsAsset(getDocsDir(), pathname);
+	if (!asset) return null;
+	return new Response(readFileSync(asset.filePath), {
+		headers: {
+			'Content-Type': asset.mime,
+			'Cache-Control': 'public, max-age=86400',
+		},
+	});
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
 	// Favicon — public, no auth needed
 	if (FAVICON_NAMES.some((n) => event.url.pathname === '/' + n)) {
@@ -41,6 +53,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const password = getConfig().password;
 
 	if (!password) {
+		const asset = tryServeAsset(event.url.pathname);
+		if (asset) return asset;
 		return resolve(event);
 	}
 
@@ -69,6 +83,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const cookieHeader = event.request.headers.get('cookie') || '';
 	const match = cookieHeader.match(/docs_session=([^;]+)/);
 	if (match && validateSession(match[1])) {
+		const asset = tryServeAsset(event.url.pathname);
+		if (asset) return asset;
 		return resolve(event);
 	}
 

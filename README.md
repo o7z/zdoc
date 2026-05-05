@@ -229,6 +229,7 @@ Any Markdown below the frontmatter renders normally.
 - **Search**: Press `Ctrl+K` (Mac: `Cmd+K`) to fuzzy-search sidebar titles.
 - **Dark mode**: Auto-detect + manual toggle, persisted to `localStorage`.
 - **Password protection**: Server-side HttpOnly session cookie. Omit `-w` or pass `-w ""` to disable. Sessions are persisted in a small SQLite file at `<docsDir>/.zdoc/zdoc.db`, so a logged-in cookie keeps working after a `zdoc` restart. Sessions expire after their 7-day TTL; deleting `<docsDir>/.zdoc/` invalidates everyone.
+- **Image assets**: relative paths in Markdown (e.g. `![](./img/screenshot.png)`) are served directly from the docs tree. Supported: `.png`, `.jpg`/`.jpeg`, `.gif`, `.svg`, `.webp`, `.avif`, `.ico`. When password protection is enabled, asset requests require a valid session — the same gate as page routes.
 - **PDFs**: listed in `_meta.yaml` pages, opened in the browser's native PDF viewer via iframe.
 
 ## Linting your docs

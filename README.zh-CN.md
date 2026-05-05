@@ -174,6 +174,7 @@ frontmatter 之后的 Markdown 正常渲染。
 - **搜索**：按 `Ctrl+K`（Mac：`Cmd+K`）模糊匹配侧边栏条目。
 - **暗色模式**：自动检测系统偏好 + 手动切换，状态持久化到 `localStorage`。
 - **密码保护**：服务端 HttpOnly 会话 cookie；传空密码（`-w ""`）或不传 `-w` 即禁用鉴权。会话信息持久化在 `<docsDir>/.zdoc/zdoc.db` 这个小型 SQLite 文件里，所以重启 `zdoc` 后已登录的 cookie 仍然有效。会话在 7 天 TTL 到期时失效；删除 `<docsDir>/.zdoc/` 即可让所有人下线。
+- **图片资源**：Markdown 中的相对路径（如 `![](./img/screenshot.png)`）会从文档目录直接服务出去。支持 `.png`、`.jpg`/`.jpeg`、`.gif`、`.svg`、`.webp`、`.avif`、`.ico`。启用密码保护时，资源请求与页面共用同一会话校验门。
 - **PDF**：在 `_meta.yaml` 的 `pages` 里列出后，会通过浏览器原生 PDF 查看器嵌入 iframe。
 
 ## 开发（贡献者）
