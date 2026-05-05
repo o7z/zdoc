@@ -20,7 +20,18 @@
 	let aboutDialogEl = $state(null);
 	let mainEl = $state(null);
 	/** @type {Set<string>} */
-	let collapsedGroups = $state(new Set());
+	let collapsedGroups = $state(new Set(data.collapsedGroups ?? []));
+
+	function persistCollapsedGroups(next) {
+		if (typeof document === 'undefined') return;
+		const arr = [...next];
+		if (arr.length === 0) {
+			document.cookie = 'zdoc-collapsed=; Max-Age=0; Path=/; SameSite=Lax';
+		} else {
+			const v = encodeURIComponent(JSON.stringify(arr));
+			document.cookie = `zdoc-collapsed=${v}; Max-Age=31536000; Path=/; SameSite=Lax`;
+		}
+	}
 
 	// Flatten sidebar once
 	let flatItems = $derived.by(() => {
@@ -371,6 +382,7 @@
 					if (next.has(group.text)) next.delete(group.text);
 					else next.add(group.text);
 					collapsedGroups = next;
+					persistCollapsedGroups(next);
 				}}
 			>
 				<svg class="chevron" class:collapsed={isCollapsed} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
