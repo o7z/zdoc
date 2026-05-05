@@ -116,6 +116,17 @@ body {
 }
 
 .doc-content img { max-width: 100%; border-radius: 8px; }
+.doc-content p:has(> img:only-child) { text-align: center; }
+.doc-content p:has(> img:only-child) > img {
+	display: block;
+	margin: 8px auto;
+	padding: 12px;
+	background: linear-gradient(45deg, var(--bg-soft), var(--brand-soft));
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	box-sizing: border-box;
+	max-width: 100%;
+}
 
 /* Mermaid */
 .doc-content .mermaid {
