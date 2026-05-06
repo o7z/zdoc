@@ -12,6 +12,7 @@ interface Args {
 	port: number;
 	password: string;
 	title: string;
+	download: boolean;
 	help: boolean;
 	version: boolean;
 }
@@ -21,6 +22,7 @@ interface FileConfig {
 	docsDir?: string;
 	password?: string;
 	port?: number;
+	downloadEnabled?: boolean;
 }
 
 const DEFAULTS = {
@@ -28,6 +30,7 @@ const DEFAULTS = {
 	port: 8888,
 	password: '',
 	title: 'Docs',
+	download: false,
 };
 
 function printHelp(): void {
@@ -43,11 +46,12 @@ Options:
   -p, --port <number>    Port to listen on (default: 8888, auto-increments if busy)
   -t, --title <string>   Site title (default: Docs)
   -w, --password <pwd>   Access password (default: none, docs are public; set to enable auth)
+  -D, --download         Enable docs zip download endpoint and header button (default: off)
   -h, --help             Show this help message
   -v, --version          Show version
 
 Configuration precedence: CLI flags > zdoc.config.json (cwd) > defaults.
-A zdoc.config.json in the current directory may define: title, docsDir, password, port.
+A zdoc.config.json in the current directory may define: title, docsDir, password, port, downloadEnabled.
 `;
 	process.stdout.write(msg);
 }
@@ -58,6 +62,7 @@ function parseArgs(argv: string[]): Args {
 		port: DEFAULTS.port,
 		password: DEFAULTS.password,
 		title: DEFAULTS.title,
+		download: DEFAULTS.download,
 		help: false,
 		version: false,
 	};
@@ -65,6 +70,7 @@ function parseArgs(argv: string[]): Args {
 	let portSet = false;
 	let passwordSet = false;
 	let titleSet = false;
+	let downloadSet = false;
 
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
@@ -113,6 +119,11 @@ function parseArgs(argv: string[]): Args {
 				titleSet = true;
 				break;
 			}
+			case '-D':
+			case '--download':
+				args.download = true;
+				downloadSet = true;
+				break;
 			default:
 				throw new Error(`Unknown argument: ${a}`);
 		}
@@ -122,6 +133,7 @@ function parseArgs(argv: string[]): Args {
 	(args as unknown as Record<string, boolean>).__portSet = portSet;
 	(args as unknown as Record<string, boolean>).__passwordSet = passwordSet;
 	(args as unknown as Record<string, boolean>).__titleSet = titleSet;
+	(args as unknown as Record<string, boolean>).__downloadSet = downloadSet;
 	return args;
 }
 
@@ -201,6 +213,7 @@ async function main(): Promise<void> {
 	const portSet = (args as unknown as Record<string, boolean>).__portSet;
 	const passwordSet = (args as unknown as Record<string, boolean>).__passwordSet;
 	const titleSet = (args as unknown as Record<string, boolean>).__titleSet;
+	const downloadSet = (args as unknown as Record<string, boolean>).__downloadSet;
 
 	const cwd = process.cwd();
 	const fileConfig = readConfigJson(cwd);
@@ -217,6 +230,9 @@ async function main(): Promise<void> {
 			: DEFAULTS.password;
 
 	const title = titleSet ? args.title : fileConfig.title ?? DEFAULTS.title;
+	const downloadEnabled = downloadSet
+		? args.download
+		: fileConfig.downloadEnabled === true;
 
 	if (!existsSync(docsDir)) {
 		process.stderr.write(`Error: docs directory not found: ${docsDir}\n`);
@@ -228,6 +244,7 @@ async function main(): Promise<void> {
 	process.env.ZDOC_DIR = docsDir;
 	process.env.ZDOC_PASSWORD = password;
 	process.env.ZDOC_TITLE = title;
+	process.env.ZDOC_DOWNLOAD = downloadEnabled ? '1' : '0';
 	process.env.ZDOC_VERSION = pkg.version;
 	process.env.ZDOC_REPO_URL = pkg.repository?.url ?? '';
 	process.env.PORT = String(port);
@@ -245,6 +262,7 @@ async function main(): Promise<void> {
 	process.stdout.write(`  ➜  Docs:     ${docsDir}\n`);
 	process.stdout.write(`  ➜  Local:    http://localhost:${port}\n`);
 	process.stdout.write(`  ➜  Password: ${password ? 'enabled' : 'disabled'}\n`);
+	process.stdout.write(`  ➜  Download: ${downloadEnabled ? 'enabled' : 'disabled'}\n`);
 
 	const agent = detectAiAgent();
 	const agentHint = formatAgentHint(agent);

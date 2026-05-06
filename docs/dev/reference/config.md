@@ -9,18 +9,20 @@
   "title": "我的文档",
   "docsDir": "./docs",
   "password": "hunter2",
-  "port": 8888
+  "port": 8888,
+  "downloadEnabled": false
 }
 ```
 
 ## 字段
 
-| 字段       | 类型     | 说明                                                     |
-|------------|----------|----------------------------------------------------------|
-| `title`    | `string` | 站点标题（浏览器标签、[侧边栏](/glossary.md#侧边栏)顶部），默认 `Docs`          |
-| `docsDir`  | `string` | [文档目录](/glossary.md#文档目录)，默认当前工作目录                               |
-| `password` | `string` | 访问密码，传空串即关闭鉴权                               |
-| `port`     | `number` | 监听端口，默认 8888                                      |
+| 字段              | 类型      | 说明                                                     |
+|-------------------|-----------|----------------------------------------------------------|
+| `title`           | `string`  | 站点标题（浏览器标签、[侧边栏](/glossary.md#侧边栏)顶部），默认 `Docs`          |
+| `docsDir`         | `string`  | [文档目录](/glossary.md#文档目录)，默认当前工作目录                               |
+| `password`        | `string`  | 访问密码，传空串即关闭鉴权                               |
+| `port`            | `number`  | 监听端口，默认 8888                                      |
+| `downloadEnabled` | `boolean` | 是否允许打包下载文档目录为 zip。`true` 时开放 `/api/download.zip` 端点，并在 header 显示下载按钮；`false`（默认）时端点返回 403 且按钮不渲染。开启密码保护时下载会被同一鉴权拦截 |
 
 ## 优先级链
 
@@ -30,12 +32,13 @@ CLI 参数  >  环境变量  >  zdoc.config.json  >  默认值
 
 具体：
 
-| 项目      | CLI             | 环境变量          | zdoc.config.json | 默认              |
-|-----------|-----------------|-------------------|------------------|-------------------|
-| [文档目录](/glossary.md#文档目录)  | `-d / --dir`    | `ZDOC_DIR`        | `docsDir`        | `process.cwd()`   |
-| 标题      | `-t / --title`  | `ZDOC_TITLE`      | `title`          | `Docs`            |
-| 密码      | `-w / --password` | `ZDOC_PASSWORD` | `password`       | *（无密码）*      |
-| 端口      | `-p / --port`   | `PORT`            | `port`           | `8888`            |
+| 项目      | CLI                | 环境变量          | zdoc.config.json   | 默认              |
+|-----------|--------------------|-------------------|--------------------|-------------------|
+| [文档目录](/glossary.md#文档目录)  | `-d / --dir`       | `ZDOC_DIR`        | `docsDir`          | `process.cwd()`   |
+| 标题      | `-t / --title`     | `ZDOC_TITLE`      | `title`            | `Docs`            |
+| 密码      | `-w / --password`  | `ZDOC_PASSWORD`   | `password`         | *（无密码）*      |
+| 端口      | `-p / --port`      | `PORT`            | `port`             | `8888`            |
+| 打包下载  | `-D / --download`  | `ZDOC_DOWNLOAD`   | `downloadEnabled`  | `false`           |
 
 `ZDOC_PASSWORD` 允许显式传空串 `""` 来**强制关闭**鉴权，哪怕 `zdoc.config.json` 里写了密码。
 

@@ -7,6 +7,7 @@ const repoRoot = resolve(here, '..');
 
 process.env.ZDOC_DIR = join(repoRoot, 'docs');
 process.env.ZDOC_TITLE = process.env.ZDOC_TITLE ?? 'zdoc';
+process.env.ZDOC_DOWNLOAD = process.env.ZDOC_DOWNLOAD ?? '1';
 
 process.chdir(repoRoot);
 

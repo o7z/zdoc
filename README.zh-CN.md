@@ -11,6 +11,7 @@
 - 暗色模式 + `Ctrl+K` 搜索
 - 响应式布局
 - 自动渲染 PDF
+- 可选的整站文档打包下载（默认关闭，见 `--download`）
 
 ## 快速开始
 
@@ -33,6 +34,7 @@ Options:
   -d, --dir <path>       Markdown 文档目录（默认：当前工作目录）
   -p, --port <number>    监听端口（默认：8888；被占用时自动递增）
   -w, --password <pwd>   访问密码（默认：无密码，文档公开；设置后启用密码保护）
+  -D, --download         启用文档打包下载端点 + header 下载按钮（默认：关闭）
   -h, --help             显示帮助信息
   -v, --version          显示版本号
 ```
@@ -43,6 +45,7 @@ Options:
 zdoc                                # 当前目录，端口 8888，无密码（公开）
 zdoc -d ./docs -p 3000              # 自定义目录和端口
 zdoc -w hunter2                     # 启用密码保护
+zdoc -D                             # 开放 /api/download.zip 并在 header 显示下载按钮
 zdoc -w hunter2 -p 8080 -d ./site   # 全参数覆盖
 ```
 
@@ -57,13 +60,16 @@ zdoc -w hunter2 -p 8080 -d ./site   # 全参数覆盖
   "title": "我的文档",
   "docsDir": "./docs",
   "password": "hunter2",
-  "port": 8888
+  "port": 8888,
+  "downloadEnabled": false
 }
 ```
 
 优先级：**CLI 参数 > `config.json` > 默认值**。
 
 密码在启动时由 CLI / `config.json` / `ZDOC_PASSWORD` 决定。浏览器里没有改密码界面 —— 如要换密码，请改源头并重启。
+
+`downloadEnabled` **默认关闭**。开启后（CLI `-D`、环境变量 `ZDOC_DOWNLOAD=1`，或 `zdoc.config.json` 里写 `"downloadEnabled": true`）`/api/download.zip` 会把整个文档目录流式打包为 zip，header 也会出现下载按钮。开启密码保护时，下载端点会被同一套登录流程拦截。
 
 ## 撰写文档
 

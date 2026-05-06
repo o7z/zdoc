@@ -25,5 +25,6 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 		siteTitle: config.title,
 		repoUrl: process.env.ZDOC_REPO_URL ?? '',
 		collapsedGroups,
+		downloadEnabled: config.downloadEnabled,
 	};
 };

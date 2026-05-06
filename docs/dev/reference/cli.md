@@ -16,6 +16,7 @@ zdoc [options]
 | `-p` | `--port`     | `<number>` | `8888`    | 监听端口，被占用时**[自动递增](/glossary.md#端口自动递增)**到下一个可用端口 |
 | `-t` | `--title`    | `<string>` | `Docs`    | 站点标题（浏览器标签、[侧边栏](/glossary.md#侧边栏)顶部）             |
 | `-w` | `--password` | `<pwd>`    | *（无）*  | 访问密码，不传或传空串即关闭鉴权               |
+| `-D` | `--download` | —          | 关闭      | 启用文档打包下载：开放 `/api/download.zip` 端点并在站点 header 显示下载按钮。开启密码保护时下载也会被同一鉴权拦截 |
 | `-h` | `--help`     | —          | —         | 显示帮助                                        |
 | `-v` | `--version`  | —          | —         | 显示版本号                                      |
 
@@ -34,8 +35,11 @@ zdoc -t "我的文档"
 # 启用[密码保护](/glossary.md#密码保护)
 zdoc -w hunter2
 
+# 启用打包下载（关闭密码时文档可被任何人打包下载，注意场景）
+zdoc -D
+
 # 全参数覆盖
-zdoc -w hunter2 -p 8080 -d ./site -t "My Docs"
+zdoc -w hunter2 -p 8080 -d ./site -t "My Docs" -D
 ```
 
 ## 端口占用

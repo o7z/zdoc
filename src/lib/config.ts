@@ -6,6 +6,7 @@ export interface DocsConfig {
 	docsDir: string;
 	password: string;
 	port: number;
+	downloadEnabled: boolean;
 }
 
 interface FileConfig {
@@ -13,6 +14,15 @@ interface FileConfig {
 	docsDir?: string;
 	password?: string;
 	port?: number;
+	downloadEnabled?: boolean;
+}
+
+const TRUTHY = new Set(['1', 'true', 'yes', 'on']);
+
+function coerceBool(v: unknown): boolean | undefined {
+	if (typeof v === 'boolean') return v;
+	if (typeof v === 'string') return TRUTHY.has(v.toLowerCase());
+	return undefined;
 }
 
 const configPath = resolve(process.cwd(), 'zdoc.config.json');
@@ -38,12 +48,15 @@ function loadConfig(): DocsConfig {
 				? file.password
 				: '';
 	const port = Number(process.env.PORT) || file.port || 8888;
+	const envDownload = coerceBool(process.env.ZDOC_DOWNLOAD);
+	const downloadEnabled = envDownload !== undefined ? envDownload : file.downloadEnabled === true;
 
 	return {
 		title,
 		docsDir: resolve(docsDirRaw),
 		password,
 		port,
+		downloadEnabled,
 	};
 }
 

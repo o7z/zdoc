@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { tick } from 'svelte';
 	import LinkPreview from '$lib/LinkPreview.svelte';
-	import { ExternalLink, Package } from 'lucide-svelte';
+	import { ExternalLink, Package, Download } from 'lucide-svelte';
 	import { fuzzyScore, highlight, quickReject, snippet } from '$lib/fuzzy.js';
 	import '../app.css';
 
@@ -255,6 +255,11 @@
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
 				{/if}
 			</button>
+			{#if data.downloadEnabled}
+				<a class="icon-btn" href="/api/download.zip" download aria-label="Download docs as zip" title="Download docs as zip">
+					<Download size={18} />
+				</a>
+			{/if}
 			<button class="icon-btn" onclick={() => aboutDialogEl?.showModal()} aria-label="About zdoc">
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
 			</button>

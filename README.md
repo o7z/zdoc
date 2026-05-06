@@ -11,6 +11,7 @@ Zero-config Markdown docs server. Point `zdoc` at a folder of `.md` files, get a
 - Dark mode + `Ctrl+K` search
 - Responsive layout
 - Auto-rendered PDFs
+- Optional zip download of the entire docs tree (off by default, see `--download`)
 
 ## For AI coding agents
 
@@ -84,6 +85,7 @@ Options:
   -p, --port <number>    Port to listen on (default: 8888, auto-increments if busy)
   -t, --title <string>   Site title (default: Docs)
   -w, --password <pwd>   Access password (default: none, docs are public; set to enable auth)
+  -D, --download         Enable docs zip download endpoint and header button (default: off)
   -h, --help             Show help
   -v, --version          Show version
 ```
@@ -95,6 +97,7 @@ zdoc                                # cwd, port 8888, no password (public)
 zdoc -d ./docs -p 3000              # custom dir and port
 zdoc -t "My Docs"                   # custom site title
 zdoc -w hunter2                     # enable password protection
+zdoc -D                             # expose /api/download.zip + header download button
 zdoc -w hunter2 -p 8080 -d ./site   # full override
 ```
 
@@ -109,13 +112,16 @@ Create a `zdoc.config.json` in the directory where you run `zdoc` to set default
   "title": "My Docs",
   "docsDir": "./docs",
   "password": "hunter2",
-  "port": 8888
+  "port": 8888,
+  "downloadEnabled": false
 }
 ```
 
 Precedence: **CLI flags > `zdoc.config.json` > defaults**.
 
 The password is set at boot from CLI / `zdoc.config.json` / `ZDOC_PASSWORD`. There is no in-browser change-password UI — to rotate the password, edit the source and restart.
+
+`downloadEnabled` is **off by default**. When turned on (CLI `-D`, env `ZDOC_DOWNLOAD=1`, or `downloadEnabled: true` in the config), `/api/download.zip` streams the whole docs directory as a zip and a Download button appears in the header. Under password protection the download endpoint is gated by the same login flow as the rest of the site.
 
 ## Authoring docs
 
