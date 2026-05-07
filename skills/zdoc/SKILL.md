@@ -25,7 +25,11 @@ After ANY edit under `<docs-dir>`, run `npx @o7z/zdoc lint` (it reads the same c
 
 - `.md` files are pure content — never add YAML frontmatter, never add HTML comments. Metadata lives in `_meta.yaml`.
 - Each directory in the sidebar has a `_meta.yaml` with `title:` + `pages:` map.
-- Pages NOT listed under `pages:` are NOT routable — adding a `.md` without registering it makes it invisible.
+- Pages NOT listed under `pages:` are NOT routable — adding a `.md` without registering it makes it invisible. **Exception**: a subdirectory's `index.md` is whitelisted by lint and does not need to be registered (it can still be registered if you want it to appear as an explicit sidebar entry inside that group).
+- Directory landing pages — `<dir>/foo.md` and `<dir>/sub/index.md` are NOT interchangeable; pick the right registration:
+  - `<dir>/foo.md` → register `foo:` under `<dir>/_meta.yaml`'s `pages:` map.
+  - `<dir>/sub/index.md` → do NOT register `sub:` in `<dir>/_meta.yaml.pages` (that key is always resolved to `<dir>/sub.md` and lint will error). Instead give `<dir>/sub/` its own `_meta.yaml` with a `title:` so it shows as a sidebar group; the `index.md` becomes the group's landing page, reachable from the site-home hero `actions.link`, sibling docs, or by registering `index:` in the subdirectory's own `_meta.yaml.pages`.
+  - zdoc has no "directory-as-link" fallback — sidebar group titles are not clickable on their own.
 - Internal links MUST keep the `.md` suffix: `[install](/getting-started/install.md)` ✓ / `[install](/getting-started/install)` ✗ (404).
 - Lifecycle metadata (all optional, all in `_meta.yaml`):
   - `lifecycle: draft | stable | archived` — archived pages drop out of search and grey out in sidebar.
