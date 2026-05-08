@@ -20,7 +20,14 @@
 	let aboutDialogEl = $state(null);
 	let mainEl = $state(null);
 	/** @type {Set<string>} */
-	let collapsedGroups = $state(new Set(data.collapsedGroups ?? []));
+	let collapsedGroups = $state(new Set());
+	let _initDone = $state(false);
+
+	$effect(() => {
+		if (_initDone) return;
+		collapsedGroups = new Set(data?.collapsedGroups ?? []);
+		_initDone = true;
+	});
 
 	function persistCollapsedGroups(next) {
 		if (typeof document === 'undefined') return;
@@ -402,25 +409,27 @@
 			{/if}
 		</div>
 	{:else if group.link}
-		<a
-			href={group.link}
-			class="sidebar-link"
-			class:active={$page.url.pathname === group.link}
-			class:nested={depth > 0}
-			class:archived={group.lifecycle === 'archived'}
-		>
-			<span class="sidebar-link-text">{group.text}</span>
-			{#if group.lifecycle === 'archived'}<span class="sidebar-badge sidebar-badge-archived" title="Archived">🗄</span>{/if}
-			{#if group.superseded}<span class="sidebar-badge sidebar-badge-superseded" title="Superseded">↗</span>{/if}
-		</a>
+		<div class="sidebar-group" class:nested={depth > 0}>
+			<a
+				href={group.link}
+				class="sidebar-link"
+				class:active={$page.url.pathname === group.link}
+				class:archived={group.lifecycle === 'archived'}
+			>
+				<span class="sidebar-link-text">{group.text}</span>
+				{#if group.lifecycle === 'archived'}<span class="sidebar-badge sidebar-badge-archived" title="Archived">🗄</span>{/if}
+				{#if group.superseded}<span class="sidebar-badge sidebar-badge-superseded" title="Superseded">↗</span>{/if}
+			</a>
+		</div>
 	{:else}
-		<span class="sidebar-label">{group.text}</span>
+		<div class="sidebar-group" class:nested={depth > 0}>
+			<span class="sidebar-label">{group.text}</span>
+		</div>
 	{/if}
 {/snippet}
 
 <style>
 	* { box-sizing: border-box; }
-	body { margin: 0; font-family: var(--font-sans); background: var(--bg); color: var(--text); }
 	:global(.doc-content p, .doc-content li) { font-size: 16px; line-height: 1.8; }
 	:global(.doc-content a) { color: var(--brand); text-decoration: none; }
 	:global(.doc-content a:hover) { text-decoration: underline; }
@@ -437,22 +446,20 @@
 	.icon-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: none; background: none; color: var(--text-muted); cursor: pointer; border-radius: 6px; }
 	.icon-btn:hover { background: var(--bg-soft); color: var(--text); }
 	.body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
-	.sidebar { width: 240px; flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
+	.sidebar { width: 240px; min-width: 200px; max-width: 320px; flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
 	main { flex: 1; display: flex; min-width: 0; overflow: hidden; }
 	
 	/* Sidebar */
-	.sidebar-group { margin-bottom: -4px; }
-	.group-toggle { display: flex; align-items: center; gap: 4px; width: 100%; padding: 6px 8px; border: none; background: none; color: var(--text); font-weight: 600; cursor: pointer; text-align: left; font-size: 14px; border-radius: 4px; }
+	.sidebar-group { margin-bottom: -4px; width: 100%; box-sizing: border-box; }
+	.group-toggle { display: flex; align-items: center; gap: 4px; width: 100%; padding: 6px 8px; border: none; background: none; color: var(--text); font-weight: 600; cursor: pointer; text-align: left; font-size: 14px; border-radius: 4px; box-sizing: border-box; }
 	.group-toggle:hover { background: var(--bg-soft); }
-	.group-toggle.nested { font-weight: 500; font-size: 13px; padding-left: 20px; }
 	.chevron { transition: transform 0.2s; }
 	.chevron.collapsed { transform: rotate(-90deg); }
 	.group-items { padding-left: 12px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
 	.group-items > .nested { padding-left: 20px; }
-	.sidebar-link { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 4px; text-decoration: none; color: var(--text); font-size: 14px; line-height: 1.5; }
+	.sidebar-link { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 4px; text-decoration: none; color: var(--text); font-size: 14px; line-height: 1.5; width: 100%; box-sizing: border-box; }
 	.sidebar-link:hover { background: var(--bg-soft); }
 	.sidebar-link.active { color: var(--brand); background: var(--brand-soft); font-weight: 500; }
-	.sidebar-link.nested { padding-left: 20px; }
 	.sidebar-link.archived { opacity: 0.55; }
 	.sidebar-link.archived:hover { opacity: 0.85; }
 	.sidebar-link-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
