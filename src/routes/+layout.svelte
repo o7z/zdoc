@@ -550,7 +550,7 @@
 	.icon-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: none; background: none; color: var(--text-muted); cursor: pointer; border-radius: 6px; }
 	.icon-btn:hover { background: var(--bg-soft); color: var(--text); }
 	.body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
-	.sidebar { width: auto; min-width: var(--sidebar-min-width, 200px); max-width: var(--sidebar-max-width, 320px); flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
+	.sidebar { width: auto; min-width: var(--sidebar-min-width, 200px); max-width: var(--sidebar-max-width, 320px); flex-shrink: 0; border-right: 1px solid var(--border); overflow: hidden auto; padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
 	main { flex: 1; display: flex; min-width: 0; overflow: hidden; }
 	
 	/* Sidebar */
