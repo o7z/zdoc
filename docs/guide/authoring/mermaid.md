@@ -67,14 +67,8 @@ sequenceDiagram
     Frontend->>+API: POST /auth/login
     API->>+DB: 查询用户
     DB-->>-API: 用户记录
-
-    alt 密码正确
-        API-->>Frontend: 200 + JWT
-        Frontend-->>-User: 跳转仪表盘
-    else 密码错误
-        API-->>Frontend: 401
-        Frontend-->>-User: 显示错误
-    end
+    API-->>-Frontend: 200 + JWT
+    Frontend-->>-User: 跳转仪表盘
 ```
 
 ### 并行与循环
@@ -371,9 +365,9 @@ mindmap
       Markdown 驱动
       Mermaid 图表
     文档结构
-      [建设者视角](choose-a-structure/structure-builder.md)
-      [使用者视角](choose-a-structure/structure-user.md)
-      [知识库视角](choose-a-structure/structure-knowledge.md)
+      建设者视角
+      使用者视角
+      知识库视角
     技术栈
       SvelteKit
       rehype/unified
@@ -411,14 +405,14 @@ timeline
 
 ```mermaid
 architecture-beta
-    group public(cloud)[公网]
-    group private(cloud)[私有网络]
+    group public(cloud)["公网"]
+    group private(cloud)["私有网络"]
 
-    service lb(load_balancer)[负载均衡] in public
-    service api1(server)[API 服务 1] in private
-    service api2(server)[API 服务 2] in private
-    service db(database)[主数据库] in private
-    service replica(database)[只读副本] in private
+    service lb(load_balancer)["负载均衡"] in public
+    service api1(server)["API 服务 1"] in private
+    service api2(server)["API 服务 2"] in private
+    service db(database)["主数据库"] in private
+    service replica(database)["只读副本"] in private
 
     lb:R --> L:api1
     lb:R --> L:api2
