@@ -179,6 +179,40 @@
 		goto(link);
 	}
 
+	// Settings (localStorage)
+	let settingsDialogEl = $state(null);
+	const SETTINGS_DEFAULT = { sidebarMinWidth: 200, sidebarMaxWidth: 400, sidebarIndent: 16, tocMinWidth: 200, tocMaxWidth: 380, tocIndent: 16 };
+	/** @type {Record<string, number>} */
+	let settings = $state(loadSettings());
+
+	function loadSettings() {
+		try {
+			const raw = localStorage.getItem('zdoc-settings');
+			if (raw) return { ...SETTINGS_DEFAULT, ...JSON.parse(raw) };
+		} catch { /* ignore */ }
+		return { ...SETTINGS_DEFAULT };
+	}
+
+	function saveSettings() {
+		localStorage.setItem('zdoc-settings', JSON.stringify(settings));
+	}
+
+	function resetSettings() {
+		settings = { ...SETTINGS_DEFAULT };
+		saveSettings();
+	}
+
+	$effect(() => {
+		if (typeof document === 'undefined') return;
+		const style = document.documentElement.style;
+		style.setProperty('--sidebar-min-width', settings.sidebarMinWidth + 'px');
+		style.setProperty('--sidebar-max-width', settings.sidebarMaxWidth + 'px');
+		style.setProperty('--sidebar-indent', settings.sidebarIndent + 'px');
+		style.setProperty('--toc-min-width', settings.tocMinWidth + 'px');
+		style.setProperty('--toc-max-width', settings.tocMaxWidth + 'px');
+		style.setProperty('--toc-indent', settings.tocIndent + 'px');
+	});
+
 	function handleSearchKeydown(e) {
 		const len = allResults.length;
 		if (e.key === 'ArrowDown') {
@@ -267,6 +301,9 @@
 					<Download size={18} />
 				</a>
 			{/if}
+			<button class="icon-btn" onclick={() => settingsDialogEl?.showModal()} aria-label="Settings">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+			</button>
 			<button class="icon-btn" onclick={() => aboutDialogEl?.showModal()} aria-label="About zdoc">
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
 			</button>
@@ -293,36 +330,103 @@
 	<LinkPreview container={mainEl} />
 {/if}
 
-<dialog class="about-dialog" bind:this={aboutDialogEl} onclick={(e) => { if (e.target === aboutDialogEl) aboutDialogEl.close(); }}>
-		<div class="about-content">
-			<button class="about-close" onclick={() => aboutDialogEl.close()} aria-label="Close">
+<dialog class="modal" bind:this={aboutDialogEl} onclick={(e) => { e.stopPropagation(); aboutDialogEl.close(); }}>
+	<div class="modal-content about-modal" onclick={(e) => e.stopPropagation()}>
+		<div class="modal-header">
+			<h2 class="modal-title">关于</h2>
+			<button class="modal-close" onclick={() => aboutDialogEl.close()} aria-label="关闭">
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
 			</button>
-			<div class="about-body">
-				<div class="about-logo">
-					<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+		</div>
+		<div class="about-body">
+			<div class="about-logo">
+				<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+			</div>
+			<h3 class="about-title">zdoc</h3>
+			<p class="about-desc">Zero-config Markdown docs site</p>
+			<div class="about-links">
+				<a href="https://github.com/o7z/zdoc" target="_blank" rel="noopener" class="about-link">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+					<span>GitHub</span>
+				</a>
+				<a href="https://www.npmjs.com/package/@o7z/zdoc" target="_blank" rel="noopener" class="about-link">
+					<Package size={16} />
+					<span>npm</span>
+				</a>
+				<a href="https://context7.com/o7z/zdoc" target="_blank" rel="noopener" class="about-link">
+					<ExternalLink size={16} />
+					<span>Context7</span>
+				</a>
+			</div>
+		</div>
+	</div>
+</dialog>
+
+<dialog class="modal" bind:this={settingsDialogEl} onclick={(e) => { e.stopPropagation(); settingsDialogEl.close(); }}>
+	<div class="modal-content settings-modal" onclick={(e) => e.stopPropagation()}>
+		<div class="modal-header">
+			<h2 class="modal-title">设置</h2>
+			<button class="modal-close" onclick={() => settingsDialogEl.close()} aria-label="关闭">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+			</button>
+		</div>
+		<div class="settings-body">
+			<div class="settings-columns">
+				<div class="settings-column">
+					<h3 class="settings-column-title">左侧栏</h3>
+					<div class="setting-group">
+						<div class="setting-label">
+							<span>最小宽度</span>
+							<span class="setting-value">{settings.sidebarMinWidth}px</span>
+						</div>
+						<input type="range" min="120" max="{settings.sidebarMaxWidth}" step="4" bind:value={settings.sidebarMinWidth} oninput={saveSettings} class="setting-range">
+					</div>
+					<div class="setting-group">
+						<div class="setting-label">
+							<span>最大宽度</span>
+							<span class="setting-value">{settings.sidebarMaxWidth}px</span>
+						</div>
+						<input type="range" min="{settings.sidebarMinWidth}" max="600" step="4" bind:value={settings.sidebarMaxWidth} oninput={saveSettings} class="setting-range">
+					</div>
+					<div class="setting-group">
+						<div class="setting-label">
+							<span>层级缩进</span>
+							<span class="setting-value">{settings.sidebarIndent}px</span>
+						</div>
+						<input type="range" min="0" max="32" step="2" bind:value={settings.sidebarIndent} oninput={saveSettings} class="setting-range">
+					</div>
 				</div>
-				<h2 class="about-title">zdoc</h2>
-				<p class="about-desc">Zero-config Markdown docs site</p>
-				<div class="about-links">
-					<a href="https://github.com/o7z/zdoc" target="_blank" rel="noopener" class="about-link">
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-						<span>GitHub</span>
-					</a>
-					<a href="https://www.npmjs.com/package/@o7z/zdoc" target="_blank" rel="noopener" class="about-link">
-						<Package size={16} />
-						<span>npm</span>
-					</a>
-					<a href="https://context7.com/o7z/zdoc" target="_blank" rel="noopener" class="about-link">
-						<ExternalLink size={16} />
-						<span>Context7</span>
-					</a>
+				<div class="settings-column">
+					<h3 class="settings-column-title">本页目录</h3>
+					<div class="setting-group">
+						<div class="setting-label">
+							<span>最小宽度</span>
+							<span class="setting-value">{settings.tocMinWidth}px</span>
+						</div>
+						<input type="range" min="120" max="{settings.tocMaxWidth}" step="4" bind:value={settings.tocMinWidth} oninput={saveSettings} class="setting-range">
+					</div>
+					<div class="setting-group">
+						<div class="setting-label">
+							<span>最大宽度</span>
+							<span class="setting-value">{settings.tocMaxWidth}px</span>
+						</div>
+						<input type="range" min="{settings.tocMinWidth}" max="500" step="4" bind:value={settings.tocMaxWidth} oninput={saveSettings} class="setting-range">
+					</div>
+					<div class="setting-group">
+						<div class="setting-label">
+							<span>层级缩进</span>
+							<span class="setting-value">{settings.tocIndent}px</span>
+						</div>
+						<input type="range" min="0" max="32" step="2" bind:value={settings.tocIndent} oninput={saveSettings} class="setting-range">
+					</div>
 				</div>
 			</div>
 		</div>
-	</dialog>
-
-<!-- Search modal -->
+		<div class="settings-footer">
+			<button class="settings-reset" onclick={resetSettings}>恢复默认</button>
+		</div>
+	</div>
+</dialog>
 <dialog class="search-dialog" bind:this={searchDialogEl} onclose={() => { searchOpen = false; searchQuery = ''; debouncedQuery = ''; activeIdx = 0; }}>
 	<div class="search-modal">
 		<div class="search-input-row">
@@ -446,7 +550,7 @@
 	.icon-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: none; background: none; color: var(--text-muted); cursor: pointer; border-radius: 6px; }
 	.icon-btn:hover { background: var(--bg-soft); color: var(--text); }
 	.body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
-	.sidebar { width: 240px; min-width: 200px; max-width: 320px; flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
+	.sidebar { width: auto; min-width: var(--sidebar-min-width, 200px); max-width: var(--sidebar-max-width, 320px); flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
 	main { flex: 1; display: flex; min-width: 0; overflow: hidden; }
 	
 	/* Sidebar */
@@ -455,8 +559,8 @@
 	.group-toggle:hover { background: var(--bg-soft); }
 	.chevron { transition: transform 0.2s; }
 	.chevron.collapsed { transform: rotate(-90deg); }
-	.group-items { padding-left: 12px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
-	.group-items > .nested { padding-left: 20px; }
+		.sidebar-group.nested { margin-left: calc(var(--sidebar-indent, 16px) - 8px); }
+	.group-items { padding-left: 8px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
 	.sidebar-link { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 4px; text-decoration: none; color: var(--text); font-size: 14px; line-height: 1.5; width: 100%; box-sizing: border-box; }
 	.sidebar-link:hover { background: var(--bg-soft); }
 	.sidebar-link.active { color: var(--brand); background: var(--brand-soft); font-weight: 500; }
@@ -469,19 +573,38 @@
 	.sidebar-label { display: block; padding: 6px 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 	.sidebar-scroll { flex: 1; }
 	
-	/* About dialog */
-	.about-dialog { border: none; background: var(--bg); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); padding: 24px; color: var(--text); width: 280px; max-width: 90vw; margin: auto; }
-	.about-dialog::backdrop { background: rgba(0,0,0,0.5); }
-	.about-content { position: relative; }
-	.about-close { position: absolute; top: 0; right: 0; background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 4px; }
-	.about-close:hover { background: var(--bg-soft); color: var(--text); }
-	.about-body { text-align: center; }
+	/* Shared modal */
+	.modal { display: flex; align-items: center; justify-content: center; border: none; background: transparent; padding: 0; margin: 0; width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; }
+	.modal::backdrop { background: rgba(0,0,0,0.5); }
+	.modal-content { background: var(--bg); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); color: var(--text); max-height: 90vh; overflow-y: auto; }
+	.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+	.modal-title { font-size: 16px; font-weight: 700; margin: 0; }
+	.modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 4px; flex-shrink: 0; }
+	.modal-close:hover { background: var(--bg-soft); color: var(--text); }
+	
+	/* About modal */
+	.about-modal { width: 280px; max-width: 90vw; }
+	.about-body { text-align: center; padding: 24px; }
 	.about-logo { margin-bottom: 12px; }
 	.about-title { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
-	.about-desc { font-size: 13px; color: var(--text-muted); margin: 0 0 4px; }
+	.about-desc { font-size: 13px; color: var(--text-muted); margin: 0 0 16px; }
 	.about-links { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 180px; margin: 0 auto; }
 	.about-links a, .about-link { width: 100%; padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text-muted); text-decoration: none; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
 	.about-links a:hover, .about-link:hover { color: var(--brand); border-color: var(--brand); background: var(--brand-soft); }
+	
+	/* Settings modal */
+	.settings-modal { width: 560px; max-width: 90vw; }
+	.settings-body { padding: 16px 20px; }
+	.settings-columns { display: flex; gap: 20px; }
+	.settings-column { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+	.settings-column-title { font-size: 13px; font-weight: 700; margin: 0 0 4px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+	.settings-body .setting-group { display: flex; flex-direction: column; gap: 4px; }
+	.setting-label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+	.setting-value { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+	.setting-range { width: 100%; accent-color: var(--brand); cursor: pointer; }
+	.settings-footer { padding: 0 20px 16px; }
+	.settings-reset { font-size: 12px; color: var(--text-muted); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; cursor: pointer; background: none; width: 100%; }
+	.settings-reset:hover { color: var(--brand); border-color: var(--brand); background: var(--brand-soft); }
 
 	/* Search modal */
 	.search-dialog { border: none; background: transparent; position: fixed; top: 15vh; left: 50%; transform: translateX(-50%); width: 560px; max-width: 90vw; max-height: 70vh; padding: 0; margin: 0; z-index: 200; color: var(--text); border-radius: 12px; overflow: hidden; }

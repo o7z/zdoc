@@ -248,7 +248,7 @@
 	@media (min-width: 1280px) {
 		.toc {
 			display: block;
-			width: 260px; min-width: 200px; max-width: 380px;
+			width: auto; min-width: var(--toc-min-width, 200px); max-width: var(--toc-max-width, 380px);
 			flex-shrink: 0;
 			overflow-y: auto;
 			padding: 32px 14px 32px 14px;
@@ -284,8 +284,8 @@
 			border-left-color: var(--brand);
 			font-weight: 500;
 		}
-		.toc-item.depth-2 a { padding-left: 20px; }
-		.toc-item.depth-3 a { padding-left: 32px; font-size: 12px; }
+		.toc-item.depth-2 a { padding-left: var(--toc-indent, 16px); }
+		.toc-item.depth-3 a { padding-left: calc(var(--toc-indent, 16px) * 2); font-size: 12px; }
 	}
 
 	@media (max-width: 768px) {
