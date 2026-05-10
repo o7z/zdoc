@@ -1,0 +1,1289 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - link "Skip to content" [ref=e4] [cursor=pointer]:
+        - /url: "#start-of-content"
+      - banner [ref=e6]:
+        - heading "Navigation Menu" [level=2] [ref=e7]
+        - generic [ref=e8]:
+          - link "Homepage" [ref=e10] [cursor=pointer]:
+            - /url: /
+            - img [ref=e11]
+          - generic [ref=e13]:
+            - navigation "Global" [ref=e16]:
+              - list [ref=e17]:
+                - listitem [ref=e18]:
+                  - button "Platform" [ref=e20] [cursor=pointer]:
+                    - text: Platform
+                    - img [ref=e21]
+                - listitem [ref=e23]:
+                  - button "Solutions" [ref=e25] [cursor=pointer]:
+                    - text: Solutions
+                    - img [ref=e26]
+                - listitem [ref=e28]:
+                  - button "Resources" [ref=e30] [cursor=pointer]:
+                    - text: Resources
+                    - img [ref=e31]
+                - listitem [ref=e33]:
+                  - button "Open Source" [ref=e35] [cursor=pointer]:
+                    - text: Open Source
+                    - img [ref=e36]
+                - listitem [ref=e38]:
+                  - button "Enterprise" [ref=e40] [cursor=pointer]:
+                    - text: Enterprise
+                    - img [ref=e41]
+                - listitem [ref=e43]:
+                  - link "Pricing" [ref=e44] [cursor=pointer]:
+                    - /url: https://github.com/pricing
+                    - generic [ref=e45]: Pricing
+            - generic [ref=e46]:
+              - button "Search or jump to…" [ref=e49] [cursor=pointer]:
+                - img [ref=e51]
+              - link "Sign in" [ref=e54] [cursor=pointer]:
+                - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fsoftaworks%2Fagent-toolkit%2Fblob%2Fmain%2Fskills%2Fmermaid-diagrams%2FREADME.md
+              - link "Sign up" [ref=e55] [cursor=pointer]:
+                - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Fblob%2Fshow&source=header-repo&source_repo=softaworks%2Fagent-toolkit
+              - button "Appearance settings" [ref=e58] [cursor=pointer]:
+                - img
+    - main [ref=e62]:
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - generic [ref=e66]:
+            - img [ref=e67]
+            - link "softaworks" [ref=e70] [cursor=pointer]:
+              - /url: /softaworks
+            - generic [ref=e71]: /
+            - strong [ref=e72]:
+              - link "agent-toolkit" [ref=e73] [cursor=pointer]:
+                - /url: /softaworks/agent-toolkit
+            - generic [ref=e74]: Public
+          - generic [ref=e75]:
+            - list:
+              - listitem [ref=e76]:
+                - link "You must be signed in to change notification settings" [ref=e77] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fsoftaworks%2Fagent-toolkit
+                  - img [ref=e78]
+                  - text: Notifications
+              - listitem [ref=e80]:
+                - link "Fork 152" [ref=e81] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fsoftaworks%2Fagent-toolkit
+                  - img [ref=e82]
+                  - text: Fork
+                  - generic "152" [ref=e84]
+              - listitem [ref=e85]:
+                - link "You must be signed in to star a repository" [ref=e87] [cursor=pointer]:
+                  - /url: /login?return_to=%2Fsoftaworks%2Fagent-toolkit
+                  - img [ref=e88]
+                  - text: Star
+                  - generic "1759 users starred this repository" [ref=e90]: 1.8k
+        - navigation "Repository" [ref=e91]:
+          - list [ref=e92]:
+            - listitem [ref=e93]:
+              - link "Code" [ref=e94] [cursor=pointer]:
+                - /url: /softaworks/agent-toolkit
+                - img [ref=e95]
+                - generic [ref=e97]: Code
+            - listitem [ref=e98]:
+              - link "Issues 2" [ref=e99] [cursor=pointer]:
+                - /url: /softaworks/agent-toolkit/issues
+                - img [ref=e100]
+                - generic [ref=e103]: Issues
+                - generic "2" [ref=e104]
+            - listitem [ref=e105]:
+              - link "Pull requests 6" [ref=e106] [cursor=pointer]:
+                - /url: /softaworks/agent-toolkit/pulls
+                - img [ref=e107]
+                - generic [ref=e109]: Pull requests
+                - generic "6" [ref=e110]
+            - listitem [ref=e111]:
+              - link "Actions" [ref=e112] [cursor=pointer]:
+                - /url: /softaworks/agent-toolkit/actions
+                - img [ref=e113]
+                - generic [ref=e115]: Actions
+            - listitem [ref=e116]:
+              - link "Projects" [ref=e117] [cursor=pointer]:
+                - /url: /softaworks/agent-toolkit/projects
+                - img [ref=e118]
+                - generic [ref=e120]: Projects
+            - listitem [ref=e121]:
+              - link "Security and quality" [ref=e122] [cursor=pointer]:
+                - /url: /softaworks/agent-toolkit/security
+                - img [ref=e123]
+                - generic [ref=e125]: Security and quality
+            - listitem [ref=e126]:
+              - link "Insights" [ref=e127] [cursor=pointer]:
+                - /url: /softaworks/agent-toolkit/pulse
+                - img [ref=e128]
+                - generic [ref=e130]: Insights
+      - generic [ref=e138]:
+        - generic [ref=e140]:
+          - generic [ref=e143]:
+            - generic [ref=e144]:
+              - generic [ref=e145]:
+                - heading "Collapse file tree" [level=2] [ref=e146]:
+                  - button "Collapse file tree" [expanded] [ref=e147] [cursor=pointer]:
+                    - img [ref=e148]
+                - heading "Files" [level=2] [ref=e151]
+              - generic [ref=e152]:
+                - button "main branch" [ref=e154] [cursor=pointer]:
+                  - generic [ref=e155]:
+                    - generic [ref=e157]:
+                      - img [ref=e159]
+                      - generic [ref=e162]: main
+                    - generic:
+                      - img
+                - button "Search this repository (forward slash)" [ref=e164] [cursor=pointer]:
+                  - img [ref=e165]
+            - generic [ref=e168]:
+              - img [ref=e170]
+              - combobox "Go to file" [ref=e172]
+            - navigation "File Tree Navigation" [ref=e178]:
+              - tree "Files" [ref=e180]:
+                - treeitem ".claude-plugin" [level=1] [ref=e181]:
+                  - generic [ref=e182] [cursor=pointer]:
+                    - img [ref=e184]
+                    - generic [ref=e186]:
+                      - img [ref=e190]
+                      - generic [ref=e192]: .claude-plugin
+                - treeitem ".claude" [level=1] [ref=e193]:
+                  - generic [ref=e194] [cursor=pointer]:
+                    - img [ref=e196]
+                    - generic [ref=e198]:
+                      - img [ref=e202]
+                      - generic [ref=e204]: .claude
+                - treeitem ".github" [level=1] [ref=e205]:
+                  - generic [ref=e206] [cursor=pointer]:
+                    - img [ref=e208]
+                    - generic [ref=e210]:
+                      - img [ref=e214]
+                      - generic [ref=e216]: .github
+                - treeitem "agents" [level=1] [ref=e217]:
+                  - generic [ref=e218] [cursor=pointer]:
+                    - img [ref=e220]
+                    - generic [ref=e222]:
+                      - img [ref=e226]
+                      - generic [ref=e228]: agents
+                - treeitem "commands" [level=1] [ref=e229]:
+                  - generic [ref=e230] [cursor=pointer]:
+                    - img [ref=e232]
+                    - generic [ref=e234]:
+                      - img [ref=e238]
+                      - generic [ref=e240]: commands
+                - treeitem "dist" [level=1] [ref=e241]:
+                  - generic [ref=e242] [cursor=pointer]:
+                    - img [ref=e244]
+                    - generic [ref=e246]:
+                      - img [ref=e250]
+                      - generic [ref=e252]: dist
+                - treeitem "scripts" [level=1] [ref=e253]:
+                  - generic [ref=e254] [cursor=pointer]:
+                    - img [ref=e256]
+                    - generic [ref=e258]:
+                      - img [ref=e262]
+                      - generic [ref=e264]: scripts
+                - treeitem "skills" [expanded] [level=1] [ref=e265]:
+                  - generic [ref=e266] [cursor=pointer]:
+                    - img [ref=e268]
+                    - generic [ref=e270]:
+                      - img [ref=e274]
+                      - generic [ref=e276]: skills
+                  - group [ref=e277]:
+                    - treeitem "agent-md-refactor" [level=2] [ref=e278]:
+                      - generic [ref=e279] [cursor=pointer]:
+                        - img [ref=e284]
+                        - generic [ref=e286]:
+                          - img [ref=e290]
+                          - generic [ref=e292]: agent-md-refactor
+                    - treeitem "backend-to-frontend-handoff-docs" [level=2] [ref=e293]:
+                      - generic [ref=e294] [cursor=pointer]:
+                        - img [ref=e299]
+                        - generic [ref=e301]:
+                          - img [ref=e305]
+                          - generic [ref=e307]: backend-to-frontend-handoff-docs
+                    - treeitem "c4-architecture" [level=2] [ref=e308]:
+                      - generic [ref=e309] [cursor=pointer]:
+                        - img [ref=e314]
+                        - generic [ref=e316]:
+                          - img [ref=e320]
+                          - generic [ref=e322]: c4-architecture
+                    - treeitem "codex" [level=2] [ref=e323]:
+                      - generic [ref=e324] [cursor=pointer]:
+                        - img [ref=e329]
+                        - generic [ref=e331]:
+                          - img [ref=e335]
+                          - generic [ref=e337]: codex
+                    - treeitem "command-creator" [level=2] [ref=e338]:
+                      - generic [ref=e339] [cursor=pointer]:
+                        - img [ref=e344]
+                        - generic [ref=e346]:
+                          - img [ref=e350]
+                          - generic [ref=e352]: command-creator
+                    - treeitem "commit-work" [level=2] [ref=e353]:
+                      - generic [ref=e354] [cursor=pointer]:
+                        - img [ref=e359]
+                        - generic [ref=e361]:
+                          - img [ref=e365]
+                          - generic [ref=e367]: commit-work
+                    - treeitem "crafting-effective-readmes" [level=2] [ref=e368]:
+                      - generic [ref=e369] [cursor=pointer]:
+                        - img [ref=e374]
+                        - generic [ref=e376]:
+                          - img [ref=e380]
+                          - generic [ref=e382]: crafting-effective-readmes
+                    - treeitem "daily-meeting-update" [level=2] [ref=e383]:
+                      - generic [ref=e384] [cursor=pointer]:
+                        - img [ref=e389]
+                        - generic [ref=e391]:
+                          - img [ref=e395]
+                          - generic [ref=e397]: daily-meeting-update
+                    - treeitem "database-schema-designer" [level=2] [ref=e398]:
+                      - generic [ref=e399] [cursor=pointer]:
+                        - img [ref=e404]
+                        - generic [ref=e406]:
+                          - img [ref=e410]
+                          - generic [ref=e412]: database-schema-designer
+                    - treeitem "datadog-cli" [level=2] [ref=e413]:
+                      - generic [ref=e414] [cursor=pointer]:
+                        - img [ref=e419]
+                        - generic [ref=e421]:
+                          - img [ref=e425]
+                          - generic [ref=e427]: datadog-cli
+                    - treeitem "dependency-updater" [level=2] [ref=e428]:
+                      - generic [ref=e429] [cursor=pointer]:
+                        - img [ref=e434]
+                        - generic [ref=e436]:
+                          - img [ref=e440]
+                          - generic [ref=e442]: dependency-updater
+                    - treeitem "design-system-starter" [level=2] [ref=e443]:
+                      - generic [ref=e444] [cursor=pointer]:
+                        - img [ref=e449]
+                        - generic [ref=e451]:
+                          - img [ref=e455]
+                          - generic [ref=e457]: design-system-starter
+                    - treeitem "difficult-workplace-conversations" [level=2] [ref=e458]:
+                      - generic [ref=e459] [cursor=pointer]:
+                        - img [ref=e464]
+                        - generic [ref=e466]:
+                          - img [ref=e470]
+                          - generic [ref=e472]: difficult-workplace-conversations
+                    - treeitem "domain-name-brainstormer" [level=2] [ref=e473]:
+                      - generic [ref=e474] [cursor=pointer]:
+                        - img [ref=e479]
+                        - generic [ref=e481]:
+                          - img [ref=e485]
+                          - generic [ref=e487]: domain-name-brainstormer
+                    - treeitem "draw-io" [level=2] [ref=e488]:
+                      - generic [ref=e489] [cursor=pointer]:
+                        - img [ref=e494]
+                        - generic [ref=e496]:
+                          - img [ref=e500]
+                          - generic [ref=e502]: draw-io
+                    - treeitem "excalidraw" [level=2] [ref=e503]:
+                      - generic [ref=e504] [cursor=pointer]:
+                        - img [ref=e509]
+                        - generic [ref=e511]:
+                          - img [ref=e515]
+                          - generic [ref=e517]: excalidraw
+                    - treeitem "feedback-mastery" [level=2] [ref=e518]:
+                      - generic [ref=e519] [cursor=pointer]:
+                        - img [ref=e524]
+                        - generic [ref=e526]:
+                          - img [ref=e530]
+                          - generic [ref=e532]: feedback-mastery
+                    - treeitem "frontend-to-backend-requirements" [level=2] [ref=e533]:
+                      - generic [ref=e534] [cursor=pointer]:
+                        - img [ref=e539]
+                        - generic [ref=e541]:
+                          - img [ref=e545]
+                          - generic [ref=e547]: frontend-to-backend-requirements
+                    - treeitem "game-changing-features" [level=2] [ref=e548]:
+                      - generic [ref=e549] [cursor=pointer]:
+                        - img [ref=e554]
+                        - generic [ref=e556]:
+                          - img [ref=e560]
+                          - generic [ref=e562]: game-changing-features
+                    - treeitem "gemini" [level=2] [ref=e563]:
+                      - generic [ref=e564] [cursor=pointer]:
+                        - img [ref=e569]
+                        - generic [ref=e571]:
+                          - img [ref=e575]
+                          - generic [ref=e577]: gemini
+                    - treeitem "gepetto" [level=2] [ref=e578]:
+                      - generic [ref=e579] [cursor=pointer]:
+                        - img [ref=e584]
+                        - generic [ref=e586]:
+                          - img [ref=e590]
+                          - generic [ref=e592]: gepetto
+                    - treeitem "humanizer" [level=2] [ref=e593]:
+                      - generic [ref=e594] [cursor=pointer]:
+                        - img [ref=e599]
+                        - generic [ref=e601]:
+                          - img [ref=e605]
+                          - generic [ref=e607]: humanizer
+                    - treeitem "jira" [level=2] [ref=e608]:
+                      - generic [ref=e609] [cursor=pointer]:
+                        - img [ref=e614]
+                        - generic [ref=e616]:
+                          - img [ref=e620]
+                          - generic [ref=e622]: jira
+                    - treeitem "lesson-learned" [level=2] [ref=e623]:
+                      - generic [ref=e624] [cursor=pointer]:
+                        - img [ref=e629]
+                        - generic [ref=e631]:
+                          - img [ref=e635]
+                          - generic [ref=e637]: lesson-learned
+                    - treeitem "marp-slide" [level=2] [ref=e638]:
+                      - generic [ref=e639] [cursor=pointer]:
+                        - img [ref=e644]
+                        - generic [ref=e646]:
+                          - img [ref=e650]
+                          - generic [ref=e652]: marp-slide
+                    - treeitem "meme-factory" [level=2] [ref=e653]:
+                      - generic [ref=e654] [cursor=pointer]:
+                        - img [ref=e659]
+                        - generic [ref=e661]:
+                          - img [ref=e665]
+                          - generic [ref=e667]: meme-factory
+                    - treeitem "mermaid-diagrams" [expanded] [level=2] [ref=e668]:
+                      - generic [ref=e669] [cursor=pointer]:
+                        - img [ref=e674]
+                        - generic [ref=e676]:
+                          - img [ref=e680]
+                          - generic [ref=e682]: mermaid-diagrams
+                      - group [ref=e683]:
+                        - treeitem "references" [level=3] [ref=e684]:
+                          - generic [ref=e685] [cursor=pointer]:
+                            - img [ref=e691]
+                            - generic [ref=e693]:
+                              - img [ref=e697]
+                              - generic [ref=e699]: references
+                        - treeitem "README.md" [level=3] [ref=e700]:
+                          - generic [ref=e706] [cursor=pointer]:
+                            - img [ref=e709]
+                            - generic [ref=e711]: README.md
+                        - treeitem "SKILL.md" [level=3] [ref=e712]:
+                          - generic [ref=e718] [cursor=pointer]:
+                            - img [ref=e721]
+                            - generic [ref=e723]: SKILL.md
+                    - treeitem "mui" [level=2] [ref=e724]:
+                      - generic [ref=e725] [cursor=pointer]:
+                        - img [ref=e730]
+                        - generic [ref=e732]:
+                          - img [ref=e736]
+                          - generic [ref=e738]: mui
+                    - treeitem "naming-analyzer" [level=2] [ref=e739]:
+                      - generic [ref=e740] [cursor=pointer]:
+                        - img [ref=e745]
+                        - generic [ref=e747]:
+                          - img [ref=e751]
+                          - generic [ref=e753]: naming-analyzer
+                    - treeitem "openapi-to-typescript" [level=2] [ref=e754]:
+                      - generic [ref=e755] [cursor=pointer]:
+                        - img [ref=e760]
+                        - generic [ref=e762]:
+                          - img [ref=e766]
+                          - generic [ref=e768]: openapi-to-typescript
+                    - treeitem "perplexity" [level=2] [ref=e769]:
+                      - generic [ref=e770] [cursor=pointer]:
+                        - img [ref=e775]
+                        - generic [ref=e777]:
+                          - img [ref=e781]
+                          - generic [ref=e783]: perplexity
+                    - treeitem "plugin-forge" [level=2] [ref=e784]:
+                      - generic [ref=e785] [cursor=pointer]:
+                        - img [ref=e790]
+                        - generic [ref=e792]:
+                          - img [ref=e796]
+                          - generic [ref=e798]: plugin-forge
+                    - treeitem "professional-communication" [level=2] [ref=e799]:
+                      - generic [ref=e800] [cursor=pointer]:
+                        - img [ref=e805]
+                        - generic [ref=e807]:
+                          - img [ref=e811]
+                          - generic [ref=e813]: professional-communication
+                    - treeitem "qa-test-planner" [level=2] [ref=e814]:
+                      - generic [ref=e815] [cursor=pointer]:
+                        - img [ref=e820]
+                        - generic [ref=e822]:
+                          - img [ref=e826]
+                          - generic [ref=e828]: qa-test-planner
+                    - treeitem "react-dev" [level=2] [ref=e829]:
+                      - generic [ref=e830] [cursor=pointer]:
+                        - img [ref=e835]
+                        - generic [ref=e837]:
+                          - img [ref=e841]
+                          - generic [ref=e843]: react-dev
+                    - treeitem "react-useeffect" [level=2] [ref=e844]:
+                      - generic [ref=e845] [cursor=pointer]:
+                        - img [ref=e850]
+                        - generic [ref=e852]:
+                          - img [ref=e856]
+                          - generic [ref=e858]: react-useeffect
+                    - treeitem "reducing-entropy" [level=2] [ref=e859]:
+                      - generic [ref=e860] [cursor=pointer]:
+                        - img [ref=e865]
+                        - generic [ref=e867]:
+                          - img [ref=e871]
+                          - generic [ref=e873]: reducing-entropy
+                    - treeitem "requirements-clarity" [level=2] [ref=e874]:
+                      - generic [ref=e875] [cursor=pointer]:
+                        - img [ref=e880]
+                        - generic [ref=e882]:
+                          - img [ref=e886]
+                          - generic [ref=e888]: requirements-clarity
+                    - treeitem "session-handoff" [level=2] [ref=e889]:
+                      - generic [ref=e890] [cursor=pointer]:
+                        - img [ref=e895]
+                        - generic [ref=e897]:
+                          - img [ref=e901]
+                          - generic [ref=e903]: session-handoff
+                    - treeitem "ship-learn-next" [level=2] [ref=e904]:
+                      - generic [ref=e905] [cursor=pointer]:
+                        - img [ref=e910]
+                        - generic [ref=e912]:
+                          - img [ref=e916]
+                          - generic [ref=e918]: ship-learn-next
+                    - treeitem "skill-judge" [level=2] [ref=e919]:
+                      - generic [ref=e920] [cursor=pointer]:
+                        - img [ref=e925]
+                        - generic [ref=e927]:
+                          - img [ref=e931]
+                          - generic [ref=e933]: skill-judge
+                    - treeitem "web-to-markdown" [level=2] [ref=e934]:
+                      - generic [ref=e935] [cursor=pointer]:
+                        - img [ref=e940]
+                        - generic [ref=e942]:
+                          - img [ref=e946]
+                          - generic [ref=e948]: web-to-markdown
+                    - treeitem "writing-clearly-and-concisely" [level=2] [ref=e949]:
+                      - generic [ref=e950] [cursor=pointer]:
+                        - img [ref=e955]
+                        - generic [ref=e957]:
+                          - img [ref=e961]
+                          - generic [ref=e963]: writing-clearly-and-concisely
+                - treeitem ".gitignore" [level=1] [ref=e964]:
+                  - generic [ref=e966] [cursor=pointer]:
+                    - img [ref=e969]
+                    - generic [ref=e971]: .gitignore
+                - treeitem "AGENTS.md" [level=1] [ref=e972]:
+                  - generic [ref=e974] [cursor=pointer]:
+                    - img [ref=e977]
+                    - generic [ref=e979]: AGENTS.md
+                - treeitem "CLAUDE.md" [level=1] [ref=e980]:
+                  - generic [ref=e982] [cursor=pointer]:
+                    - img [ref=e985]
+                    - generic [ref=e987]: CLAUDE.md
+                - treeitem "CONTRIBUTING.md" [level=1] [ref=e988]:
+                  - generic [ref=e990] [cursor=pointer]:
+                    - img [ref=e993]
+                    - generic [ref=e995]: CONTRIBUTING.md
+                - treeitem "LICENSE" [level=1] [ref=e996]:
+                  - generic [ref=e998] [cursor=pointer]:
+                    - img [ref=e1001]
+                    - generic [ref=e1003]: LICENSE
+                - treeitem "README.md" [level=1] [ref=e1004]:
+                  - generic [ref=e1006] [cursor=pointer]:
+                    - img [ref=e1009]
+                    - generic [ref=e1011]: README.md
+          - slider "Draggable pane splitter" [ref=e1013]
+        - generic [ref=e1016]:
+          - generic [ref=e1020]:
+            - generic [ref=e1022]:
+              - navigation "Breadcrumbs" [ref=e1023]:
+                - heading "Breadcrumbs" [level=2] [ref=e1024]
+                - list [ref=e1025]:
+                  - listitem [ref=e1026]:
+                    - link "agent-toolkit" [ref=e1027] [cursor=pointer]:
+                      - /url: /softaworks/agent-toolkit/tree/main
+                  - listitem [ref=e1028]:
+                    - text: /
+                    - link "skills" [ref=e1029] [cursor=pointer]:
+                      - /url: /softaworks/agent-toolkit/tree/main/skills
+                  - listitem [ref=e1030]:
+                    - text: /
+                    - link "mermaid-diagrams" [ref=e1031] [cursor=pointer]:
+                      - /url: /softaworks/agent-toolkit/tree/main/skills/mermaid-diagrams
+              - generic [ref=e1032]:
+                - text: /
+                - heading "README.md" [level=1] [ref=e1033]
+              - button "Copy path" [ref=e1034] [cursor=pointer]:
+                - img [ref=e1035]
+            - button "More file actions" [ref=e1041] [cursor=pointer]:
+              - img [ref=e1042]
+          - generic [ref=e1044]:
+            - generic [ref=e1046]:
+              - heading "Latest commit" [level=2] [ref=e1047]
+              - generic [ref=e1048]:
+                - generic [ref=e1050]:
+                  - link "khaitranhq" [ref=e1051] [cursor=pointer]:
+                    - /url: /khaitranhq
+                    - img "khaitranhq" [ref=e1052]
+                  - link "commits by khaitranhq" [ref=e1053] [cursor=pointer]:
+                    - /url: /softaworks/agent-toolkit/commits?author=khaitranhq
+                    - text: khaitranhq
+                - generic [ref=e1054]:
+                  - generic [ref=e1056]:
+                    - 'link "docs[mermaid-diagrams]: add architecture diagrams reference and links (" [ref=e1057] [cursor=pointer]':
+                      - /url: /softaworks/agent-toolkit/commit/025dcd003b457880d4b541ad5c8b8d29bbb2e6a9
+                    - link "…" [ref=e1058] [cursor=pointer]:
+                      - /url: https://github.com/softaworks/agent-toolkit/pull/5
+                  - button "Open commit details" [ref=e1059] [cursor=pointer]:
+                    - img [ref=e1060]
+                  - button "failure" [ref=e1062] [cursor=pointer]:
+                    - img [ref=e1063]
+              - generic [ref=e1065]:
+                - generic [ref=e1067]:
+                  - link "Commit 025dcd0" [ref=e1068] [cursor=pointer]:
+                    - /url: /softaworks/agent-toolkit/commit/025dcd003b457880d4b541ad5c8b8d29bbb2e6a9
+                    - text: 025dcd0
+                  - text: ·
+                  - generic "Feb 1, 2026, 7:28 PM GMT+8" [ref=e1069]: Feb 1, 20263 months ago
+                - generic [ref=e1070]:
+                  - heading "History" [level=2] [ref=e1071]
+                  - link "History" [ref=e1072] [cursor=pointer]:
+                    - /url: /softaworks/agent-toolkit/commits/main/skills/mermaid-diagrams/README.md
+                    - generic [ref=e1073]:
+                      - generic:
+                        - img
+                      - generic [ref=e1074]: History
+            - generic [ref=e1076]:
+              - generic [ref=e1077]:
+                - generic [ref=e1534]:
+                  - generic [ref=e1535]:
+                    - navigation "Breadcrumbs" [ref=e1536]:
+                      - heading "Breadcrumbs" [level=2] [ref=e1537]
+                      - list [ref=e1538]:
+                        - listitem [ref=e1539]:
+                          - link "agent-toolkit" [ref=e1540] [cursor=pointer]:
+                            - /url: /softaworks/agent-toolkit/tree/main
+                        - listitem [ref=e1541]:
+                          - text: /
+                          - link "skills" [ref=e1542] [cursor=pointer]:
+                            - /url: /softaworks/agent-toolkit/tree/main/skills
+                        - listitem [ref=e1543]:
+                          - text: /
+                          - link "mermaid-diagrams" [ref=e1544] [cursor=pointer]:
+                            - /url: /softaworks/agent-toolkit/tree/main/skills/mermaid-diagrams
+                    - generic [ref=e1545]:
+                      - text: /
+                      - heading "README.md" [level=1] [ref=e1546]
+                  - button "Top" [ref=e1547] [cursor=pointer]:
+                    - generic [ref=e1548]:
+                      - generic:
+                        - img
+                      - generic [ref=e1549]: Top
+                - generic [ref=e1078]:
+                  - heading "File metadata and controls" [level=2] [ref=e1079]
+                  - list "File view" [ref=e1081]:
+                    - listitem [ref=e1082]:
+                      - button "Preview" [ref=e1083] [cursor=pointer]:
+                        - generic [ref=e1085]: Preview
+                    - listitem [ref=e1086]:
+                      - button "Code" [ref=e1087] [cursor=pointer]:
+                        - generic [ref=e1089]: Code
+                    - listitem [ref=e1090]:
+                      - button "Blame" [ref=e1091] [cursor=pointer]:
+                        - generic [ref=e1093]: Blame
+                  - generic [ref=e1094]:
+                    - generic [ref=e1095]:
+                      - generic [ref=e1096]:
+                        - link "Raw" [ref=e1098] [cursor=pointer]:
+                          - /url: https://github.com/softaworks/agent-toolkit/raw/refs/heads/main/skills/mermaid-diagrams/README.md
+                          - generic [ref=e1100]: Raw
+                        - button "Copy raw file" [ref=e1102] [cursor=pointer]:
+                          - img [ref=e1103]
+                        - button "Download raw file" [ref=e1107] [cursor=pointer]:
+                          - img [ref=e1108]
+                      - generic [ref=e1111]:
+                        - button "You must be signed in to make or propose changes" [disabled] [ref=e1113]:
+                          - img [ref=e1114]
+                        - button "More edit options" [ref=e1117] [cursor=pointer]:
+                          - img [ref=e1118]
+                    - button "Outline" [ref=e1120] [cursor=pointer]:
+                      - img [ref=e1121]
+              - region "README.md" [ref=e1124]:
+                - article [ref=e1126]:
+                  - generic [ref=e1127]:
+                    - heading "Mermaid Diagrams Skill" [level=1] [ref=e1128]
+                    - 'link "Permalink: Mermaid Diagrams Skill" [ref=e1129] [cursor=pointer]':
+                      - /url: "#mermaid-diagrams-skill"
+                      - img [ref=e1130]
+                  - paragraph [ref=e1132]: A comprehensive guide for creating professional software diagrams using Mermaid's text-based syntax. This skill enables you to visualize system architecture, document code structure, model databases, and communicate technical concepts through diagrams.
+                  - generic [ref=e1133]:
+                    - heading "Purpose" [level=2] [ref=e1134]
+                    - 'link "Permalink: Purpose" [ref=e1135] [cursor=pointer]':
+                      - /url: "#purpose"
+                      - img [ref=e1136]
+                  - paragraph [ref=e1138]: Transform complex technical concepts into clear, maintainable diagrams that can be version-controlled alongside your code. Mermaid diagrams are rendered from simple text definitions, making them easy to update, review in pull requests, and maintain over time.
+                  - generic [ref=e1139]:
+                    - heading "When to Use This Skill" [level=2] [ref=e1140]
+                    - 'link "Permalink: When to Use This Skill" [ref=e1141] [cursor=pointer]':
+                      - /url: "#when-to-use-this-skill"
+                      - img [ref=e1142]
+                  - paragraph [ref=e1144]: "Use this skill when you need to:"
+                  - list [ref=e1145]:
+                    - listitem [ref=e1146]:
+                      - strong [ref=e1147]: Document architecture
+                      - text: "- Visualize system context, containers, components, and deployment"
+                    - listitem [ref=e1148]:
+                      - strong [ref=e1149]: Model domains
+                      - text: "- Create domain models with entities, relationships, and behaviors"
+                    - listitem [ref=e1150]:
+                      - strong [ref=e1151]: Explain flows
+                      - text: "- Show API interactions, user journeys, authentication sequences"
+                    - listitem [ref=e1152]:
+                      - strong [ref=e1153]: Design databases
+                      - text: "- Document table relationships, keys, and schema structure"
+                    - listitem [ref=e1154]:
+                      - strong [ref=e1155]: Plan processes
+                      - text: "- Map workflows, decision trees, algorithms, and pipelines"
+                    - listitem [ref=e1156]:
+                      - strong [ref=e1157]: Communicate designs
+                      - text: "- Align stakeholders on technical decisions before coding"
+                  - generic [ref=e1158]:
+                    - heading "Trigger Phrases" [level=3] [ref=e1159]
+                    - 'link "Permalink: Trigger Phrases" [ref=e1160] [cursor=pointer]':
+                      - /url: "#trigger-phrases"
+                      - img [ref=e1161]
+                  - paragraph [ref=e1163]: "The skill activates when you mention:"
+                  - list [ref=e1164]:
+                    - listitem [ref=e1165]: "\"diagram\", \"visualize\", \"model\", \"map out\", \"show the flow\""
+                    - listitem [ref=e1166]: "\"architecture diagram\", \"class diagram\", \"sequence diagram\", \"flowchart\""
+                    - listitem [ref=e1167]: "\"database schema\", \"ERD\", \"entity relationship\""
+                    - listitem [ref=e1168]: "\"system design\", \"data model\", \"domain model\""
+                  - generic [ref=e1169]:
+                    - heading "How It Works" [level=2] [ref=e1170]
+                    - 'link "Permalink: How It Works" [ref=e1171] [cursor=pointer]':
+                      - /url: "#how-it-works"
+                      - img [ref=e1172]
+                  - list [ref=e1174]:
+                    - listitem [ref=e1175]:
+                      - strong [ref=e1176]: Choose the right diagram type
+                      - text: based on what you want to communicate
+                    - listitem [ref=e1177]:
+                      - strong [ref=e1178]: Start with core elements
+                      - text: "- entities, actors, or components"
+                    - listitem [ref=e1179]:
+                      - strong [ref=e1180]: Add relationships
+                      - text: "- connections, flows, interactions"
+                    - listitem [ref=e1181]:
+                      - strong [ref=e1182]: Refine incrementally
+                      - text: "- add details, styling, notes"
+                    - listitem [ref=e1183]:
+                      - strong [ref=e1184]: Export or embed
+                      - text: "- use in documentation, PRs, wikis"
+                  - paragraph [ref=e1185]: "Mermaid syntax is intuitive and follows a consistent pattern across all diagram types:"
+                  - region "mermaid rendered output container" [ref=e1186]:
+                    - generic [ref=e1187]:
+                      - generic [ref=e1188]:
+                        - paragraph [ref=e1189]: Unable to render rich display
+                        - paragraph [ref=e1190]:
+                          - text: "No diagram type detected matching given configuration for text: diagramType"
+                          - text: definition content
+                          - text: For more information, see https://docs.github.com/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams#creating-mermaid-diagrams
+                      - generic "Raw mermaid code" [ref=e1192]: diagramType definition content
+                  - generic [ref=e1193]:
+                    - heading "Key Features" [level=2] [ref=e1194]
+                    - 'link "Permalink: Key Features" [ref=e1195] [cursor=pointer]':
+                      - /url: "#key-features"
+                      - img [ref=e1196]
+                  - generic [ref=e1198]:
+                    - heading "9 Diagram Types Supported" [level=3] [ref=e1199]
+                    - 'link "Permalink: 9 Diagram Types Supported" [ref=e1200] [cursor=pointer]':
+                      - /url: "#9-diagram-types-supported"
+                      - img [ref=e1201]
+                  - list [ref=e1203]:
+                    - listitem [ref=e1204]:
+                      - strong [ref=e1205]: Class Diagrams
+                      - text: "- Domain models, OOP design, entity relationships"
+                    - listitem [ref=e1206]:
+                      - strong [ref=e1207]: Sequence Diagrams
+                      - text: "- API flows, user interactions, temporal sequences"
+                    - listitem [ref=e1208]:
+                      - strong [ref=e1209]: Flowcharts
+                      - text: "- User journeys, processes, decision logic, pipelines"
+                    - listitem [ref=e1210]:
+                      - strong [ref=e1211]: Entity Relationship Diagrams
+                      - text: "- Database schemas, table relationships"
+                    - listitem [ref=e1212]:
+                      - strong [ref=e1213]: C4 Architecture Diagrams
+                      - text: "- System context, containers, components"
+                    - listitem [ref=e1214]:
+                      - strong [ref=e1215]: State Diagrams
+                      - text: "- State machines, lifecycle states"
+                    - listitem [ref=e1216]:
+                      - strong [ref=e1217]: Git Graphs
+                      - text: "- Branching strategies, version control flows"
+                    - listitem [ref=e1218]:
+                      - strong [ref=e1219]: Gantt Charts
+                      - text: "- Project timelines, scheduling"
+                    - listitem [ref=e1220]:
+                      - strong [ref=e1221]: Pie/Bar Charts
+                      - text: "- Data visualization, metrics"
+                  - generic [ref=e1222]:
+                    - heading "Advanced Capabilities" [level=3] [ref=e1223]
+                    - 'link "Permalink: Advanced Capabilities" [ref=e1224] [cursor=pointer]':
+                      - /url: "#advanced-capabilities"
+                      - img [ref=e1225]
+                  - list [ref=e1227]:
+                    - listitem [ref=e1228]:
+                      - strong [ref=e1229]: Themes and styling
+                      - text: "- Default, forest, dark, neutral, base themes"
+                    - listitem [ref=e1230]:
+                      - strong [ref=e1231]: Custom theming
+                      - text: "- Configure colors, fonts, and layout"
+                    - listitem [ref=e1232]:
+                      - strong [ref=e1233]: Layout options
+                      - text: "- Dagre (balanced) or ELK (advanced)"
+                    - listitem [ref=e1234]:
+                      - strong [ref=e1235]: Look options
+                      - text: "- Classic or hand-drawn sketch style"
+                    - listitem [ref=e1236]:
+                      - strong [ref=e1237]: Subgraphs
+                      - text: "- Group related elements for clarity"
+                    - listitem [ref=e1238]:
+                      - strong [ref=e1239]: Notes and comments
+                      - text: "- Add context and explanations"
+                    - listitem [ref=e1240]:
+                      - strong [ref=e1241]: Alt/loop/opt blocks
+                      - text: "- Complex flow control in sequences"
+                  - generic [ref=e1242]:
+                    - heading "Integration Support" [level=3] [ref=e1243]
+                    - 'link "Permalink: Integration Support" [ref=e1244] [cursor=pointer]':
+                      - /url: "#integration-support"
+                      - img [ref=e1245]
+                  - list [ref=e1247]:
+                    - listitem [ref=e1248]:
+                      - strong [ref=e1249]: GitHub/GitLab
+                      - text: "- Automatic rendering in Markdown files"
+                    - listitem [ref=e1250]:
+                      - strong [ref=e1251]: VS Code
+                      - text: "- Preview with Markdown Mermaid extension"
+                    - listitem [ref=e1252]:
+                      - strong [ref=e1253]: Notion, Obsidian, Confluence
+                      - text: "- Built-in support"
+                    - listitem [ref=e1254]:
+                      - strong [ref=e1255]: Export
+                      - text: "- PNG, SVG, PDF via Mermaid Live or CLI"
+                  - generic [ref=e1256]:
+                    - heading "Usage Examples" [level=2] [ref=e1257]
+                    - 'link "Permalink: Usage Examples" [ref=e1258] [cursor=pointer]':
+                      - /url: "#usage-examples"
+                      - img [ref=e1259]
+                  - generic [ref=e1261]:
+                    - 'heading "Example 1: Document a Domain Model" [level=3] [ref=e1262]'
+                    - 'link "Permalink: Example 1: Document a Domain Model" [ref=e1263] [cursor=pointer]':
+                      - /url: "#example-1-document-a-domain-model"
+                      - img [ref=e1264]
+                  - paragraph [ref=e1266]:
+                    - strong [ref=e1267]: "When:"
+                    - text: You're designing a video streaming platform and need to model core entities.
+                  - region "mermaid rendered output container" [ref=e1268]:
+                    - generic [ref=e1269]:
+                      - generic [ref=e1270]:
+                        - group [ref=e1271]:
+                          - button "Open dialog" [ref=e1272] [cursor=pointer]:
+                            - img [ref=e1273]
+                          - dialog "mermaid rendered container" [active] [ref=e1550]:
+                            - generic [ref=e1551]:
+                              - button "Close dialog" [ref=e1552] [cursor=pointer]:
+                                - img [ref=e1553]
+                              - iframe [ref=e1556]:
+                                - generic [active] [ref=f13e1]:
+                                  - document [ref=f13e30]:
+                                    - generic [ref=f13e32]:
+                                      - paragraph [ref=f13e43]: creates
+                                      - generic [ref=f13e44]:
+                                        - generic [ref=f13e45]:
+                                          - paragraph [ref=f13e54]: Title
+                                          - generic [ref=f13e55]:
+                                            - paragraph [ref=f13e60]: +string name
+                                            - paragraph [ref=f13e65]: +int releaseYear
+                                          - paragraph [ref=f13e71]: +play()
+                                        - generic [ref=f13e76]:
+                                          - paragraph [ref=f13e85]: Genre
+                                          - paragraph [ref=f13e91]: +string name
+                                          - paragraph [ref=f13e97]: +getTopTitles()
+                                        - paragraph [ref=f13e111]: Season
+                                        - paragraph [ref=f13e125]: Review
+                                        - paragraph [ref=f13e139]: User
+                                  - generic [ref=f13e5]:
+                                    - button "Zoom in" [ref=f13e6] [cursor=pointer]:
+                                      - img [ref=f13e7]
+                                    - button "Zoom out" [ref=f13e10] [cursor=pointer]:
+                                      - img [ref=f13e11]
+                                    - button "Reset view" [ref=f13e14] [cursor=pointer]:
+                                      - img [ref=f13e15]
+                                    - button "Pan up" [ref=f13e17] [cursor=pointer]:
+                                      - img [ref=f13e18]
+                                    - button "Pan down" [ref=f13e20] [cursor=pointer]:
+                                      - img [ref=f13e21]
+                                    - button "Pan left" [ref=f13e23] [cursor=pointer]:
+                                      - img [ref=f13e24]
+                                    - button "Pan right" [ref=f13e26] [cursor=pointer]:
+                                      - img [ref=f13e27]
+                        - button "Copy mermaid code" [ref=e1275] [cursor=pointer]:
+                          - img [ref=e1276]
+                      - iframe [ref=e1280]:
+                        - generic [active] [ref=f8e1]:
+                          - document [ref=f8e5]:
+                            - generic [ref=f8e7]:
+                              - paragraph [ref=f8e18]: creates
+                              - generic [ref=f8e19]:
+                                - generic [ref=f8e20]:
+                                  - paragraph [ref=f8e29]: Title
+                                  - generic [ref=f8e30]:
+                                    - paragraph [ref=f8e35]: +string name
+                                    - paragraph [ref=f8e40]: +int releaseYear
+                                  - paragraph [ref=f8e46]: +play()
+                                - generic [ref=f8e51]:
+                                  - paragraph [ref=f8e60]: Genre
+                                  - paragraph [ref=f8e66]: +string name
+                                  - paragraph [ref=f8e72]: +getTopTitles()
+                                - paragraph [ref=f8e86]: Season
+                                - paragraph [ref=f8e100]: Review
+                                - paragraph [ref=f8e114]: User
+                          - generic [ref=f8e119]:
+                            - button "Zoom in" [ref=f8e120] [cursor=pointer]:
+                              - img [ref=f8e121]
+                            - button "Zoom out" [ref=f8e124] [cursor=pointer]:
+                              - img [ref=f8e125]
+                            - button "Reset view" [ref=f8e128] [cursor=pointer]:
+                              - img [ref=f8e129]
+                            - button "Pan up" [ref=f8e131] [cursor=pointer]:
+                              - img [ref=f8e132]
+                            - button "Pan down" [ref=f8e134] [cursor=pointer]:
+                              - img [ref=f8e135]
+                            - button "Pan left" [ref=f8e137] [cursor=pointer]:
+                              - img [ref=f8e138]
+                            - button "Pan right" [ref=f8e140] [cursor=pointer]:
+                              - img [ref=f8e141]
+                  - generic [ref=e1286]:
+                    - 'heading "Example 2: Explain an API Authentication Flow" [level=3] [ref=e1287]'
+                    - 'link "Permalink: Example 2: Explain an API Authentication Flow" [ref=e1288] [cursor=pointer]':
+                      - /url: "#example-2-explain-an-api-authentication-flow"
+                      - img [ref=e1289]
+                  - paragraph [ref=e1291]:
+                    - strong [ref=e1292]: "When:"
+                    - text: You need to document how login works for frontend developers.
+                  - region "mermaid rendered output container" [ref=e1293]:
+                    - generic [ref=e1294]:
+                      - generic [ref=e1295]:
+                        - group [ref=e1296]:
+                          - button "Open dialog" [ref=e1297] [cursor=pointer]:
+                            - img [ref=e1298]
+                        - button "Copy mermaid code" [ref=e1300] [cursor=pointer]:
+                          - img [ref=e1301]
+                      - iframe [ref=e1305]:
+                        - generic [active] [ref=f9e1]:
+                          - document [ref=f9e5]:
+                            - generic [ref=f9e8]: Database
+                            - generic [ref=f9e11]: API
+                            - generic [ref=f9e14]: User
+                            - generic [ref=f9e18]: Database
+                            - generic [ref=f9e22]: API
+                            - generic [ref=f9e26]: User
+                            - generic [ref=f9e27]:
+                              - generic [ref=f9e29]: alt
+                              - generic [ref=f9e30]: "[Valid credentials]"
+                              - generic [ref=f9e31]: "[Invalid credentials]"
+                            - generic [ref=f9e32]: POST /login
+                            - generic [ref=f9e33]: Query credentials
+                            - generic [ref=f9e34]: Return user data
+                            - generic [ref=f9e35]: 200 OK + JWT token
+                            - generic [ref=f9e36]: 401 Unauthorized
+                          - generic [ref=f9e37]:
+                            - button "Zoom in" [ref=f9e38] [cursor=pointer]:
+                              - img [ref=f9e39]
+                            - button "Zoom out" [ref=f9e42] [cursor=pointer]:
+                              - img [ref=f9e43]
+                            - button "Reset view" [ref=f9e46] [cursor=pointer]:
+                              - img [ref=f9e47]
+                            - button "Pan up" [ref=f9e49] [cursor=pointer]:
+                              - img [ref=f9e50]
+                            - button "Pan down" [ref=f9e52] [cursor=pointer]:
+                              - img [ref=f9e53]
+                            - button "Pan left" [ref=f9e55] [cursor=pointer]:
+                              - img [ref=f9e56]
+                            - button "Pan right" [ref=f9e58] [cursor=pointer]:
+                              - img [ref=f9e59]
+                  - generic [ref=e1306]:
+                    - 'heading "Example 3: Map a User Journey" [level=3] [ref=e1307]'
+                    - 'link "Permalink: Example 3: Map a User Journey" [ref=e1308] [cursor=pointer]':
+                      - /url: "#example-3-map-a-user-journey"
+                      - img [ref=e1309]
+                  - paragraph [ref=e1311]:
+                    - strong [ref=e1312]: "When:"
+                    - text: You're planning a feature and need to visualize the user flow.
+                  - region "mermaid rendered output container" [ref=e1313]:
+                    - generic [ref=e1314]:
+                      - generic [ref=e1315]:
+                        - group [ref=e1316]:
+                          - button "Open dialog" [ref=e1317] [cursor=pointer]:
+                            - img [ref=e1318]
+                        - button "Copy mermaid code" [ref=e1320] [cursor=pointer]:
+                          - img [ref=e1321]
+                      - iframe [ref=e1325]:
+                        - generic [active] [ref=f10e1]:
+                          - document [ref=f10e5]:
+                            - generic [ref=f10e7]:
+                              - generic [ref=f10e16]:
+                                - paragraph [ref=f10e22]: "No"
+                                - paragraph [ref=f10e28]: "Yes"
+                                - paragraph [ref=f10e34]: "Yes"
+                                - paragraph [ref=f10e40]: "No"
+                              - generic [ref=f10e41]:
+                                - paragraph [ref=f10e50]: User visits site
+                                - paragraph [ref=f10e57]: Authenticated?
+                                - paragraph [ref=f10e64]: Show login page
+                                - paragraph [ref=f10e71]: Show dashboard
+                                - paragraph [ref=f10e78]: Enter credentials
+                                - paragraph [ref=f10e85]: Valid?
+                                - paragraph [ref=f10e92]: Show error
+                          - generic [ref=f10e93]:
+                            - button "Zoom in" [ref=f10e94] [cursor=pointer]:
+                              - img [ref=f10e95]
+                            - button "Zoom out" [ref=f10e98] [cursor=pointer]:
+                              - img [ref=f10e99]
+                            - button "Reset view" [ref=f10e102] [cursor=pointer]:
+                              - img [ref=f10e103]
+                            - button "Pan up" [ref=f10e105] [cursor=pointer]:
+                              - img [ref=f10e106]
+                            - button "Pan down" [ref=f10e108] [cursor=pointer]:
+                              - img [ref=f10e109]
+                            - button "Pan left" [ref=f10e111] [cursor=pointer]:
+                              - img [ref=f10e112]
+                            - button "Pan right" [ref=f10e114] [cursor=pointer]:
+                              - img [ref=f10e115]
+                  - generic [ref=e1331]:
+                    - 'heading "Example 4: Design a Database Schema" [level=3] [ref=e1332]'
+                    - 'link "Permalink: Example 4: Design a Database Schema" [ref=e1333] [cursor=pointer]':
+                      - /url: "#example-4-design-a-database-schema"
+                      - img [ref=e1334]
+                  - paragraph [ref=e1336]:
+                    - strong [ref=e1337]: "When:"
+                    - text: You're planning table relationships for a new feature.
+                  - region "mermaid rendered output container" [ref=e1338]:
+                    - generic [ref=e1339]:
+                      - generic [ref=e1340]:
+                        - group [ref=e1341]:
+                          - button "Open dialog" [ref=e1342] [cursor=pointer]:
+                            - img [ref=e1343]
+                        - button "Copy mermaid code" [ref=e1345] [cursor=pointer]:
+                          - img [ref=e1346]
+                      - iframe [ref=e1350]:
+                        - generic [active] [ref=f11e1]:
+                          - document [ref=f11e5]:
+                            - generic [ref=f11e7]:
+                              - generic [ref=f11e11]:
+                                - paragraph [ref=f11e17]: places
+                                - paragraph [ref=f11e23]: contains
+                                - paragraph [ref=f11e29]: includes
+                              - generic [ref=f11e30]:
+                                - generic [ref=f11e31]:
+                                  - paragraph [ref=f11e51]: USER
+                                  - paragraph [ref=f11e56]: int
+                                  - paragraph [ref=f11e61]: id
+                                  - paragraph [ref=f11e66]: PK
+                                  - paragraph [ref=f11e71]: string
+                                  - paragraph [ref=f11e76]: email
+                                  - paragraph [ref=f11e81]: UK
+                                  - paragraph [ref=f11e86]: string
+                                  - paragraph [ref=f11e91]: name
+                                  - paragraph [ref=f11e96]: datetime
+                                  - paragraph [ref=f11e101]: created_at
+                                - generic [ref=f11e114]:
+                                  - paragraph [ref=f11e134]: ORDER
+                                  - paragraph [ref=f11e139]: int
+                                  - paragraph [ref=f11e144]: id
+                                  - paragraph [ref=f11e149]: PK
+                                  - paragraph [ref=f11e154]: int
+                                  - paragraph [ref=f11e159]: user_id
+                                  - paragraph [ref=f11e164]: FK
+                                  - paragraph [ref=f11e169]: decimal
+                                  - paragraph [ref=f11e174]: total
+                                  - paragraph [ref=f11e179]: datetime
+                                  - paragraph [ref=f11e184]: created_at
+                                - paragraph [ref=f11e203]: LINE_ITEM
+                                - paragraph [ref=f11e210]: PRODUCT
+                          - generic [ref=f11e211]:
+                            - button "Zoom in" [ref=f11e212] [cursor=pointer]:
+                              - img [ref=f11e213]
+                            - button "Zoom out" [ref=f11e216] [cursor=pointer]:
+                              - img [ref=f11e217]
+                            - button "Reset view" [ref=f11e220] [cursor=pointer]:
+                              - img [ref=f11e221]
+                            - button "Pan up" [ref=f11e223] [cursor=pointer]:
+                              - img [ref=f11e224]
+                            - button "Pan down" [ref=f11e226] [cursor=pointer]:
+                              - img [ref=f11e227]
+                            - button "Pan left" [ref=f11e229] [cursor=pointer]:
+                              - img [ref=f11e230]
+                            - button "Pan right" [ref=f11e232] [cursor=pointer]:
+                              - img [ref=f11e233]
+                  - generic [ref=e1356]:
+                    - 'heading "Example 5: Visualize System Architecture (C4)" [level=3] [ref=e1357]'
+                    - 'link "Permalink: Example 5: Visualize System Architecture (C4)" [ref=e1358] [cursor=pointer]':
+                      - /url: "#example-5-visualize-system-architecture-c4"
+                      - img [ref=e1359]
+                  - paragraph [ref=e1361]:
+                    - strong [ref=e1362]: "When:"
+                    - text: You need to show how systems and external services interact.
+                  - region "mermaid rendered output container" [ref=e1363]:
+                    - generic [ref=e1364]:
+                      - generic [ref=e1365]:
+                        - group [ref=e1366]:
+                          - button "Open dialog" [ref=e1367] [cursor=pointer]:
+                            - img [ref=e1368]
+                        - button "Copy mermaid code" [ref=e1370] [cursor=pointer]:
+                          - img [ref=e1371]
+                      - iframe [ref=e1375]:
+                        - generic [active] [ref=f12e1]:
+                          - document [ref=f12e32]:
+                            - generic [ref=f12e33]:
+                              - generic [ref=f12e35]: <<person>>
+                              - generic [ref=f12e37]: Customer
+                              - generic [ref=f12e38]: A user browsing and purchasing products
+                            - generic [ref=f12e39]:
+                              - generic [ref=f12e41]: <<system>>
+                              - generic [ref=f12e42]: Web Application
+                              - generic [ref=f12e43]: Provides product catalog and checkout
+                            - generic [ref=f12e44]:
+                              - generic [ref=f12e46]: <<external_system>>
+                              - generic [ref=f12e47]: Payment Gateway
+                              - generic [ref=f12e48]: Processes payments
+                            - generic [ref=f12e49]:
+                              - generic [ref=f12e51]: <<external_system>>
+                              - generic [ref=f12e52]: Email Service
+                              - generic [ref=f12e53]: Sends order confirmations
+                            - generic [ref=f12e54]:
+                              - generic [ref=f12e56]: Browses products, places orders
+                              - generic [ref=f12e58]: Processes payments
+                              - generic [ref=f12e59]: "[HTTPS]"
+                              - generic [ref=f12e61]: Sends notifications
+                              - generic [ref=f12e62]: "[SMTP]"
+                            - generic [ref=f12e63]: System Context Diagram for E-commerce Platform
+                          - generic [ref=f12e7]:
+                            - button "Zoom in" [ref=f12e8] [cursor=pointer]:
+                              - img [ref=f12e9]
+                            - button "Zoom out" [ref=f12e12] [cursor=pointer]:
+                              - img [ref=f12e13]
+                            - button "Reset view" [ref=f12e16] [cursor=pointer]:
+                              - img [ref=f12e17]
+                            - button "Pan up" [ref=f12e19] [cursor=pointer]:
+                              - img [ref=f12e20]
+                            - button "Pan down" [ref=f12e22] [cursor=pointer]:
+                              - img [ref=f12e23]
+                            - button "Pan left" [ref=f12e25] [cursor=pointer]:
+                              - img [ref=f12e26]
+                            - button "Pan right" [ref=f12e28] [cursor=pointer]:
+                              - img [ref=f12e29]
+                  - generic [ref=e1381]:
+                    - heading "Getting Started" [level=2] [ref=e1382]
+                    - 'link "Permalink: Getting Started" [ref=e1383] [cursor=pointer]':
+                      - /url: "#getting-started"
+                      - img [ref=e1384]
+                  - list [ref=e1386]:
+                    - listitem [ref=e1387]:
+                      - strong [ref=e1388]: Identify what you need to communicate
+                      - text: "- Architecture? Flow? Data model?"
+                    - listitem [ref=e1389]:
+                      - strong [ref=e1390]: Choose the appropriate diagram type
+                      - text: "- See \"Diagram Type Selection Guide\" in SKILL.md"
+                    - listitem [ref=e1391]:
+                      - strong [ref=e1392]: Start simple
+                      - text: "- Add core entities/components first"
+                    - listitem [ref=e1393]:
+                      - strong [ref=e1394]: Add relationships
+                      - text: "- Connect elements with appropriate connectors"
+                    - listitem [ref=e1395]:
+                      - strong [ref=e1396]: Refine and style
+                      - text: "- Add details, notes, and custom theming"
+                    - listitem [ref=e1397]:
+                      - strong [ref=e1398]: Validate
+                      - text: "- Test in"
+                      - link "Mermaid Live Editor" [ref=e1399] [cursor=pointer]:
+                        - /url: https://mermaid.live
+                    - listitem [ref=e1400]:
+                      - strong [ref=e1401]: Embed or export
+                      - text: "- Use in Markdown, export as image, or integrate"
+                  - generic [ref=e1402]:
+                    - heading "Detailed References" [level=2] [ref=e1403]
+                    - 'link "Permalink: Detailed References" [ref=e1404] [cursor=pointer]':
+                      - /url: "#detailed-references"
+                      - img [ref=e1405]
+                  - paragraph [ref=e1407]: "For comprehensive syntax and advanced features, see:"
+                  - list [ref=e1408]:
+                    - listitem [ref=e1409]:
+                      - strong [ref=e1410]:
+                        - link "SKILL.md" [ref=e1411] [cursor=pointer]:
+                          - /url: /softaworks/agent-toolkit/blob/main/skills/mermaid-diagrams/SKILL.md
+                      - text: "- Quick start guide and diagram selection"
+                    - listitem [ref=e1412]:
+                      - strong [ref=e1413]:
+                        - link "references/class-diagrams.md" [ref=e1414] [cursor=pointer]:
+                          - /url: /softaworks/agent-toolkit/blob/main/skills/mermaid-diagrams/references/class-diagrams.md
+                      - text: "- Relationships, multiplicity, methods"
+                    - listitem [ref=e1415]:
+                      - strong [ref=e1416]:
+                        - link "references/sequence-diagrams.md" [ref=e1417] [cursor=pointer]:
+                          - /url: /softaworks/agent-toolkit/blob/main/skills/mermaid-diagrams/references/sequence-diagrams.md
+                      - text: "- Messages, activations, loops, alt blocks"
+                    - listitem [ref=e1418]:
+                      - strong [ref=e1419]:
+                        - link "references/flowcharts.md" [ref=e1420] [cursor=pointer]:
+                          - /url: /softaworks/agent-toolkit/blob/main/skills/mermaid-diagrams/references/flowcharts.md
+                      - text: "- Node shapes, decision logic, subgraphs"
+                    - listitem [ref=e1421]:
+                      - strong [ref=e1422]:
+                        - link "references/erd-diagrams.md" [ref=e1423] [cursor=pointer]:
+                          - /url: /softaworks/agent-toolkit/blob/main/skills/mermaid-diagrams/references/erd-diagrams.md
+                      - text: "- Cardinality, keys, attributes"
+                    - listitem [ref=e1424]:
+                      - strong [ref=e1425]:
+                        - link "references/c4-diagrams.md" [ref=e1426] [cursor=pointer]:
+                          - /url: /softaworks/agent-toolkit/blob/main/skills/mermaid-diagrams/references/c4-diagrams.md
+                      - text: "- Context, container, component levels"
+                    - listitem [ref=e1427]:
+                      - strong [ref=e1428]:
+                        - link "references/architecture-diagrams.md" [ref=e1429] [cursor=pointer]:
+                          - /url: /softaworks/agent-toolkit/blob/main/skills/mermaid-diagrams/references/architecture-diagrams.md
+                      - text: "- Cloud services, infrastructure, CI/CD deployments"
+                    - listitem [ref=e1430]:
+                      - strong [ref=e1431]:
+                        - link "references/advanced-features.md" [ref=e1432] [cursor=pointer]:
+                          - /url: /softaworks/agent-toolkit/blob/main/skills/mermaid-diagrams/references/advanced-features.md
+                      - text: "- Themes, styling, configuration"
+                  - generic [ref=e1433]:
+                    - heading "Best Practices" [level=2] [ref=e1434]
+                    - 'link "Permalink: Best Practices" [ref=e1435] [cursor=pointer]':
+                      - /url: "#best-practices"
+                      - img [ref=e1436]
+                  - list [ref=e1438]:
+                    - listitem [ref=e1439]:
+                      - strong [ref=e1440]: Start simple, iterate
+                      - text: "- Begin with core elements, add complexity gradually"
+                    - listitem [ref=e1441]:
+                      - strong [ref=e1442]: One diagram, one concept
+                      - text: "- Keep diagrams focused and split large views"
+                    - listitem [ref=e1443]:
+                      - strong [ref=e1444]: Use meaningful names
+                      - text: "- Clear labels make diagrams self-documenting"
+                    - listitem [ref=e1445]:
+                      - strong [ref=e1446]: Comment liberally
+                      - text: "- Use"
+                      - code [ref=e1447]: "%%"
+                      - text: to explain non-obvious relationships
+                    - listitem [ref=e1448]:
+                      - strong [ref=e1449]: Version control
+                      - text: "- Store"
+                      - code [ref=e1450]: .mmd
+                      - text: files with code, update as system evolves
+                    - listitem [ref=e1451]:
+                      - strong [ref=e1452]: Add context
+                      - text: "- Include titles and notes explaining diagram purpose"
+                    - listitem [ref=e1453]:
+                      - strong [ref=e1454]: Validate syntax
+                      - text: "- Test in Mermaid Live before committing"
+                    - listitem [ref=e1455]:
+                      - strong [ref=e1456]: Keep it readable
+                      - text: "- Don't overcrowd; split into multiple diagrams if needed"
+                  - generic [ref=e1457]:
+                    - heading "Common Use Cases" [level=2] [ref=e1458]
+                    - 'link "Permalink: Common Use Cases" [ref=e1459] [cursor=pointer]':
+                      - /url: "#common-use-cases"
+                      - img [ref=e1460]
+                  - list [ref=e1462]:
+                    - listitem [ref=e1463]:
+                      - strong [ref=e1464]: Onboarding
+                      - text: "- Help new team members understand system structure"
+                    - listitem [ref=e1465]:
+                      - strong [ref=e1466]: Design reviews
+                      - text: "- Visualize proposals before implementation"
+                    - listitem [ref=e1467]:
+                      - strong [ref=e1468]: Documentation
+                      - text: "- Create living docs that evolve with code"
+                    - listitem [ref=e1469]:
+                      - strong [ref=e1470]: Architecture decisions
+                      - text: "- Align stakeholders on technical choices"
+                    - listitem [ref=e1471]:
+                      - strong [ref=e1472]: Refactoring
+                      - text: "- Plan restructuring with before/after diagrams"
+                    - listitem [ref=e1473]:
+                      - strong [ref=e1474]: API handoffs
+                      - text: "- Document flows for frontend/backend coordination"
+                    - listitem [ref=e1475]:
+                      - strong [ref=e1476]: Database migrations
+                      - text: "- Visualize schema changes"
+                  - generic [ref=e1477]:
+                    - heading "Tips for Success" [level=2] [ref=e1478]
+                    - 'link "Permalink: Tips for Success" [ref=e1479] [cursor=pointer]':
+                      - /url: "#tips-for-success"
+                      - img [ref=e1480]
+                  - list [ref=e1482]:
+                    - listitem [ref=e1483]:
+                      - strong [ref=e1484]: Test incrementally
+                      - text: "- Validate syntax as you build to catch errors early"
+                    - listitem [ref=e1485]:
+                      - strong [ref=e1486]: Use consistent naming
+                      - text: "- Match diagram names to code/database names"
+                    - listitem [ref=e1487]:
+                      - strong [ref=e1488]: Leverage GitHub rendering
+                      - text: "- Diagrams appear automatically in"
+                      - code [ref=e1489]: .md
+                      - text: files
+                    - listitem [ref=e1490]:
+                      - strong [ref=e1491]: Export for presentations
+                      - text: "- Use Mermaid Live or CLI for high-res exports"
+                    - listitem [ref=e1492]:
+                      - strong [ref=e1493]: Collaborate
+                      - text: "- Diagrams are great for PR discussions and design docs"
+                    - listitem [ref=e1494]:
+                      - strong [ref=e1495]: Keep updated
+                      - text: "- Update diagrams when code changes to prevent drift"
+                  - generic [ref=e1496]:
+                    - heading "Tools and Resources" [level=2] [ref=e1497]
+                    - 'link "Permalink: Tools and Resources" [ref=e1498] [cursor=pointer]':
+                      - /url: "#tools-and-resources"
+                      - img [ref=e1499]
+                  - list [ref=e1501]:
+                    - listitem [ref=e1502]:
+                      - strong [ref=e1503]:
+                        - link "Mermaid Live Editor" [ref=e1504] [cursor=pointer]:
+                          - /url: https://mermaid.live
+                      - text: "- Interactive editor with instant preview and export"
+                    - listitem [ref=e1505]:
+                      - strong [ref=e1506]:
+                        - link "Official Documentation" [ref=e1507] [cursor=pointer]:
+                          - /url: https://mermaid.js.org
+                      - text: "- Comprehensive syntax reference"
+                    - listitem [ref=e1508]:
+                      - strong [ref=e1509]: Mermaid CLI
+                      - text: "-"
+                      - code [ref=e1510]: npm install -g @mermaid-js/mermaid-cli
+                      - text: for batch exports
+                    - listitem [ref=e1511]:
+                      - strong [ref=e1512]: VS Code Extension
+                      - text: "- \"Markdown Preview Mermaid Support\" for live preview"
+                    - listitem [ref=e1513]:
+                      - strong [ref=e1514]: GitHub
+                      - text: "- Native rendering in all"
+                      - code [ref=e1515]: .md
+                      - text: files
+                  - generic [ref=e1516]:
+                    - heading "Support" [level=2] [ref=e1517]
+                    - 'link "Permalink: Support" [ref=e1518] [cursor=pointer]':
+                      - /url: "#support"
+                      - img [ref=e1519]
+                  - paragraph [ref=e1521]: "For questions, syntax help, or advanced features, refer to:"
+                  - list [ref=e1522]:
+                    - listitem [ref=e1523]: SKILL.md for quick reference
+                    - listitem [ref=e1524]:
+                      - text: Reference files in
+                      - code [ref=e1525]: references/
+                      - text: for detailed syntax
+                    - listitem [ref=e1526]:
+                      - link "Mermaid official docs" [ref=e1527] [cursor=pointer]:
+                        - /url: https://mermaid.js.org
+                      - text: for latest features
+  - alert [ref=e1531]

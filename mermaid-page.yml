@@ -1,0 +1,858 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - link "zdoc" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - button "搜索 Ctrl+K" [ref=e6] [cursor=pointer]:
+        - img [ref=e7]
+        - generic [ref=e10]: 搜索
+        - generic [ref=e11]: Ctrl+K
+      - generic [ref=e12]:
+        - button "Toggle dark mode" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+        - link "Download docs as zip" [ref=e16] [cursor=pointer]:
+          - /url: /api/download.zip
+          - img [ref=e17]
+        - button "Settings" [ref=e20] [cursor=pointer]:
+          - img [ref=e21]
+        - button "About zdoc" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+    - generic [ref=e27]:
+      - navigation [ref=e28]:
+        - generic [ref=e29]:
+          - link "首页" [ref=e31] [cursor=pointer]:
+            - /url: /index.md
+            - generic [ref=e32]: 首页
+          - generic [ref=e33]:
+            - button "指南" [ref=e34] [cursor=pointer]:
+              - img [ref=e35]
+              - generic [ref=e37]: 指南
+            - generic [ref=e38]:
+              - generic [ref=e39]:
+                - button "简介" [ref=e40] [cursor=pointer]:
+                  - img [ref=e41]
+                  - generic [ref=e43]: 简介
+                - generic [ref=e44]:
+                  - link "什么是 zdoc" [ref=e46] [cursor=pointer]:
+                    - /url: /guide/intro/what-is-zdoc.md
+                    - generic [ref=e47]: 什么是 zdoc
+                  - link "安装与运行" [ref=e49] [cursor=pointer]:
+                    - /url: /guide/intro/install.md
+                    - generic [ref=e50]: 安装与运行
+              - generic [ref=e51]:
+                - button "编写文档" [ref=e52] [cursor=pointer]:
+                  - img [ref=e53]
+                  - generic [ref=e55]: 编写文档
+                - generic [ref=e56]:
+                  - link "_meta.yaml" [ref=e58] [cursor=pointer]:
+                    - /url: /guide/authoring/meta-yaml.md
+                    - generic [ref=e59]: _meta.yaml
+                  - link "单文档字段" [ref=e61] [cursor=pointer]:
+                    - /url: /guide/authoring/page-fields.md
+                    - generic [ref=e62]: 单文档字段
+                  - link "文档生命周期" [ref=e64] [cursor=pointer]:
+                    - /url: /guide/authoring/lifecycle.md
+                    - generic [ref=e65]: 文档生命周期
+                  - link "链接与路由" [ref=e67] [cursor=pointer]:
+                    - /url: /guide/authoring/links-and-routes.md
+                    - generic [ref=e68]: 链接与路由
+                  - link "Mermaid 图表全集" [ref=e70] [cursor=pointer]:
+                    - /url: /guide/authoring/mermaid.md
+                    - generic [ref=e71]: Mermaid 图表全集
+                  - generic [ref=e72]:
+                    - button "选一套文档结构" [ref=e73] [cursor=pointer]:
+                      - img [ref=e74]
+                      - generic [ref=e76]: 选一套文档结构
+                    - generic [ref=e77]:
+                      - link "面向建设者" [ref=e79] [cursor=pointer]:
+                        - /url: /guide/authoring/choose-a-structure/structure-builder.md
+                        - generic [ref=e80]: 面向建设者
+                      - link "面向使用者" [ref=e82] [cursor=pointer]:
+                        - /url: /guide/authoring/choose-a-structure/structure-user.md
+                        - generic [ref=e83]: 面向使用者
+                      - link "面向知识库" [ref=e85] [cursor=pointer]:
+                        - /url: /guide/authoring/choose-a-structure/structure-knowledge.md
+                        - generic [ref=e86]: 面向知识库
+              - generic [ref=e87]:
+                - button "进阶" [ref=e88] [cursor=pointer]:
+                  - img [ref=e89]
+                  - generic [ref=e91]: 进阶
+                - generic [ref=e92]:
+                  - link "会话与持久化" [ref=e94] [cursor=pointer]:
+                    - /url: /guide/advanced/sessions.md
+                    - generic [ref=e95]: 会话与持久化
+                  - link "搜索" [ref=e97] [cursor=pointer]:
+                    - /url: /guide/advanced/search.md
+                    - generic [ref=e98]: 搜索
+          - generic [ref=e99]:
+            - button "开发者" [ref=e100] [cursor=pointer]:
+              - img [ref=e101]
+              - generic [ref=e103]: 开发者
+            - generic [ref=e104]:
+              - link "2.0 规划" [ref=e106] [cursor=pointer]:
+                - /url: /dev/next-major.md
+                - generic [ref=e107]: 2.0 规划
+              - generic [ref=e108]:
+                - button "参考" [ref=e109] [cursor=pointer]:
+                  - img [ref=e110]
+                  - generic [ref=e112]: 参考
+                - generic [ref=e113]:
+                  - link "命令行参数" [ref=e115] [cursor=pointer]:
+                    - /url: /dev/reference/cli.md
+                    - generic [ref=e116]: 命令行参数
+                  - link "config.json 配置" [ref=e118] [cursor=pointer]:
+                    - /url: /dev/reference/config.md
+                    - generic [ref=e119]: config.json 配置
+              - link "发布规范" [ref=e121] [cursor=pointer]:
+                - /url: /dev/release.md
+                - generic [ref=e122]: 发布规范
+          - link "术语表" [ref=e124] [cursor=pointer]:
+            - /url: /glossary.md
+            - generic [ref=e125]: 术语表
+      - main [ref=e126]:
+        - generic [ref=e236]:
+          - article [ref=e237]:
+            - paragraph [ref=e239]: 覆盖流程图、时序图、类图、ER 图、状态图、甘特图、饼图、Git 图、用户旅程、思维导图、时间线、架构图、C4 模型等全部图表类型。
+            - heading "Mermaid 图表全集" [level=1] [ref=e240]
+            - paragraph [ref=e241]:
+              - text: zdoc 原生支持 Mermaid：用
+              - code [ref=e242]: "```mermaid"
+              - text: 代码块即可渲染 SVG 图表。以下是 Mermaid 支持的所有主要图表类型。
+            - heading "流程图（Flowchart）" [level=2] [ref=e243]
+            - paragraph [ref=e244]: 最常用的图表类型，适合展示流程、算法、决策树。
+            - document [ref=e246]:
+              - generic [ref=e248]:
+                - generic [ref=e257]:
+                  - paragraph [ref=e264]: 否
+                  - paragraph [ref=e270]: 是
+                  - paragraph [ref=e278]: 是
+                  - paragraph [ref=e284]: 否
+                - generic [ref=e286]:
+                  - paragraph [ref=e295]: 用户访问
+                  - paragraph [ref=e302]: 已登录?
+                  - paragraph [ref=e309]: 显示登录页
+                  - paragraph [ref=e316]: 显示仪表盘
+                  - paragraph [ref=e323]: 输入凭据
+                  - paragraph [ref=e330]: 有效?
+                  - paragraph [ref=e337]: 显示错误
+            - heading "节点形状速查" [level=3] [ref=e338]
+            - document [ref=e340]:
+              - generic [ref=e358]:
+                - paragraph [ref=e365]: 矩形
+                - paragraph [ref=e374]: 圆角矩形
+                - paragraph [ref=e381]: 体育场形
+                - paragraph [ref=e388]: 子程序
+                - paragraph [ref=e395]: 数据库
+                - paragraph [ref=e402]: 圆形
+                - paragraph [ref=e409]: 菱形判断
+                - paragraph [ref=e416]: 六边形
+                - paragraph [ref=e423]: 平行四边形
+            - heading "子图与方向" [level=3] [ref=e424]
+            - document [ref=e426]:
+              - generic [ref=e428]:
+                - generic [ref=e429]:
+                  - paragraph [ref=e436]: Backend
+                  - paragraph [ref=e443]: Frontend
+                - generic [ref=e459]:
+                  - paragraph [ref=e466]: Web App
+                  - paragraph [ref=e473]: Mobile App
+                  - paragraph [ref=e480]: API Gateway
+                  - paragraph [ref=e487]: Auth Service
+                  - paragraph [ref=e494]: Business Service
+                  - paragraph [ref=e501]: Database
+            - heading "时序图（Sequence Diagram）" [level=2] [ref=e502]
+            - paragraph [ref=e503]: 展示参与者之间的消息交互，适合 API 流程、认证过程。
+            - document [ref=e505]:
+              - generic [ref=e508]: DB
+              - generic [ref=e511]: API
+              - generic [ref=e514]: Frontend
+              - generic [ref=e518]: DB
+              - generic [ref=e522]: API
+              - generic [ref=e526]: Frontend
+              - generic [ref=e537]: User
+              - generic [ref=e538]: 点击登录
+              - generic [ref=e539]: "1"
+              - generic [ref=e540]: POST /auth/login
+              - generic [ref=e541]: "2"
+              - generic [ref=e542]: 查询用户
+              - generic [ref=e543]: "3"
+              - generic [ref=e544]: 用户记录
+              - generic [ref=e545]: "4"
+              - generic [ref=e546]: 200 + JWT
+              - generic [ref=e547]: "5"
+              - generic [ref=e548]: 跳转仪表盘
+              - generic [ref=e549]: "6"
+              - generic [ref=e554]: User
+            - heading "并行与循环" [level=3] [ref=e555]
+            - document [ref=e557]:
+              - generic [ref=e560]: Notify
+              - generic [ref=e563]: Inventory
+              - generic [ref=e566]: Payment
+              - generic [ref=e569]: Order
+              - generic [ref=e573]: Notify
+              - generic [ref=e577]: Inventory
+              - generic [ref=e581]: Payment
+              - generic [ref=e585]: Order
+              - generic [ref=e586]:
+                - generic [ref=e588]: par
+                - generic [ref=e589]: "[并行处理]"
+              - generic [ref=e590]:
+                - generic [ref=e592]: loop
+                - generic [ref=e593]: "[每 30 秒轮询]"
+              - generic [ref=e594]: 扣款
+              - generic [ref=e595]: 扣款成功
+              - generic [ref=e596]: 扣减库存
+              - generic [ref=e597]: 发送确认邮件
+              - generic [ref=e598]: 查询状态
+              - generic [ref=e599]: 处理中
+            - heading "类图（Class Diagram）" [level=2] [ref=e600]
+            - paragraph [ref=e601]: 面向对象设计、领域建模，展示类、属性、方法和关系。
+            - document [ref=e603]:
+              - generic [ref=e605]:
+                - generic [ref=e609]:
+                  - paragraph [ref=e615]: places
+                  - paragraph [ref=e621]: contains
+                  - paragraph [ref=e627]: references
+                  - paragraph [ref=e634]: "1"
+                  - paragraph [ref=e640]: "1"
+                  - paragraph [ref=e646]: "1"
+                  - paragraph [ref=e651]: 0..*
+                  - paragraph [ref=e656]: 1..*
+                  - paragraph [ref=e661]: "1"
+                - generic [ref=e662]:
+                  - generic [ref=e663]:
+                    - paragraph [ref=e672]: User
+                    - generic [ref=e673]:
+                      - paragraph [ref=e678]: +UUID id
+                      - paragraph [ref=e683]: +String email
+                      - paragraph [ref=e688]: +String name
+                    - generic [ref=e689]:
+                      - paragraph [ref=e694]: "+login(password) : bool"
+                      - paragraph [ref=e699]: "+getOrders() : List<Order>"
+                  - generic [ref=e704]:
+                    - paragraph [ref=e713]: Order
+                    - generic [ref=e714]:
+                      - paragraph [ref=e719]: +UUID id
+                      - paragraph [ref=e724]: +DateTime createdAt
+                      - paragraph [ref=e729]: +OrderStatus status
+                    - generic [ref=e730]:
+                      - paragraph [ref=e735]: "+calculateTotal() : Decimal"
+                      - paragraph [ref=e740]: +cancel()
+                  - generic [ref=e745]:
+                    - paragraph [ref=e754]: LineItem
+                    - generic [ref=e755]:
+                      - paragraph [ref=e760]: +int quantity
+                      - paragraph [ref=e765]: +Decimal pricePerUnit
+                    - paragraph [ref=e771]: "+getSubtotal() : Decimal"
+                  - generic [ref=e776]:
+                    - paragraph [ref=e785]: Product
+                    - generic [ref=e786]:
+                      - paragraph [ref=e791]: +UUID id
+                      - paragraph [ref=e796]: +String name
+                      - paragraph [ref=e801]: +Decimal price
+                    - paragraph [ref=e807]: "+isAvailable() : bool"
+                  - generic [ref=e812]:
+                    - paragraph [ref=e821]: «enumeration»
+                    - paragraph [ref=e827]: OrderStatus
+                    - generic [ref=e828]:
+                      - paragraph [ref=e833]: PENDING
+                      - paragraph [ref=e838]: PAID
+                      - paragraph [ref=e843]: SHIPPED
+                      - paragraph [ref=e848]: CANCELLED
+            - heading "设计模式示例" [level=3] [ref=e853]
+            - document [ref=e855]:
+              - generic [ref=e864]:
+                - generic [ref=e865]:
+                  - paragraph [ref=e874]: «interface»
+                  - paragraph [ref=e880]: PaymentStrategy
+                  - paragraph [ref=e886]: "+pay(amount: Decimal)"
+                - generic [ref=e891]:
+                  - paragraph [ref=e900]: CreditCardPayment
+                  - paragraph [ref=e906]: "+pay(amount: Decimal)"
+                - generic [ref=e911]:
+                  - paragraph [ref=e920]: PayPalPayment
+                  - paragraph [ref=e926]: "+pay(amount: Decimal)"
+                - generic [ref=e931]:
+                  - paragraph [ref=e940]: PaymentProcessor
+                  - paragraph [ref=e946]: "-PaymentStrategy strategy"
+                  - generic [ref=e947]:
+                    - paragraph [ref=e952]: "+setStrategy(s: PaymentStrategy)"
+                    - paragraph [ref=e957]: "+processPayment(amount: Decimal)"
+            - heading "ER 图（Entity Relationship Diagram）" [level=2] [ref=e962]
+            - paragraph [ref=e963]: 数据库建模，展示表、字段和关系。
+            - document [ref=e965]:
+              - generic [ref=e967]:
+                - generic [ref=e973]:
+                  - paragraph [ref=e979]: creates
+                  - paragraph [ref=e985]: writes
+                  - paragraph [ref=e991]: receives
+                  - paragraph [ref=e997]: tagged_with
+                  - paragraph [ref=e1003]: belongs to
+                - generic [ref=e1004]:
+                  - generic [ref=e1005]:
+                    - paragraph [ref=e1025]: USER
+                    - paragraph [ref=e1030]: uuid
+                    - paragraph [ref=e1035]: id
+                    - paragraph [ref=e1040]: PK
+                    - paragraph [ref=e1045]: varchar
+                    - paragraph [ref=e1050]: email
+                    - paragraph [ref=e1055]: UK
+                    - paragraph [ref=e1060]: NOT NULL
+                    - paragraph [ref=e1065]: varchar
+                    - paragraph [ref=e1070]: name
+                    - paragraph [ref=e1075]: NOT NULL
+                    - paragraph [ref=e1080]: timestamp
+                    - paragraph [ref=e1085]: created_at
+                    - paragraph [ref=e1090]: DEFAULT NOW()
+                  - generic [ref=e1100]:
+                    - paragraph [ref=e1126]: POST
+                    - paragraph [ref=e1131]: uuid
+                    - paragraph [ref=e1136]: id
+                    - paragraph [ref=e1141]: PK
+                    - paragraph [ref=e1146]: uuid
+                    - paragraph [ref=e1151]: user_id
+                    - paragraph [ref=e1156]: FK
+                    - paragraph [ref=e1161]: NOT NULL
+                    - paragraph [ref=e1166]: varchar
+                    - paragraph [ref=e1171]: title
+                    - paragraph [ref=e1176]: NOT NULL
+                    - paragraph [ref=e1181]: text
+                    - paragraph [ref=e1186]: content
+                    - paragraph [ref=e1191]: NOT NULL
+                    - paragraph [ref=e1196]: varchar
+                    - paragraph [ref=e1201]: status
+                    - paragraph [ref=e1206]: DEFAULT draft
+                    - paragraph [ref=e1211]: timestamp
+                    - paragraph [ref=e1216]: published_at
+                  - generic [ref=e1226]:
+                    - paragraph [ref=e1246]: COMMENT
+                    - paragraph [ref=e1251]: uuid
+                    - paragraph [ref=e1256]: id
+                    - paragraph [ref=e1261]: PK
+                    - paragraph [ref=e1266]: uuid
+                    - paragraph [ref=e1271]: user_id
+                    - paragraph [ref=e1276]: FK
+                    - paragraph [ref=e1281]: NOT NULL
+                    - paragraph [ref=e1286]: uuid
+                    - paragraph [ref=e1291]: post_id
+                    - paragraph [ref=e1296]: FK
+                    - paragraph [ref=e1301]: NOT NULL
+                    - paragraph [ref=e1306]: text
+                    - paragraph [ref=e1311]: content
+                    - paragraph [ref=e1316]: NOT NULL
+                  - generic [ref=e1326]:
+                    - paragraph [ref=e1340]: TAG
+                    - paragraph [ref=e1345]: uuid
+                    - paragraph [ref=e1350]: id
+                    - paragraph [ref=e1355]: PK
+                    - paragraph [ref=e1360]: varchar
+                    - paragraph [ref=e1365]: name
+                    - paragraph [ref=e1370]: UK
+                    - paragraph [ref=e1375]: NOT NULL
+                  - generic [ref=e1382]:
+                    - paragraph [ref=e1396]: CATEGORY
+                    - paragraph [ref=e1401]: uuid
+                    - paragraph [ref=e1406]: id
+                    - paragraph [ref=e1411]: PK
+                    - paragraph [ref=e1416]: varchar
+                    - paragraph [ref=e1421]: name
+                    - paragraph [ref=e1426]: UK
+                    - paragraph [ref=e1431]: NOT NULL
+            - heading "状态图（State Diagram）" [level=2] [ref=e1438]
+            - paragraph [ref=e1439]: 状态机、生命周期、订单状态流转。
+            - document [ref=e1441]:
+              - generic [ref=e1443]:
+                - generic [ref=e1452]:
+                  - paragraph [ref=e1458]: 创建订单
+                  - paragraph [ref=e1464]: 提交
+                  - paragraph [ref=e1470]: 支付成功
+                  - paragraph [ref=e1476]: 支付超时
+                  - paragraph [ref=e1482]: 发货
+                  - paragraph [ref=e1488]: 签收
+                  - paragraph [ref=e1494]: 确认收货
+                  - paragraph [ref=e1500]: 申请退货
+                  - paragraph [ref=e1506]: 退款成功
+                  - paragraph [ref=e1512]: 退货驳回
+                - generic [ref=e1516]:
+                  - paragraph [ref=e1525]: Draft
+                  - paragraph [ref=e1532]: Pending
+                  - paragraph [ref=e1539]: Paid
+                  - paragraph [ref=e1546]: Cancelled
+                  - paragraph [ref=e1553]: Shipped
+                  - paragraph [ref=e1560]: Delivered
+                  - paragraph [ref=e1567]: Completed
+                  - paragraph [ref=e1574]: Returning
+                  - paragraph [ref=e1581]: Refunded
+            - heading "复合状态" [level=3] [ref=e1589]
+            - document [ref=e1591]:
+              - generic [ref=e1593]:
+                - generic [ref=e1597]:
+                  - paragraph [ref=e1604]: 开始处理
+                  - paragraph [ref=e1610]: 处理结束
+                - generic [ref=e1611]:
+                  - paragraph [ref=e1620]: Idle
+                  - generic [ref=e1621]:
+                    - paragraph [ref=e1630]: Processing
+                    - generic [ref=e1636]:
+                      - paragraph [ref=e1643]: 输入合法
+                      - paragraph [ref=e1649]: 输入非法
+                      - paragraph [ref=e1656]: 保存完成
+                    - generic [ref=e1657]:
+                      - paragraph [ref=e1666]: Validating
+                      - paragraph [ref=e1673]: Computing
+                      - paragraph [ref=e1687]: Saving
+            - heading "甘特图（Gantt Chart）" [level=2] [ref=e1688]
+            - paragraph [ref=e1689]: 项目排期、里程碑、任务依赖。
+            - document [ref=e1691]:
+              - generic [ref=e1692]:
+                - generic [ref=e1695]: 01/04
+                - generic [ref=e1697]: 01/11
+                - generic [ref=e1699]: 01/18
+                - generic [ref=e1701]: 01/25
+                - generic [ref=e1703]: 02/01
+                - generic [ref=e1705]: 02/08
+                - generic [ref=e1707]: 02/15
+                - generic [ref=e1709]: 02/22
+                - generic [ref=e1711]: 03/01
+                - generic [ref=e1713]: 03/08
+                - generic [ref=e1715]: 03/15
+                - generic [ref=e1717]: 03/22
+                - generic [ref=e1719]: 03/29
+                - generic [ref=e1721]: 04/05
+              - generic [ref=e1732]:
+                - generic [ref=e1742]: 需求分析
+                - generic [ref=e1743]: 需求评审
+                - generic [ref=e1744]: 架构设计
+                - generic [ref=e1745]: 详细设计
+                - generic [ref=e1746]: 前端开发
+                - generic [ref=e1747]: 后端开发
+                - generic [ref=e1748]: 集成测试
+                - generic [ref=e1749]: 用户验收
+                - generic [ref=e1750]: 上线
+              - generic [ref=e1751]:
+                - generic [ref=e1752]: 需求
+                - generic [ref=e1753]: 设计
+                - generic [ref=e1754]: 开发
+                - generic [ref=e1755]: 测试
+              - generic [ref=e1756]: 项目开发计划
+            - heading "饼图（Pie Chart）" [level=2] [ref=e1757]
+            - paragraph [ref=e1758]: 数据占比可视化。
+            - document [ref=e1760]:
+              - generic [ref=e1761]:
+                - generic [ref=e1768]: 40%
+                - generic [ref=e1769]: 25%
+                - generic [ref=e1770]: 15%
+                - generic [ref=e1771]: 12%
+                - generic [ref=e1772]: 8%
+                - generic [ref=e1773]: 技术栈使用分布
+                - generic [ref=e1776]: TypeScript
+                - generic [ref=e1779]: Python
+                - generic [ref=e1782]: Go
+                - generic [ref=e1785]: Rust
+                - generic [ref=e1788]: 其他
+            - heading "Git 图（Git Graph）" [level=2] [ref=e1789]
+            - paragraph [ref=e1790]: 分支策略、版本管理流程。
+            - document [ref=e1792]:
+              - generic [ref=e1793]:
+                - generic [ref=e1797]: main
+                - generic [ref=e1801]: develop
+                - generic [ref=e1805]: feature/payment
+                - generic [ref=e1809]: hotfix
+              - generic [ref=e1831]:
+                - generic [ref=e1834]: init
+                - generic [ref=e1837]: "feat: 基础框架"
+                - generic [ref=e1840]: "feat: 用户模块"
+                - generic [ref=e1843]: "feat: 订单模块"
+                - generic [ref=e1846]: "feat: 支付集成"
+                - generic [ref=e1849]: "fix: 金额精度"
+                - generic [ref=e1852]: "merge: 支付功能"
+                - generic [ref=e1855]: "release: v1.0"
+                - generic [ref=e1858]: "fix: 紧急修复"
+                - generic [ref=e1861]: "release: v1.0.1"
+            - heading "用户旅程图（User Journey）" [level=2] [ref=e1862]
+            - paragraph [ref=e1863]: 用户体验地图，展示情绪变化。
+            - document [ref=e1865]:
+              - generic [ref=e1867]: 用户
+              - generic [ref=e1869]: 系统
+              - generic [ref=e1875]: 浏览
+              - generic [ref=e1876]:
+                - generic "用户" [ref=e1883]
+                - generic [ref=e1887]: 打开首页
+              - generic [ref=e1888]:
+                - generic "用户" [ref=e1895]
+                - generic [ref=e1899]: 搜索商品
+              - generic [ref=e1900]:
+                - generic "用户" [ref=e1907]
+                - generic [ref=e1911]: 查看详情
+              - generic [ref=e1917]: 下单
+              - generic [ref=e1918]:
+                - generic "用户" [ref=e1925]
+                - generic [ref=e1929]: 加入购物车
+              - generic [ref=e1930]:
+                - generic "用户" [ref=e1936]
+                - generic [ref=e1940]: 填写地址
+              - generic [ref=e1941]:
+                - generic "用户" [ref=e1947]
+                - generic [ref=e1951]: 选择支付
+              - generic [ref=e1952]:
+                - generic "用户" [ref=e1959]
+                - generic "系统" [ref=e1960]
+                - generic [ref=e1964]: 支付失败
+              - generic [ref=e1965]:
+                - generic "用户" [ref=e1972]
+                - generic [ref=e1976]: 换卡重试
+              - generic [ref=e1977]:
+                - generic "用户" [ref=e1984]
+                - generic [ref=e1988]: 支付成功
+              - generic [ref=e1994]: 收货
+              - generic [ref=e1995]:
+                - generic "用户" [ref=e2001]
+                - generic [ref=e2005]: 查看物流
+              - generic [ref=e2006]:
+                - generic "用户" [ref=e2013]
+                - generic [ref=e2017]: 确认收货
+              - generic [ref=e2018]:
+                - generic "用户" [ref=e2025]
+                - generic [ref=e2029]: 评价商品
+              - generic [ref=e2030]: 用户购物体验
+            - heading "思维导图（Mindmap）" [level=2] [ref=e2031]
+            - paragraph [ref=e2032]: 知识梳理、头脑风暴、层级结构。
+            - document [ref=e2034]:
+              - generic [ref=e2069]:
+                - paragraph [ref=e2076]: zdoc
+                - paragraph [ref=e2083]: 核心特性
+                - paragraph [ref=e2090]: 零配置
+                - paragraph [ref=e2097]: Markdown 驱动
+                - paragraph [ref=e2104]: Mermaid 图表
+                - paragraph [ref=e2111]: 文档结构
+                - paragraph [ref=e2118]: 建设者视角
+                - paragraph [ref=e2125]: 使用者视角
+                - paragraph [ref=e2132]: 知识库视角
+                - paragraph [ref=e2139]: 技术栈
+                - paragraph [ref=e2146]: SvelteKit
+                - paragraph [ref=e2153]: rehype/unified
+                - paragraph [ref=e2160]: Mermaid.js
+                - paragraph [ref=e2167]: 部署
+                - paragraph [ref=e2174]: Docker
+                - paragraph [ref=e2181]: Node.js
+                - paragraph [ref=e2188]: 静态导出
+            - heading "时间线（Timeline）" [level=2] [ref=e2189]
+            - paragraph [ref=e2190]: 项目里程碑、事件演进。
+            - document [ref=e2192]:
+              - generic [ref=e2198]: 2025 Q1
+              - generic [ref=e2204]: 项目启动
+              - generic [ref=e2210]: 确定技术栈
+              - generic [ref=e2216]: 核心功能
+              - generic [ref=e2222]: Markdown 渲染
+              - generic [ref=e2228]: 2025 Q2
+              - generic [ref=e2234]: 搜索功能
+              - generic [ref=e2240]: 全文检索
+              - generic [ref=e2246]: 主题系统
+              - generic [ref=e2252]: 暗色模式
+              - generic [ref=e2258]: 2025 Q3
+              - generic [ref=e2264]: Mermaid 支持
+              - generic [ref=e2270]: 图表渲染
+              - generic [ref=e2276]: 国际化
+              - generic [ref=e2282]: 中英双语
+              - generic [ref=e2288]: 2025 Q4
+              - generic [ref=e2294]: 性能优化
+              - generic [ref=e2300]: 按需加载
+              - generic [ref=e2306]: v1.0 发布
+              - generic [ref=e2312]: 正式上线
+              - generic [ref=e2313]: zdoc 发展历程
+            - heading "架构图（Architecture Diagram）" [level=2] [ref=e2314]
+            - paragraph [ref=e2315]: 云服务、基础设施、部署架构（Mermaid v11.1+）。
+            - document [ref=e2317]:
+              - generic [ref=e2331]:
+                - generic [ref=e2332]:
+                  - generic [ref=e2336]: 负载均衡
+                  - img [ref=e2339]:
+                    - generic [ref=e2342]: "?"
+                - generic [ref=e2343]:
+                  - generic [ref=e2347]: API 服务 1
+                  - img [ref=e2350]
+                - generic [ref=e2375]:
+                  - generic [ref=e2379]: API 服务 2
+                  - img [ref=e2382]
+                - generic [ref=e2407]:
+                  - generic [ref=e2411]: 主数据库
+                  - img [ref=e2414]
+                - generic [ref=e2421]:
+                  - generic [ref=e2425]: 只读副本
+                  - img [ref=e2428]
+              - generic [ref=e2435]:
+                - generic [ref=e2437]:
+                  - img [ref=e2440]
+                  - generic [ref=e2447]: 公网
+                - generic [ref=e2449]:
+                  - img [ref=e2452]
+                  - generic [ref=e2459]: 私有网络
+            - heading "C4 模型（C4 Diagram）" [level=2] [ref=e2460]
+            - paragraph [ref=e2461]: 分层架构可视化：系统上下文 → 容器 → 组件。
+            - heading "系统上下文" [level=3] [ref=e2462]
+            - document [ref=e2464]:
+              - generic [ref=e2465]:
+                - generic [ref=e2467]: <<person>>
+                - generic [ref=e2469]: 顾客
+                - generic [ref=e2470]: 在线购物
+              - generic [ref=e2471]:
+                - generic [ref=e2473]: <<person>>
+                - generic [ref=e2475]: 管理员
+                - generic [ref=e2476]: 管理商品和订单
+              - generic [ref=e2477]:
+                - generic [ref=e2479]: <<system>>
+                - generic [ref=e2480]: 电商平台
+                - generic [ref=e2481]: 在线购物系统
+              - generic [ref=e2482]:
+                - generic [ref=e2484]: <<external_system>>
+                - generic [ref=e2485]: 支付网关
+                - generic [ref=e2486]: 处理支付
+              - generic [ref=e2487]:
+                - generic [ref=e2489]: <<external_system>>
+                - generic [ref=e2490]: 邮件服务
+                - generic [ref=e2491]: 发送通知
+              - generic [ref=e2492]:
+                - generic [ref=e2494]: 浏览商品、下单
+                - generic [ref=e2496]: 管理后台
+                - generic [ref=e2498]: 处理支付
+                - generic [ref=e2499]: "[HTTPS/REST]"
+                - generic [ref=e2501]: 发送邮件
+                - generic [ref=e2502]: "[SMTP]"
+              - generic [ref=e2503]: 系统上下文 - 电商平台
+            - heading "容器图" [level=3] [ref=e2504]
+            - document [ref=e2506]:
+              - generic [ref=e2507]:
+                - generic [ref=e2509]: <<person>>
+                - generic [ref=e2511]: 顾客
+              - generic [ref=e2512]:
+                - generic [ref=e2514]: <<external_system>>
+                - generic [ref=e2515]: 支付网关
+              - generic [ref=e2516]:
+                - generic [ref=e2518]: <<container>>
+                - generic [ref=e2519]: Web 应用
+                - generic [ref=e2520]: "[React]"
+                - generic [ref=e2521]: 浏览器端 UI
+              - generic [ref=e2522]:
+                - generic [ref=e2524]: <<container>>
+                - generic [ref=e2525]: 移动端
+                - generic [ref=e2526]: "[React Native]"
+                - generic [ref=e2527]: 原生体验
+              - generic [ref=e2528]:
+                - generic [ref=e2530]: 前端
+                - generic [ref=e2531]: "[CONTAINER]"
+              - generic [ref=e2532]:
+                - generic [ref=e2534]: <<container>>
+                - generic [ref=e2535]: API 网关
+                - generic [ref=e2536]: "[Node.js]"
+                - generic [ref=e2537]: 路由与鉴权
+              - generic [ref=e2538]:
+                - generic [ref=e2540]: <<container>>
+                - generic [ref=e2541]: 订单服务
+                - generic [ref=e2542]: "[Java]"
+                - generic [ref=e2543]: 订单处理
+              - generic [ref=e2544]:
+                - generic [ref=e2546]: <<container>>
+                - generic [ref=e2547]: 商品服务
+                - generic [ref=e2548]: "[Python]"
+                - generic [ref=e2549]: 商品管理
+              - generic [ref=e2550]:
+                - generic [ref=e2552]: 后端服务
+                - generic [ref=e2553]: "[CONTAINER]"
+              - generic [ref=e2554]:
+                - generic [ref=e2557]: <<container_db>>
+                - generic [ref=e2558]: 主数据库
+                - generic [ref=e2559]: "[PostgreSQL]"
+                - generic [ref=e2560]: 核心数据
+              - generic [ref=e2561]:
+                - generic [ref=e2564]: <<container_db>>
+                - generic [ref=e2565]: 缓存
+                - generic [ref=e2566]: "[Redis]"
+                - generic [ref=e2567]: 登录态与缓存
+              - generic [ref=e2568]:
+                - generic [ref=e2570]: 数据层
+                - generic [ref=e2571]: "[CONTAINER]"
+              - generic [ref=e2572]:
+                - generic [ref=e2574]: 使用
+                - generic [ref=e2575]: "[HTTPS]"
+                - generic [ref=e2577]: 使用
+                - generic [ref=e2578]: "[HTTPS]"
+                - generic [ref=e2580]: 调用
+                - generic [ref=e2581]: "[HTTPS/JSON]"
+                - generic [ref=e2583]: 调用
+                - generic [ref=e2584]: "[HTTPS/JSON]"
+                - generic [ref=e2586]: 路由
+                - generic [ref=e2587]: "[REST]"
+                - generic [ref=e2589]: 路由
+                - generic [ref=e2590]: "[REST]"
+                - generic [ref=e2592]: 读写
+                - generic [ref=e2593]: "[SQL]"
+                - generic [ref=e2595]: 读写
+                - generic [ref=e2596]: "[SQL]"
+                - generic [ref=e2598]: 缓存
+                - generic [ref=e2599]: "[Redis]"
+                - generic [ref=e2601]: 支付
+                - generic [ref=e2602]: "[HTTPS/REST]"
+              - generic [ref=e2603]: 容器图 - 电商平台
+            - heading "代码高亮" [level=2] [ref=e2604]
+            - paragraph [ref=e2605]: 除了 Mermaid，zdoc 也支持常规代码高亮：
+            - generic [ref=e2606]:
+              - button "Copy" [ref=e2607] [cursor=pointer]:
+                - img [ref=e2608]
+              - code [ref=e2612]: const sessions = new Map<string, number>(); const hash = sha256(token + secret); sessions.set(hash, Date.now() + 7 * 24 * 3600 * 1000);
+            - generic [ref=e2613]:
+              - button "Copy" [ref=e2614] [cursor=pointer]:
+                - img [ref=e2615]
+              - code [ref=e2619]: "bun run dev # Local: http://localhost:20000"
+            - generic [ref=e2620]:
+              - button "Copy" [ref=e2621] [cursor=pointer]:
+                - img [ref=e2622]
+              - code [ref=e2626]: "{ \"title\": \"我的文档\", \"docsDir\": \"./docs\", \"password\": \"hunter2\", \"port\": 8888 }"
+            - heading "行内 code" [level=2] [ref=e2627]:
+              - text: 行内
+              - code [ref=e2628]: code
+            - paragraph [ref=e2629]:
+              - text: 正文里一样能
+              - code [ref=e2630]: inline code
+              - text: ，比如
+              - code [ref=e2631]: _meta.yaml
+              - text: 或者
+              - code [ref=e2632]: const x = 1
+              - text: 。
+          - complementary "On this page" [ref=e2633]:
+            - generic [ref=e2634]: 本页目录
+            - list [ref=e2635]:
+              - listitem [ref=e2636]:
+                - link "Mermaid 图表全集" [ref=e2637] [cursor=pointer]:
+                  - /url: "#mermaid-图表全集"
+              - listitem [ref=e2638]:
+                - link "流程图（Flowchart）" [ref=e2639] [cursor=pointer]:
+                  - /url: "#流程图flowchart"
+              - listitem [ref=e2640]:
+                - link "节点形状速查" [ref=e2641] [cursor=pointer]:
+                  - /url: "#节点形状速查"
+              - listitem [ref=e2642]:
+                - link "子图与方向" [ref=e2643] [cursor=pointer]:
+                  - /url: "#子图与方向"
+              - listitem [ref=e2644]:
+                - link "时序图（Sequence Diagram）" [ref=e2645] [cursor=pointer]:
+                  - /url: "#时序图sequence-diagram"
+              - listitem [ref=e2646]:
+                - link "并行与循环" [ref=e2647] [cursor=pointer]:
+                  - /url: "#并行与循环"
+              - listitem [ref=e2648]:
+                - link "类图（Class Diagram）" [ref=e2649] [cursor=pointer]:
+                  - /url: "#类图class-diagram"
+              - listitem [ref=e2650]:
+                - link "设计模式示例" [ref=e2651] [cursor=pointer]:
+                  - /url: "#设计模式示例"
+              - listitem [ref=e2652]:
+                - link "ER 图（Entity Relationship Diagram）" [ref=e2653] [cursor=pointer]:
+                  - /url: "#er-图entity-relationship-diagram"
+              - listitem [ref=e2654]:
+                - link "状态图（State Diagram）" [ref=e2655] [cursor=pointer]:
+                  - /url: "#状态图state-diagram"
+              - listitem [ref=e2656]:
+                - link "复合状态" [ref=e2657] [cursor=pointer]:
+                  - /url: "#复合状态"
+              - listitem [ref=e2658]:
+                - link "甘特图（Gantt Chart）" [ref=e2659] [cursor=pointer]:
+                  - /url: "#甘特图gantt-chart"
+              - listitem [ref=e2660]:
+                - link "饼图（Pie Chart）" [ref=e2661] [cursor=pointer]:
+                  - /url: "#饼图pie-chart"
+              - listitem [ref=e2662]:
+                - link "Git 图（Git Graph）" [ref=e2663] [cursor=pointer]:
+                  - /url: "#git-图git-graph"
+              - listitem [ref=e2664]:
+                - link "用户旅程图（User Journey）" [ref=e2665] [cursor=pointer]:
+                  - /url: "#用户旅程图user-journey"
+              - listitem [ref=e2666]:
+                - link "思维导图（Mindmap）" [ref=e2667] [cursor=pointer]:
+                  - /url: "#思维导图mindmap"
+              - listitem [ref=e2668]:
+                - link "时间线（Timeline）" [ref=e2669] [cursor=pointer]:
+                  - /url: "#时间线timeline"
+              - listitem [ref=e2670]:
+                - link "架构图（Architecture Diagram）" [ref=e2671] [cursor=pointer]:
+                  - /url: "#架构图architecture-diagram"
+              - listitem [ref=e2672]:
+                - link "C4 模型（C4 Diagram）" [ref=e2673] [cursor=pointer]:
+                  - /url: "#c4-模型c4-diagram"
+              - listitem [ref=e2674]:
+                - link "系统上下文" [ref=e2675] [cursor=pointer]:
+                  - /url: "#系统上下文"
+              - listitem [ref=e2676]:
+                - link "容器图" [ref=e2677] [cursor=pointer]:
+                  - /url: "#容器图"
+              - listitem [ref=e2678]:
+                - link "代码高亮" [ref=e2679] [cursor=pointer]:
+                  - /url: "#代码高亮"
+              - listitem [ref=e2680]:
+                - link "行内 code" [ref=e2681] [cursor=pointer]:
+                  - /url: "#行内-code"
+  - dialog [ref=e157]:
+    - document [ref=e158]:
+      - generic [ref=e159]:
+        - heading "关于" [level=2] [ref=e160]
+        - button "关闭" [ref=e161] [cursor=pointer]:
+          - img [ref=e162]
+      - generic [ref=e165]:
+        - img [ref=e167]
+        - heading "zdoc" [level=3] [ref=e169]
+        - paragraph [ref=e170]: Zero-config Markdown docs site
+        - generic [ref=e171]:
+          - link "GitHub" [ref=e172] [cursor=pointer]:
+            - /url: https://github.com/o7z/zdoc
+            - img [ref=e173]
+            - generic [ref=e176]: GitHub
+          - link "npm" [ref=e177] [cursor=pointer]:
+            - /url: https://www.npmjs.com/package/@o7z/zdoc
+            - img [ref=e178]
+            - generic [ref=e182]: npm
+          - link "Context7" [ref=e183] [cursor=pointer]:
+            - /url: https://context7.com/o7z/zdoc
+            - img [ref=e184]
+            - generic [ref=e188]: Context7
+  - dialog [ref=e189]:
+    - document [ref=e190]:
+      - generic [ref=e191]:
+        - heading "设置" [level=2] [ref=e192]
+        - button "关闭" [ref=e193] [cursor=pointer]:
+          - img [ref=e194]
+      - generic [ref=e198]:
+        - generic [ref=e199]:
+          - heading "左侧栏" [level=3] [ref=e200]
+          - generic [ref=e201]:
+            - generic [ref=e202]:
+              - generic [ref=e203]: 最小宽度
+              - generic [ref=e204]: 200px
+            - slider [ref=e205] [cursor=pointer]: "200"
+          - generic [ref=e206]:
+            - generic [ref=e207]:
+              - generic [ref=e208]: 最大宽度
+              - generic [ref=e209]: 400px
+            - slider [ref=e210] [cursor=pointer]: "400"
+          - generic [ref=e211]:
+            - generic [ref=e212]:
+              - generic [ref=e213]: 层级缩进
+              - generic [ref=e214]: 16px
+            - slider [ref=e215] [cursor=pointer]: "16"
+        - generic [ref=e216]:
+          - heading "本页目录" [level=3] [ref=e217]
+          - generic [ref=e218]:
+            - generic [ref=e219]:
+              - generic [ref=e220]: 最小宽度
+              - generic [ref=e221]: 200px
+            - slider [ref=e222] [cursor=pointer]: "200"
+          - generic [ref=e223]:
+            - generic [ref=e224]:
+              - generic [ref=e225]: 最大宽度
+              - generic [ref=e226]: 380px
+            - slider [ref=e227] [cursor=pointer]: "380"
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - generic [ref=e230]: 层级缩进
+              - generic [ref=e231]: 16px
+            - slider [ref=e232] [cursor=pointer]: "16"
+      - button "恢复默认" [ref=e234] [cursor=pointer]
+  - generic [ref=e235]: Mermaid 图表全集
