@@ -38,16 +38,16 @@ flowchart LR
 flowchart TB
     subgraph Frontend
         direction LR
-        A[Web App] --> B[Mobile App]
+        A["Web App<br/>网页应用"] --> B["Mobile App<br/>移动应用"]
     end
     subgraph Backend
         direction TB
-        C[API Gateway] --> D[Auth Service]
-        C --> E[Business Service]
+        C["API Gateway<br/>API 网关"] --> D["Auth Service<br/>认证服务"]
+        C --> E["Business Service<br/>业务服务"]
     end
     B --> C
     A --> C
-    D --> F[(Database)]
+    D --> F[("Database<br/>数据库")]
     E --> F
 ```
 

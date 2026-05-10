@@ -156,6 +156,77 @@ body {
 .doc-content .mermaid-rendered .label span {
 	fill: var(--text) !important;
 	color: var(--text) !important;
+	line-height: 1.5 !important;
+}
+.doc-content .mermaid-rendered foreignObject > div {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 100% !important;
+	height: 100% !important;
+}
+.doc-content .mermaid-rendered p,
+.doc-content .mermaid-rendered li {
+	line-height: 1.5 !important;
+}
+.doc-content .mermaid-rendered p,
+.doc-content .mermaid-rendered ul,
+.doc-content .mermaid-rendered ol,
+.doc-content .mermaid-rendered li,
+.doc-content .mermaid-rendered h1,
+.doc-content .mermaid-rendered h2,
+.doc-content .mermaid-rendered h3,
+.doc-content .mermaid-rendered h4,
+.doc-content .mermaid-rendered a,
+.doc-content .mermaid-rendered code {
+	margin: 0 !important;
+	padding: 0 !important;
+	border: none !important;
+	background: none !important;
+	font-size: inherit !important;
+	color: inherit !important;
+}
+
+.mermaid-viewer-control-panel {
+	position: absolute;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	border-radius: 8px;
+	top: 12px;
+	right: 12px;
+	z-index: 10;
+	background: var(--bg) !important;
+	border: 1px solid var(--border) !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.mermaid-viewer-control-panel .mvcp-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	cursor: pointer;
+	padding: 0;
+	transition: background 0.12s, color 0.12s;
+}
+.mermaid-viewer-control-panel .mvcp-btn svg {
+	fill: none !important;
+	color: var(--text-muted) !important;
+	stroke: currentColor !important;
+	width: 16px;
+	height: 16px;
+}
+.mermaid-viewer-control-panel .mvcp-btn:hover svg,
+.mermaid-viewer-control-panel .mvcp-btn:active svg {
+	color: var(--text) !important;
+}
+.mermaid-viewer-control-panel .mvcp-btn:hover {
+	background: var(--bg-soft);
 }
 .doc-content .mermaid-rendered .node rect,
 .doc-content .mermaid-rendered .node circle,
@@ -165,6 +236,11 @@ body {
 	fill: var(--bg) !important;
 	stroke: var(--brand) !important;
 	stroke-width: 1.5px !important;
+}
+.doc-content .mermaid-rendered .node rect,
+.doc-content .mermaid-rendered .cluster rect {
+	rx: 4px;
+	ry: 4px;
 }
 .doc-content .mermaid-rendered .node .label {
 	text-align: center;

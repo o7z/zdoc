@@ -36,29 +36,29 @@ function readFileConfig(): FileConfig {
 	}
 }
 
-function loadConfig(): DocsConfig {
-	const file = readFileConfig();
+	function loadConfig(): DocsConfig {
+		const file = readFileConfig();
 
-	const docsDirRaw = process.env.ZDOC_DIR || file.docsDir || process.cwd();
-	const title = process.env.ZDOC_TITLE || file.title || 'Docs';
-	const password =
-		process.env.ZDOC_PASSWORD !== undefined
-			? process.env.ZDOC_PASSWORD
-			: file.password !== undefined
-				? file.password
-				: '';
-	const port = Number(process.env.PORT) || file.port || 8888;
-	const envDownload = coerceBool(process.env.ZDOC_DOWNLOAD);
-	const downloadEnabled = envDownload !== undefined ? envDownload : file.downloadEnabled === true;
+		const docsDirRaw = process.env.ZDOC_DIR || file.docsDir || process.cwd();
+		const title = process.env.ZDOC_TITLE || file.title || 'Docs';
+		const password =
+			process.env.ZDOC_PASSWORD !== undefined
+				? process.env.ZDOC_PASSWORD
+				: file.password !== undefined
+					? file.password
+					: '';
+		const port = Number(process.env.PORT) || file.port || 8888;
+		const envDownload = coerceBool(process.env.ZDOC_DOWNLOAD);
+		const downloadEnabled = envDownload !== undefined ? envDownload : file.downloadEnabled === true;
 
-	return {
-		title,
-		docsDir: resolve(docsDirRaw),
-		password,
-		port,
-		downloadEnabled,
-	};
-}
+		return {
+			title,
+			docsDir: resolve(docsDirRaw),
+			password,
+			port,
+			downloadEnabled,
+		};
+	}
 
 const state: DocsConfig = loadConfig();
 
