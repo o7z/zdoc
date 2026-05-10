@@ -330,8 +330,8 @@
 	<LinkPreview container={mainEl} />
 {/if}
 
-<dialog class="modal" bind:this={aboutDialogEl} onclick={(e) => { e.stopPropagation(); aboutDialogEl.close(); }}>
-	<div class="modal-content about-modal" onclick={(e) => e.stopPropagation()}>
+<dialog class="modal" bind:this={aboutDialogEl} onclick={(e) => { if (e.target === aboutDialogEl) aboutDialogEl.close(); }} onkeydown={(e) => { if (e.key === 'Escape') aboutDialogEl.close(); }}>
+	<div class="modal-content about-modal" role="document">
 		<div class="modal-header">
 			<h2 class="modal-title">关于</h2>
 			<button class="modal-close" onclick={() => aboutDialogEl.close()} aria-label="关闭">
@@ -362,8 +362,8 @@
 	</div>
 </dialog>
 
-<dialog class="modal" bind:this={settingsDialogEl} onclick={(e) => { e.stopPropagation(); settingsDialogEl.close(); }}>
-	<div class="modal-content settings-modal" onclick={(e) => e.stopPropagation()}>
+<dialog class="modal" bind:this={settingsDialogEl} onclick={(e) => { if (e.target === settingsDialogEl) settingsDialogEl.close(); }} onkeydown={(e) => { if (e.key === 'Escape') settingsDialogEl.close(); }}>
+	<div class="modal-content settings-modal" role="document">
 		<div class="modal-header">
 			<h2 class="modal-title">设置</h2>
 			<button class="modal-close" onclick={() => settingsDialogEl.close()} aria-label="关闭">
@@ -427,8 +427,8 @@
 		</div>
 	</div>
 </dialog>
-<dialog class="search-dialog" bind:this={searchDialogEl} onclose={() => { searchOpen = false; searchQuery = ''; debouncedQuery = ''; activeIdx = 0; }}>
-	<div class="search-modal">
+<dialog class="modal" bind:this={searchDialogEl} onclick={(e) => { if (e.target === searchDialogEl) closeSearch(); }} onkeydown={(e) => { if (e.key === 'Escape') closeSearch(); }} onclose={() => { searchOpen = false; searchQuery = ''; debouncedQuery = ''; activeIdx = 0; }}>
+	<div class="modal-content search-modal">
 		<div class="search-input-row">
 			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
 			<input
@@ -574,7 +574,8 @@
 	.sidebar-scroll { flex: 1; }
 	
 	/* Shared modal */
-	.modal { display: flex; align-items: center; justify-content: center; border: none; background: transparent; padding: 0; margin: 0; width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; }
+	.modal { border: none; background: transparent; padding: 0; margin: 0; }
+	.modal[open] { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; }
 	.modal::backdrop { background: rgba(0,0,0,0.5); }
 	.modal-content { background: var(--bg); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); color: var(--text); max-height: 90vh; overflow-y: auto; }
 	.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
@@ -607,9 +608,7 @@
 	.settings-reset:hover { color: var(--brand); border-color: var(--brand); background: var(--brand-soft); }
 
 	/* Search modal */
-	.search-dialog { border: none; background: transparent; position: fixed; top: 15vh; left: 50%; transform: translateX(-50%); width: 560px; max-width: 90vw; max-height: 70vh; padding: 0; margin: 0; z-index: 200; color: var(--text); border-radius: 12px; overflow: hidden; }
-	.search-dialog::backdrop { background: rgba(0,0,0,0.5); }
-	.search-modal { display: flex; flex-direction: column; background: var(--bg); height: 100%; }
+	.search-modal { display: flex; flex-direction: column; width: 560px; max-width: 90vw; max-height: 70vh; border-radius: 12px; overflow: hidden; }
 	.search-input-row { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
 	.search-input-row input { flex: 1; border: none; background: none; font-size: 16px; color: var(--text); outline: none; font-family: var(--font-sans); }
 	.search-close { background: none; border: none; cursor: pointer; color: var(--text-muted); }
