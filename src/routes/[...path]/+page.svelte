@@ -31,7 +31,7 @@
 		const headings = data.headings ?? [];
 		if (headings.length < 2) return;
 
-		const container = mainEl;
+		const container = mainEl?.querySelector('.doc-content');
 		if (!container) return;
 
 		const offset = 100;
