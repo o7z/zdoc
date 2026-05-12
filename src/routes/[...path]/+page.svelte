@@ -417,8 +417,6 @@
 
 	:global(.mermaid-viewport) {
 		min-height: 200px;
-		max-height: 80vh;
-		overflow: auto;
 		cursor: grab;
 	}
 	:global(.mermaid-viewport:active) {
