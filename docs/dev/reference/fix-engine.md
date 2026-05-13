@@ -1,12 +1,13 @@
 # `zdoc fix` 引擎设计
 
-`zdoc fix` 是 1.x 末计划引入的 CLI 子命令，负责修复 `_meta.yaml` 配置错误 —— 包含旧版 schema 自动迁移与常用使用错误修复。本文是设计草案，**未实现**。
+v1.15 已实现初版，本文记录设计与实现现状。`pages-to-children` 因 schema 迁移延后到 v2，详见 [v2 迁移时间线](#v2-迁移时间线)。
 
-> ⚠️ **上层依赖**：本文档基于以下用户决策起草，若改动请回扫本文：
-> - Q1（lint↔fix 耦合）：**方案 A 已确认** —— fix 只对 lint 已报的 finding 动手，本轮一并扩 lint 规则
-> - Q2（`pages-to-children` 启用时机）：**默认假设 B 待用户确认** —— 1.x minor 一上线就启用，配合 dual-parser 过渡期（详见 [v2 迁移时间线](#v2-迁移时间线)）
-> - Q3（默认行为）：**默认 dry-run** 已确认，`--apply` 才写盘
-> - CLI vs MCP：**CLI 优先**已确认，MCP 包装延后
+> **实现状态**：
+> - Q1（lint↔fix 耦合）：**已确认** —— fix 只对 lint 已报的 finding 动手，v1.15 一并扩了 lint 规则
+> - Q2（`pages-to-children` 启用时机）：**延后到 v2 开发期** —— v1.15 fix 引擎不含此 recipe，保持 v2-schema-neutral
+> - Q3（默认行为）：**已确认** —— 默认 dry-run，`--apply` 才写盘
+> - CLI vs MCP：**CLI 已在 v1.15 落地**，MCP 包装仍延后
+> - YAML 保留策略：**已决定** —— 不保留注释和空行，dumper 以固定 schema 字段顺序确定性输出；CLI 打印一次性提示
 
 ## 它做什么
 
@@ -84,16 +85,16 @@ apply_fix(finding_id: string, confirm: true)
 
 每条 recipe 是一个独立模块，描述：检测谓词、修复动作、可逆性、对应 lint 规则。
 
-| Recipe id | 检测 | 修复动作 | 可逆 | 对应 lint 规则 |
-|---|---|---|---|---|
-| `pages-to-children` | `_meta.yaml` 用 `pages:` map（v2 迁移） | 机械翻译成 `children:` 列表，保留 `order:` 决定的相对顺序 | ✅ 完全机械 | `meta-legacy-schema`（新增，warning） |
-| `register-orphan` | `.md` 存在但父级 `_meta.yaml` 未登记 | 追加到父级 `pages:`（或 `children:`），title 取首 H1 否则文件名去后缀 | ✅ 仅追加 | `meta-orphan-md`（lint 已有，warning） |
-| `remove-subdir-as-file` | 父级 `pages:` 列了 key，对应名字其实是子目录 | 删该 key（子目录走自发现，title 由子目录自己 `_meta.yaml` 提供） | ✅ 删法明确 | `meta-subdir-as-file`（新增，warning） |
-| `derive-missing-title` | `pages:` 下某 key 缺 `title:` | 从该 `.md` 首个 H1 推导 | ✅ 单字段补写 | `meta-missing-title`（新增，warning） |
-| `scaffold-meta-yaml` | 目录里有 `.md` 但缺 `_meta.yaml` | 用目录名作 title，按文件名字典序生成 `pages:` | ✅ 新建文件 | `meta-yaml-missing`（新增，warning） |
-| `prune-missing-page` | `pages:` 列了 key 但对应 `.md`/`.pdf` 都不存在 | **不自动修**，作为 finding 暴露，提示用户选：建空文件 / 删 key | ⚠️ 模糊 | `meta-page-target-missing`（lint 已有，error） |
+| Recipe id | 状态 | 检测 | 修复动作 | 可逆 | 对应 lint 规则 |
+|---|---|---|---|---|---|
+| `register-orphan` | ✅ v1.15 | `.md` 存在但父级 `_meta.yaml` 未登记 | 追加到父级 `pages:`，title 取首 H1 否则文件名去后缀 | ✅ 仅追加 | `meta-orphan-md`（lint 已有，warning） |
+| `remove-subdir-as-file` | ✅ v1.15 | 父级 `pages:` 列了 key，对应名字其实是子目录 | 删该 key（子目录走自发现，title 由子目录自己 `_meta.yaml` 提供） | ✅ 删法明确 | `meta-subdir-as-file`（v1.15 新增，warning） |
+| `derive-missing-title` | ✅ v1.15 | `pages:` 下某 key 缺 `title:` | 从该 `.md` 首个 H1 推导 | ✅ 单字段补写 | `meta-missing-title`（v1.15 新增，warning） |
+| `scaffold-meta-yaml` | ✅ v1.15 | 目录里有 `.md` 但缺 `_meta.yaml` | 用目录名作 title，按文件名字典序生成 `pages:` | ✅ 新建文件 | `meta-yaml-missing`（v1.15 新增，warning） |
+| `prune-missing-page` | ✅ v1.15 | `pages:` 列了 key 但对应 `.md`/`.pdf` 都不存在 | **不自动修**（`autoFix: false`），作为 finding 暴露，提示用户人工裁决 | — | `meta-page-target-missing`（lint 已有，error） |
+| `pages-to-children` | v2 待加 | `_meta.yaml` 仍用 `pages:` map（v2 schema 迁移） | 机械翻译成 `children:` 列表，保留 `order:` 决定的相对顺序 | ✅ 完全机械 | `meta-legacy-schema`（v2 开发期随 dual-parser 一起落地） |
 
-`prune-missing-page` 是模糊 recipe 的代表 —— `zdoc fix --apply` 默认会**跳过**它，并在输出里降级为 warning 提示"请人工裁决"。
+`prune-missing-page` 是模糊 recipe 的代表 —— `zdoc fix --apply` 默认会**跳过**它，并在输出里提示"请人工裁决"。
 
 ### Recipe id 命名约定
 
@@ -101,14 +102,15 @@ apply_fix(finding_id: string, confirm: true)
 
 ## Lint 规则新增清单
 
-为了 Q1=A 的对称承诺，本轮 fix 引擎落地时 lint 同时新增以下规则（warning 级别为主）：
+v1.15 fix 引擎落地时 lint 同时新增以下规则（warning 级别为主）：
 
 | Lint 规则 id | 严重度 | 检测 | 对应 recipe |
 |---|---|---|---|
-| `meta-legacy-schema` | warning | `_meta.yaml` 仍用 `pages:` map（2.0 前为 warning，2.0 升级为 error） | `pages-to-children` |
 | `meta-subdir-as-file` | warning | 父级 `pages:` 的 key 实际指向子目录 | `remove-subdir-as-file` |
 | `meta-missing-title` | warning | `pages:` 下 key 缺 `title:` | `derive-missing-title` |
 | `meta-yaml-missing` | warning | 目录有 `.md` 但无 `_meta.yaml` | `scaffold-meta-yaml` |
+
+`meta-legacy-schema` 随 `pages-to-children` 一起延后到 v2 开发期落地。
 
 现有 lint 规则不变：`meta-orphan-md`、`meta-page-target-missing`、internal-link 等保持原语义；fix 新接其中的 `meta-orphan-md` 和 `meta-page-target-missing`。
 
@@ -131,22 +133,25 @@ git-style unified diff，每个文件一段：
 +    title: 常见问题
 ```
 
-末尾汇总：
+末尾汇总行：
 
 ```
-3 files would be modified, 5 fixes ready to apply, 1 skipped (ambiguous: prune-missing-page).
-Re-run with --apply to write changes.
+汇总：3 个文件待修改，5 项自动修复，1 项需人工裁决。
 ```
+
+需人工裁决的 `prune-missing-page` finding 在 dry-run 中单独列出，供用户审阅。
 
 ### apply 模式
 
 每个写盘成功的文件输出一行：
 
 ```
-✓ docs/guide/_meta.yaml      register-orphan (1 fix)
-✓ docs/api/_meta.yaml        pages-to-children, derive-missing-title (2 fixes)
+✓ docs/guide/_meta.yaml      (register-orphan)
+✓ docs/api/_meta.yaml        (derive-missing-title, scaffold-meta-yaml)
 ✗ docs/legacy/_meta.yaml     SHA mismatch — file changed since scan, aborted
 ```
+
+末尾汇总行与 dry-run 格式相同。
 
 ## 安全模型
 
@@ -163,70 +168,80 @@ Re-run with --apply to write changes.
 - **逐文件原子写**：用临时文件 + rename，单个文件要么全写要么不写
 - **不做跨文件回滚**：如果跑 10 个文件，第 7 个 sha 校验失败，前 6 个**保留写入**。理由：rollback 在 docs 场景成本高（实时 serve）、收益低，多次 apply 是幂等的（recipe 在已修复的文件上是 no-op）
 
-### YAML 保留策略 ⚠️ 未决
+### YAML 保留策略
 
-⚠️ **上层依赖待补**：写 `_meta.yaml` 时如何保留注释、空行、key 顺序？
+**已决定：不保留注释和空行。** 理由：
 
-候选：
-- 用 [`yaml`](https://github.com/eemeli/yaml) 库的 AST API（能保留注释和顺序，复杂度高）
-- 用 `js-yaml` parse + dump（丢失注释和顺序，简单）
-- 介于两者：parse 后手工字符串拼接，最小改动写回
+- 零新依赖：dumper 直接用内置逻辑，不引入额外 YAML AST 库
+- 确定性输出：字段顺序固定（`title` → `order` → `pages`），每次 apply 产生相同结果，利于 diff 审查
 
-实际跑起来才知道哪种代价合理。本文先标 ⚠️，等实现期决定。
+CLI 在 apply 前打印一次性提示：
+
+```
+提示：zdoc fix 会重新格式化 _meta.yaml — 注释和空行将丢失。
+```
+
+用户预期：`_meta.yaml` 经 `--apply` 后会被规整为干净格式，注释应移到独立说明文档或 commit message。
 
 ## v2 迁移时间线
 
-> ⚠️ **默认假设 B 待用户确认**
-
 ```
-1.x.N            1.x.N+1            …              2.0
-─────────────────────────────────────────────────────
-现状             ↑ fix 引擎落地       继续 1.x         ↑ pages: 移除
-pages: only      pages-to-children   维护期           lint 报 error
-                 recipe 启用                          parser 不再接受 map
-                 dual-parser 开始
-                 lint 出 warning
-                 (meta-legacy-schema)
+1.15             1.x 维护期          v2 开发期开始      2.0
+─────────────────────────────────────────────────────────
+↑ fix 引擎落地    继续 1.x            ↑ dual-parser      ↑ pages: 移除
+5 条 v2-neutral  5 recipe 可用       启用               lint 报 error
+recipe 可用      pages: 仍正常        pages-to-children  parser 不再接受 map
+                serve               recipe 落地         meta-legacy-schema
+                                    lint 出 warning     升为 error
+                                    (meta-legacy-schema)
 ```
 
-用户的迁移窗口是从 fix 引擎落地的那个 1.x minor 一直到 2.0 发布。在此期间：
-- `pages:` 和 `children:` 两种 schema 都能正常 serve
-- lint 出 warning 鼓励迁移，不强制
-- 跑一次 `zdoc fix --recipe=pages-to-children --apply` 就能切到 `children:`
+**v1.15 fix 引擎**是 v2-schema-neutral 的：它只处理 `pages:` map 格式内部的配置错误（孤儿登记、缺 title、缺 `_meta.yaml`），不涉及 `pages:` → `children:` 的 schema 转换。
 
-**替代方案（如果用户拒绝默认 B）**：1.x 注册 recipe 但禁用，2.0 才打开。强制顺序：升 2.0 → fix 报错或失败 → 用户必须手动迁移 → 再升级一次。失去"提前迁移"的便利。如选此方案，把本节和 [next-major.md 的迁移策略](/dev/next-major.md#迁移策略) 同步改掉。
+**v2 开发期**：`pages-to-children` recipe 与 dual-parser 一同落地。届时：
+- `pages:` 和 `children:` 两种 schema 都能正常 serve（过渡期）
+- lint 出 `meta-legacy-schema` warning 鼓励迁移，不强制
+- 跑一次 `zdoc fix --recipe=pages-to-children --apply` 即可切到 `children:`
 
-## 代码组织（规划）
+用户的迁移窗口从 v2 开发期开始，一直到 2.0 正式发布。
+
+## 代码组织
 
 ```
-bin/
-  fix.ts              # CLI 入口，参数解析、子命令分发
-  fix.test.ts         # CLI 行为测试
-  fix/
-    engine.ts         # 统一 scan + apply 流程
-    recipes/
-      pages-to-children.ts
-      register-orphan.ts
-      remove-subdir-as-file.ts
-      derive-missing-title.ts
-      scaffold-meta-yaml.ts
-      prune-missing-page.ts
-    yaml-io.ts        # YAML 读写 + 保留策略
-    diff.ts           # unified diff 生成
-    types.ts          # Recipe、Finding、Patch 等接口
+bin/fix.ts                              # CLI 入口（256 行）
+bin/fix/types.ts                        # Recipe、Finding、ScanResult、ApplyResult 接口
+bin/fix/engine.ts                       # scan、apply、applyToString；RECIPES compile-time array
+bin/fix/yaml-io.ts                      # readDirMetaWithSha、parseDirMetaFromString、dumpDirMeta、sha256Hex
+bin/fix/diff.ts                         # unifiedDiff — LCS-based
+bin/fix/recipes/register-orphan.ts
+bin/fix/recipes/remove-subdir-as-file.ts
+bin/fix/recipes/derive-missing-title.ts
+bin/fix/recipes/scaffold-meta-yaml.ts
+bin/fix/recipes/prune-missing-page.ts
+bin/fix.test.ts                         # CLI 集成测试
+bin/fix.e2e.test.ts                     # 端到端 fixture 测试
+bin/fix/engine.test.ts                  # engine 单元测试
+bin/fix/yaml-io.test.ts                 # dumper roundtrip + 幂等性测试
+bin/fix/diff.test.ts                    # diff 生成器测试
+bin/fix/recipes/*.test.ts               # 每个 recipe 的单元测试
 ```
 
-`bin/lint.ts` 的现有检查复用现成的 `_meta.yaml` 解析（`bin/meta-mini.ts`）；fix 新增的 lint 规则可以放在 `bin/lint.ts` 或拆出 `bin/lint/rules/*.ts`，留待实现期再决定。
+`Recipe<P>` 接口（`bin/fix/types.ts`）：`id`、`description`、`autoFix`、`detect(scan)`、可选 `apply(finding, before): string`。`apply` 是纯函数 —— SHA 校验和写盘由 engine 统一处理。
 
 ## 开放设计问题
 
-⚠️ **以下条目尚未定，实现前需要回答**：
+v1.15 实现期已解决的问题（存档）：
 
-1. **YAML 保留策略**：见 [上一节](#yaml-保留策略)
-2. **多 recipe 之间的顺序依赖**：如果同一文件被多个 recipe 命中（例如先 `derive-missing-title` 再 `register-orphan`），是否有冲突？目前假设 recipe 都是幂等且可任意顺序，需实现期验证
-3. **国际化文案**：lint 现在的消息是中英混排（`'pages 列出 "X" 但 ... 不存在'`），fix 输出延续这个风格还是统一？暂定延续
-4. **Recipe 注册机制**：编译期写死 array vs 运行期插件？暂定编译期，需求出现再扩
-5. **Q2 默认假设**：等用户确认
+1. **YAML 保留策略** — 已决定：不保留，见 [YAML 保留策略](#yaml-保留策略)
+2. **多 recipe 之间的顺序依赖** — 已确认：compile-time array 顺序确定，recipe 幂等，不存在跨 recipe 冲突
+3. **国际化文案** — 已确认：混合 zh-CN/en，与 `bin/lint.ts` 风格一致
+4. **Recipe 注册机制** — 已确认：编译期 array，`bin/fix/engine.ts` 中写死，无插件机制
+5. **`pages-to-children` 启用时机** — 已确认：延后到 v2 开发期，v1.15 不含此 recipe
+
+尚未决定：
+
+- **MCP 包装**：将来若需要，`diagnose_meta` + `apply_fix` 两个 tool 的分离设计仍适用，见 [MCP 接口](#mcp-接口)
+- **`--recipe` 多选**：当前单值只，逗号分隔多选延后
 
 ## 参考
 
