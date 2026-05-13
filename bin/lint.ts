@@ -81,12 +81,18 @@ function lintMetaConsistency(scan: DocsScan): LintMessage[] {
 		for (const key of Object.keys(dm.pages)) {
 			const fileName = key.endsWith('.pdf') ? key : key + '.md';
 			const target = resolve(dir, fileName);
+			const subdirPath = resolve(dir, key);
+			const subdirExists = existsSync(subdirPath) && statSync(subdirPath).isDirectory();
 			if (!existsSync(target) || !statSync(target).isFile()) {
-				out.push({
-					severity: 'error',
-					file: rel(scan.docsDir, meta),
-					message: `pages 列出 "${key}" 但 ${fileName} 不存在`,
-				});
+				// If a subdirectory with this name exists, suppress the "not found" error —
+				// lintMetaSubdirAsFile will emit a warning for this case instead.
+				if (!subdirExists) {
+					out.push({
+						severity: 'error',
+						file: rel(scan.docsDir, meta),
+						message: `pages 列出 "${key}" 但 ${fileName} 不存在`,
+					});
+				}
 			}
 		}
 	}
@@ -104,6 +110,85 @@ function lintMetaConsistency(scan: DocsScan): LintMessage[] {
 		}
 	}
 
+	return out;
+}
+
+// US-004 Rule A: meta-subdir-as-file (warning)
+// A pages: key whose name on disk is a directory (not a <name>.md).
+// Emitting this warning is coordinated with lintMetaConsistency, which
+// suppresses the "not found" error when the subdir exists.
+function lintMetaSubdirAsFile(scan: DocsScan): LintMessage[] {
+	const out: LintMessage[] = [];
+	for (const meta of scan.metaFiles) {
+		const dm = readDirMeta(meta);
+		if (!dm?.pages) continue;
+		const dir = dirname(meta);
+		for (const key of Object.keys(dm.pages)) {
+			if (key.endsWith('.pdf')) continue;
+			const mdPath = resolve(dir, key + '.md');
+			const subdirPath = resolve(dir, key);
+			const mdExists = existsSync(mdPath) && statSync(mdPath).isFile();
+			const subdirExists = existsSync(subdirPath) && statSync(subdirPath).isDirectory();
+			if (!mdExists && subdirExists) {
+				out.push({
+					severity: 'warning',
+					file: rel(scan.docsDir, meta),
+					line: 1,
+					message: `pages 中 "${key}" 实际指向子目录而非 ${key}.md（footgun，应删除此 key）`,
+				});
+			}
+		}
+	}
+	return out;
+}
+
+// US-004 Rule B: meta-missing-title (warning)
+// A key under pages: has no title: field set.
+// Skip .pdf entries (PDFs may legitimately have no title).
+function lintMetaMissingTitle(scan: DocsScan): LintMessage[] {
+	const out: LintMessage[] = [];
+	for (const meta of scan.metaFiles) {
+		const dm = readDirMeta(meta);
+		if (!dm?.pages) continue;
+		for (const [key, page] of Object.entries(dm.pages)) {
+			if (key.endsWith('.pdf')) continue;
+			if (!page.title) {
+				out.push({
+					severity: 'warning',
+					file: rel(scan.docsDir, meta),
+					line: 1,
+					message: `pages 中 "${key}" 缺少 title 字段`,
+				});
+			}
+		}
+	}
+	return out;
+}
+
+// US-004 Rule C: meta-yaml-missing (warning)
+// A directory contains at least one .md file but has no _meta.yaml.
+// Skips the docsDir root itself.
+function lintMetaYamlMissing(scan: DocsScan): LintMessage[] {
+	const out: LintMessage[] = [];
+	const { dirs, mds } = walkDocs(scan.docsDir);
+	const mdSet = new Set(mds);
+	for (const dir of dirs) {
+		if (dir === scan.docsDir) continue; // skip root
+		const metaPath = join(dir, '_meta.yaml');
+		if (existsSync(metaPath)) continue;
+		// Check if at least one .md file lives directly in this dir
+		const hasMd = readdirSync(dir, { withFileTypes: true }).some(
+			(e) => e.isFile() && e.name.endsWith('.md') && mdSet.has(join(dir, e.name)),
+		);
+		if (hasMd) {
+			out.push({
+				severity: 'warning',
+				file: rel(scan.docsDir, dir),
+				line: 1,
+				message: '目录有 .md 文件但缺少 _meta.yaml',
+			});
+		}
+	}
 	return out;
 }
 
@@ -683,6 +768,9 @@ export async function lintDocs(docsDir: string): Promise<LintReport> {
 	const scan = scanDocs(docsDir);
 	const messages: LintMessage[] = [
 		...lintMetaConsistency(scan),
+		...lintMetaSubdirAsFile(scan),
+		...lintMetaMissingTitle(scan),
+		...lintMetaYamlMissing(scan),
 		...lintLifecycleTargets(scan),
 		...lintInternalLinks(scan),
 		...lintFoldedBlockquotes(scan),
@@ -699,6 +787,9 @@ function printHelp(): void {
 
 Checks performed:
   • _meta.yaml consistency (pages list ↔ files on disk)
+  • meta-subdir-as-file: pages key points to a directory, not a .md file
+  • meta-missing-title: pages key has no title field
+  • meta-yaml-missing: directory has .md files but no _meta.yaml
   • Internal markdown link existence
   • Lifecycle target existence (superseded_by / folded_to)
   • Folded blockquote convention ("> 已折叠到 [text](path)")

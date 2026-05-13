@@ -441,3 +441,136 @@ describe('lintDocs — exit code semantics (via report)', () => {
 		expect(r.warnings).toBeGreaterThan(0);
 	});
 });
+
+describe('lintDocs — meta-subdir-as-file', () => {
+	test('pages key is a directory (no .md) → warning emitted, no "不存在" error', async () => {
+		// "sub" is a directory, not sub.md
+		mkdirSync(join(docs, 'sub'), { recursive: true });
+		writeMeta(join(docs, 'sub'), `title: Sub\n`);
+		writeMeta(docs, `title: Site\npages:\n  intro:\n    title: Intro\n  sub:\n    title: Sub\n`);
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		const r = await lintDocs(docs);
+		const warns = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('实际指向子目录'),
+		);
+		expect(warns.length).toBe(1);
+		expect(warns[0].message).toContain('sub');
+		// The existing "不存在" error must NOT fire for this key
+		const notExistErrors = r.messages.filter(
+			(m) => m.severity === 'error' && m.message.includes('sub.md 不存在'),
+		);
+		expect(notExistErrors.length).toBe(0);
+	});
+
+	test('pages key with matching .md file → no meta-subdir-as-file warning', async () => {
+		writeMeta(docs, `title: Site\npages:\n  intro:\n    title: Intro\n`);
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		const r = await lintDocs(docs);
+		const warns = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('实际指向子目录'),
+		);
+		expect(warns.length).toBe(0);
+	});
+
+	test('pages key with neither .md nor directory → existing error, not subdir warning', async () => {
+		writeMeta(docs, `title: Site\npages:\n  ghost:\n    title: Ghost\n`);
+		const r = await lintDocs(docs);
+		// The original "不存在" error should still fire
+		expect(r.messages.some((m) => m.severity === 'error' && m.message.includes('ghost.md 不存在'))).toBe(true);
+		// No subdir warning
+		expect(r.messages.some((m) => m.message.includes('实际指向子目录'))).toBe(false);
+	});
+
+	test('.pdf key is skipped by meta-subdir-as-file rule', async () => {
+		// Create a directory named "report.pdf" — contrived but ensures the skip works
+		mkdirSync(join(docs, 'report.pdf'), { recursive: true });
+		writeMeta(docs, `title: Site\npages:\n  report.pdf:\n    title: Report\n`);
+		const r = await lintDocs(docs);
+		expect(r.messages.some((m) => m.message.includes('实际指向子目录'))).toBe(false);
+	});
+});
+
+describe('lintDocs — meta-missing-title', () => {
+	test('pages key without title → warning emitted', async () => {
+		writeMeta(docs, `title: Site\npages:\n  intro:\n    order: 1\n`);
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		const r = await lintDocs(docs);
+		const warns = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('缺少 title 字段'),
+		);
+		expect(warns.length).toBe(1);
+		expect(warns[0].message).toContain('intro');
+	});
+
+	test('pages key with title → no missing-title warning', async () => {
+		writeMeta(docs, `title: Site\npages:\n  intro:\n    title: Introduction\n`);
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		const r = await lintDocs(docs);
+		expect(r.messages.some((m) => m.message.includes('缺少 title 字段'))).toBe(false);
+	});
+
+	test('.pdf key skipped for missing-title rule', async () => {
+		writeMeta(docs, `title: Site\npages:\n  report.pdf:\n`);
+		writeFileSync(join(docs, 'report.pdf'), 'pdf content');
+		const r = await lintDocs(docs);
+		expect(r.messages.some((m) => m.message.includes('缺少 title 字段'))).toBe(false);
+	});
+
+	test('multiple pages, only untitled ones warned', async () => {
+		writeMeta(
+			docs,
+			`title: Site\npages:\n  a:\n    title: A\n  b:\n    order: 2\n  c:\n    order: 3\n`,
+		);
+		writeMd(join(docs, 'a.md'), '# A\n');
+		writeMd(join(docs, 'b.md'), '# B\n');
+		writeMd(join(docs, 'c.md'), '# C\n');
+		const r = await lintDocs(docs);
+		const warns = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('缺少 title 字段'),
+		);
+		expect(warns.length).toBe(2);
+		expect(warns.some((w) => w.message.includes('"b"'))).toBe(true);
+		expect(warns.some((w) => w.message.includes('"c"'))).toBe(true);
+	});
+});
+
+describe('lintDocs — meta-yaml-missing', () => {
+	test('subdirectory with .md but no _meta.yaml → warning', async () => {
+		mkdirSync(join(docs, 'sub'), { recursive: true });
+		writeMeta(docs, `title: Site\n`);
+		// sub/ has a .md but no _meta.yaml
+		writeMd(join(docs, 'sub', 'page.md'), '# Page\n');
+		const r = await lintDocs(docs);
+		const warns = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('缺少 _meta.yaml'),
+		);
+		expect(warns.length).toBe(1);
+		expect(warns[0].file).toContain('sub');
+	});
+
+	test('subdirectory with _meta.yaml → no missing-meta warning', async () => {
+		mkdirSync(join(docs, 'sub'), { recursive: true });
+		writeMeta(docs, `title: Site\npages:\n  intro:\n    title: Intro\n`);
+		writeMeta(join(docs, 'sub'), `title: Sub\npages:\n  page:\n    title: Page\n`);
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		writeMd(join(docs, 'sub', 'page.md'), '# Page\n');
+		const r = await lintDocs(docs);
+		expect(r.messages.some((m) => m.message.includes('缺少 _meta.yaml'))).toBe(false);
+	});
+
+	test('docsDir root is skipped even without _meta.yaml', async () => {
+		// No _meta.yaml at root, but has .md files — root is skipped
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		const r = await lintDocs(docs);
+		expect(r.messages.some((m) => m.message.includes('缺少 _meta.yaml'))).toBe(false);
+	});
+
+	test('subdirectory with only non-.md files → no warning', async () => {
+		mkdirSync(join(docs, 'assets'), { recursive: true });
+		writeMeta(docs, `title: Site\npages:\n  intro:\n    title: Intro\n`);
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		writeFileSync(join(docs, 'assets', 'image.png'), 'fake png');
+		const r = await lintDocs(docs);
+		expect(r.messages.some((m) => m.message.includes('缺少 _meta.yaml'))).toBe(false);
+	});
+});

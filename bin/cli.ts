@@ -39,6 +39,7 @@ function printHelp(): void {
 Usage:
   zdoc [options]              Start the docs server
   zdoc lint [-d <docs-dir>]   Check docs for broken links and metadata issues
+  zdoc fix  [-d <docs-dir>]   Auto-fix docs structure issues (dry-run by default)
   zdoc mcp  [-d <docs-dir>]   Start a stdio MCP server (for AI hosts)
 
 Options:
@@ -183,6 +184,11 @@ async function main(): Promise<void> {
 	if (process.argv[2] === 'lint') {
 		const { default: runLint } = await import('./lint.js');
 		const code = await runLint(process.argv.slice(3));
+		process.exit(code);
+	}
+	if (process.argv[2] === 'fix') {
+		const { default: runFix } = await import('./fix.js');
+		const code = await runFix(process.argv.slice(3));
 		process.exit(code);
 	}
 	if (process.argv[2] === 'mcp') {

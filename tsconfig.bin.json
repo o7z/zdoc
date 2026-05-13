@@ -11,6 +11,6 @@
     "outDir": "bin",
     "rootDir": "bin"
   },
-  "include": ["bin/*.ts"],
-  "exclude": ["bin/*.js", "bin/*.test.ts"]
+  "include": ["bin/*.ts", "bin/fix/*.ts"],
+  "exclude": ["bin/*.js", "bin/*.test.ts", "bin/fix/*.test.ts"]
 }
