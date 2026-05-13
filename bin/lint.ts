@@ -569,7 +569,10 @@ async function lintEjsBlocks(scan: DocsScan): Promise<LintMessage[]> {
 	const ejsMod = await import('ejs');
 	const ejs = (ejsMod as { default?: { Template: unknown } }).default ?? (ejsMod as unknown as { Template: unknown });
 	const acornMod = await import('acorn');
-	const acornParse = acornMod.parse as (src: string, opts: Record<string, unknown>) => unknown;
+	// Cast through unknown: acorn's strict Options type requires ecmaVersion, but
+	// we always pass it at the call site below; this keeps lint.ts self-contained
+	// without depending on @types/acorn's full surface.
+	const acornParse = acornMod.parse as unknown as (src: string, opts: Record<string, unknown>) => unknown;
 
 	for (const b of blocks) {
 		if (b.body.replace(/\s+/g, '') === '') {
