@@ -80,7 +80,6 @@ body {
 	margin: 0;
 	padding: 16px 20px;
 	background: var(--code-bg);
-	border-radius: 0 0 8px 8px;
 	overflow-x: auto;
 	font-size: 14px;
 	line-height: 1.6;
@@ -510,7 +509,6 @@ code.hljs { padding: 3px 5px; }
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
-	margin: 8px 0;
 }
 .ejs-form-field--inline {
 	flex-direction: row;
@@ -583,7 +581,7 @@ code.hljs { padding: 3px 5px; }
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
-	padding: 4px 0 4px 4px;
+	padding: 2px 0 2px 4px;
 }
 .ejs-form-empty {
 	color: var(--text-muted);
@@ -593,12 +591,12 @@ code.hljs { padding: 3px 5px; }
 }
 
 .ejs-form-array {
-	gap: 8px;
+	gap: 6px;
 }
 .ejs-array-item {
 	display: flex;
 	gap: 6px;
-	padding: 6px;
+	padding: 4px 6px;
 	background: var(--bg);
 	border: 1px solid var(--border);
 	border-radius: 6px;
@@ -648,8 +646,8 @@ code.hljs { padding: 3px 5px; }
 }
 
 .ejs-form-add-btn {
-	margin-top: 4px;
-	padding: 6px;
+	margin-top: 2px;
+	padding: 4px 6px;
 	background: transparent;
 	color: var(--text-muted);
 	border: 1px dashed var(--border);
