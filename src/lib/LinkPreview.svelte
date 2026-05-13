@@ -18,13 +18,25 @@
 
 	const cache = new Map<string, { title: string; html: string }>();
 
+	function safeDecode(s: string): string {
+		try {
+			return decodeURIComponent(s);
+		} catch {
+			return s;
+		}
+	}
+
 	function parseLink(href: string, base: string): { path: string; anchor: string } | null {
 		try {
 			const url = new URL(href, base);
 			if (url.origin !== new URL(base).origin) return null;
 			const pathname = url.pathname;
 			if (!pathname.endsWith('.md')) return null;
-			return { path: pathname.startsWith('/') ? pathname.slice(1) : pathname, anchor: url.hash.slice(1) };
+			const rawPath = pathname.startsWith('/') ? pathname.slice(1) : pathname;
+			// `URL` returns percent-encoded forms for non-ASCII (CJK / spaces / …).
+			// Decode for human display + downstream API params; URLSearchParams will
+			// re-encode if needed.
+			return { path: safeDecode(rawPath), anchor: safeDecode(url.hash.slice(1)) };
 		} catch {
 			return null;
 		}
