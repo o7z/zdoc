@@ -21,6 +21,8 @@ In this skill, `<docs-dir>` refers to whichever path you resolved. Substitute th
 
 After ANY edit under `<docs-dir>`, run `npx @o7z/zdoc lint` (it reads the same config) and report the result. Do not claim a docs operation is done until lint shows 0 errors. Warnings can be reported and left for the user to decide.
 
+`lint` also validates fenced ` ```mermaid ` blocks by routing them through `mermaid.parse()` under a jsdom shim — diagram syntax errors fail the gate too. See `docs/dev/reference/mermaid-lint.md` for the implementation.
+
 ## Project conventions
 
 - `.md` files are pure content — never add YAML frontmatter, never add HTML comments. Metadata lives in `_meta.yaml`.
@@ -41,6 +43,15 @@ After ANY edit under `<docs-dir>`, run `npx @o7z/zdoc lint` (it reads the same c
   ```
   > 已折叠到 [/path/to/schema.md#field](/path/to/schema.md#field) — YYYY-MM-DD
   ```
+
+## Interactive code blocks
+
+zdoc transforms certain fenced code blocks into live components — authors only write the source, the runtime hydrates them in the browser:
+
+- ` ```mermaid ` → rendered diagram (also lint-checked, see Hard rule above).
+- ` ```ejs ` → AST-scanned template + auto-generated form + live preview in a Web Worker sandbox (1s timeout). The data shape (string / boolean / number / array / object, with `for...of` loop-var scope tracking) is inferred via `acorn`; the form lets the reader edit data and see output update. Templates that call functions or use `include` silently fall back to a plain highlighted block (no preview button) — this matches the safety boundary (no helper injection, no filesystem access).
+
+When suggesting a code sample for an EJS / templating concept, prefer the ` ```ejs ` fence — it doubles as a runnable demo. Same for diagrams: prefer ` ```mermaid ` over a screenshot.
 
 ## Standard procedure: fold a section
 
