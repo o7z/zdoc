@@ -480,31 +480,3 @@ C4Container
     Rel(api, redis, "缓存", "Redis")
     Rel(order, payment, "支付", "HTTPS/REST")
 ```
-
-## 代码高亮
-
-除了 Mermaid，zdoc 也支持常规代码高亮：
-
-```ts
-const sessions = new Map<string, number>();
-const hash = sha256(token + secret);
-sessions.set(hash, Date.now() + 7 * 24 * 3600 * 1000);
-```
-
-```bash
-bun run dev
-# Local:   http://localhost:20000
-```
-
-```json
-{
-  "title": "我的文档",
-  "docsDir": "./docs",
-  "password": "hunter2",
-  "port": 8888
-}
-```
-
-## 行内 `code`
-
-正文里一样能 `inline code`，比如 `_meta.yaml` 或者 `const x = 1`。

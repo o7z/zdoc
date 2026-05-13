@@ -62,6 +62,32 @@ const rehypeMermaid: Plugin<[], Root> = () => {
 	};
 };
 
+// Rewrite ```ejs fenced blocks so the client-side EjsPreview component can
+// hydrate them. Mirrors the mermaid pattern: <pre><code class="language-ejs">…
+// becomes <pre class="ejs-preview">…</pre> with the raw template as text. The
+// client extracts the template, scans it for variable shapes, generates a form,
+// and shows a live preview in a Web Worker sandbox.
+const rehypeEjs: Plugin<[], Root> = () => {
+	return (tree) => {
+		visit(tree, 'element', (node, index, parent) => {
+			if (node.tagName !== 'pre' || !parent || index == null) return;
+			const codeChild = node.children.find(
+				(c): c is Element => c.type === 'element' && c.tagName === 'code',
+			);
+			if (!codeChild) return;
+			const classes = (codeChild.properties?.className as string[]) ?? [];
+			if (!classes.some((c) => c === 'language-ejs')) return;
+			const code = textOf(codeChild);
+			parent.children[index as number] = {
+				type: 'element',
+				tagName: 'pre',
+				properties: { className: ['ejs-preview'] },
+				children: [{ type: 'text', value: code }],
+			};
+		});
+	};
+};
+
 const rehypeExternalLinks: Plugin<[], Root> = () => {
 	return (tree) => {
 		visit(tree, 'element', (node) => {
@@ -83,7 +109,8 @@ const rehypeCodeCopy: Plugin<[], Root> = () => {
 	return (tree) => {
 		visit(tree, 'element', (node, index, parent) => {
 			if (node.tagName !== 'pre' || !parent || index == null) return;
-			if ((node.properties?.className as string[])?.includes('mermaid')) return;
+			const preClasses = (node.properties?.className as string[]) ?? [];
+			if (preClasses.includes('mermaid') || preClasses.includes('ejs-preview')) return;
 			const codeChild = node.children.find(
 				(c): c is Element => c.type === 'element' && c.tagName === 'code',
 			);
@@ -156,6 +183,7 @@ export async function renderMarkdown(md: string): Promise<RenderResult> {
 		.use(rehypeSlug)
 		.use(collectHeadings, { out: headings })
 		.use(rehypeHighlight, { detect: true, ignoreMissing: true })
+		.use(rehypeEjs)
 		.use(rehypeMermaid)
 		.use(rehypeExternalLinks)
 		.use(rehypeCodeCopy)

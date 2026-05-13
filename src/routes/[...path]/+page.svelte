@@ -9,7 +9,10 @@
 	let cleanupSpy = () => {};
 
 	onMount(() => {
-		if (data.kind === 'md') initMermaid();
+		if (data.kind === 'md') {
+			initMermaid();
+			initEjsPreview();
+		}
 		setupScrollSpy();
 	});
 
@@ -18,10 +21,32 @@
 		if (typeof window !== 'undefined' && data.kind === 'md') {
 			requestAnimationFrame(() => {
 				initMermaid();
+				initEjsPreview();
 				setupScrollSpy();
 			});
 		}
 	});
+
+	async function initEjsPreview() {
+		if (typeof window === 'undefined') return;
+		const blocks = document.querySelectorAll('pre.ejs-preview:not([data-ejs-mounted])');
+		if (blocks.length === 0) return;
+		const { mount } = await import('svelte');
+		const { default: EjsPreview } = await import('$lib/ejs-preview/EjsPreview.svelte');
+		for (const block of blocks) {
+			const el = /** @type {HTMLElement} */ (block);
+			if (el.dataset.ejsMounted) continue;
+			el.dataset.ejsMounted = 'true';
+			const template = el.textContent ?? '';
+			const wrapper = document.createElement('div');
+			wrapper.className = 'ejs-preview-mount';
+			el.replaceWith(wrapper);
+			mount(EjsPreview, {
+				target: wrapper,
+				props: { template },
+			});
+		}
+	}
 
 	onDestroy(() => cleanupSpy());
 
