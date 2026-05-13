@@ -10,3 +10,11 @@ pages:
     title: config.json 配置
     order: 20
     description: 配置文件字段、优先级、环境变量。
+  mermaid-lint:
+    title: Mermaid 语法 lint
+    order: 30
+    description: zdoc lint 如何校验 mermaid 代码块；为何用 mermaid.parse()；mermaid 内部使用 Jison + Langium。
+  fix-engine:
+    title: zdoc fix 引擎
+    order: 40
+    description: 1.x 末计划落地的修复子命令设计 —— 处理 _meta.yaml 配置错误、旧版 schema 迁移、常用使用错误。

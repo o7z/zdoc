@@ -11,6 +11,20 @@
 | 触发条件 | 已决定项积累到值得发布的程度 |
 | 维护方式 | 决定一项加一条;放弃的提议挪到「明确不做」并保留记录 |
 
+## 1.x 配套工作(为 2.0 迁移铺路)
+
+> 这一节登记**在 1.x 释放、目的是支撑 2.0 平滑迁移**的工作。它们本身不是 v2 breaking change,但要在 2.0 之前稳定下来,以免迁移日需要现场造轮子。
+
+### `zdoc fix` 引擎(1.x minor)
+
+新增"修复"子命令,处理 `_meta.yaml` 配置错误,包含老版本 schema 自动迁移与常用使用错误修复。这是替代原计划专用迁移子命令的更宽口径方案 —— 详细设计见 [`zdoc fix` 引擎](/dev/reference/fix-engine.md)。
+
+核心点:
+- 与 [lint](/dev/reference/cli.md) 耦合:fix 只对 lint 已报出的 finding 动手(确保"什么算配置错误"边界一致)。本轮 lint 会同时扩出几条新 warning 规则。
+- 默认 dry-run:`zdoc fix` 只打印 unified diff,需 `--apply` 才写盘。`-y/--yes` 给 CI。
+- 包含 recipe `pages-to-children`,用户可在 1.x 末提前迁移,2.0 自然 no-op 升级。
+- MCP 侧暂不暴露 fix tool(zdoc MCP server 当前是纯只读,加写盘 tool 是 trust model 变化,延后做)。
+
 ## 已决定
 
 ### `_meta.yaml` schema:`pages:` map → `children:` list
@@ -58,7 +72,9 @@ children:
 
 - **过渡期**(1.x 末发一个 minor):parser 同时接受 `pages:` (map) 和 `children:` (list);[lint](/dev/reference/cli.md) 对继续用 `pages:` 出 warning,提示迁移。
 - **2.0**:`pages:` 字段移除,parser 不再接受 map 形式,lint 报 error。
-- **工具**:发布 `zdoc migrate` 子命令做机械翻译(map → list),保持现有 `order:` 数值的相对顺序。
+- **工具**: 由 [`zdoc fix` 引擎](/dev/reference/fix-engine.md) 的 `pages-to-children` recipe 做机械翻译(map → list),保持现有 `order:` 数值的相对顺序。fix 引擎在 1.x minor 引入,2.0 切换时已是用户用熟的工具。
+
+> ⚠️ **默认假设待用户确认**:本文目前假设 `pages-to-children` recipe **在 1.x minor 一上线就启用**(配合 dual-parser 过渡期),用户可提前迁移、2.0 自然 no-op 升级。另一种方案是 recipe 在 1.x 注册但禁用,2.0 才打开 —— 等于强制用户先升 2.0 再迁移,失去 fix 引擎"方便迁移"的初衷。如需切换,改本段同时改 [fix 引擎设计文档](/dev/reference/fix-engine.md#v2-迁移时间线)。
 
 #### 边界确认
 
@@ -112,7 +128,7 @@ children:
 
 ### zdoc 自身
 
-- [ ] `docs/` 下所有 `_meta.yaml` 改成 `children:` 形式(用 `zdoc migrate`)
+- [ ] `docs/` 下所有 `_meta.yaml` 改成 `children:` 形式(`zdoc fix --recipe=pages-to-children --apply`)
 - [ ] [`docs/guide/authoring/meta-yaml.md`](/guide/authoring/meta-yaml.md) 重写,反映新 schema
 - [ ] `skills/zdoc/SKILL.md` 更新规则段(目录入口页 footgun 段落,如 schema 改造后失效则整段删)
 - [ ] CHANGELOG / release notes 列出 breaking changes 与迁移步骤
@@ -121,7 +137,7 @@ children:
 ### 用户侧
 
 - [ ] [发布规范](/dev/release.md)增加"major 版本升级指引"段
-- [ ] `zdoc migrate` 子命令的使用文档
+- [ ] [`zdoc fix` 引擎](/dev/reference/fix-engine.md)的使用文档已就位
 - [ ] 1.x → 2.0 cookbook(常见 `_meta.yaml` 形态前后对照)
 
 ⚠️ **上层依赖缺失**:具体发布时间、是否合并其他大动作、各候选的最终决定 —— 待「待评估候选」积累到一定数量后再做发布决定。

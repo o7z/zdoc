@@ -253,6 +253,7 @@ What it checks:
 - **Internal markdown link health** — `[text](/path.md)` and `[text](./relative.md)` targets must exist. External URLs, `mailto:`, and same-page anchors (`#section`) are ignored. Links inside fenced code blocks (` ``` ` / `~~~`) and inline code (`` ` ``) are skipped (they're documentation examples).
 - **Lifecycle target existence** — `superseded_by` and `folded_to` paths must point to a file that exists (warning if not).
 - **Folded blockquote convention** — lines like `> 已折叠到 [text](/path.md#anchor)` get their target validated.
+- **Mermaid code-block syntax** — every ` ```mermaid ` fence is parsed via `mermaid.parse()`, covering all diagram types (flowchart, sequence, class, state, ER, gantt, pie, mindmap, gitGraph, C4, etc.). See [docs/dev/reference/mermaid-lint.md](./docs/dev/reference/mermaid-lint.md) for parser internals and rationale.
 
 The lint command is fully optional: zdoc serves your docs the same whether you run it or not. CI integration is straightforward:
 
