@@ -554,8 +554,8 @@
 	main { flex: 1; display: flex; min-width: 0; overflow: hidden; }
 	
 	/* Sidebar */
-	.sidebar-group { margin-bottom: -4px; width: 100%; box-sizing: border-box; }
-	.group-toggle { display: flex; align-items: center; gap: 4px; width: 100%; padding: 6px 8px; border: none; background: none; color: var(--text); font-weight: 600; cursor: pointer; text-align: left; font-size: 14px; border-radius: 4px; box-sizing: border-box; }
+	.sidebar-group { width: 100%; box-sizing: border-box; }
+	.group-toggle { display: flex; align-items: center; gap: 4px; width: 100%; padding: 4px 8px; border: none; background: none; color: var(--text); font-weight: 600; cursor: pointer; text-align: left; font-size: 14px; border-radius: 4px; box-sizing: border-box; }
 	.group-toggle:hover { background: var(--bg-soft); }
 	.chevron { transition: transform 0.2s; }
 	.chevron.collapsed { transform: rotate(-90deg); }
@@ -571,7 +571,7 @@
 	.sidebar-badge-archived { filter: grayscale(1); }
 	.sidebar-badge-superseded { color: var(--brand); }
 	.sidebar-label { display: block; padding: 6px 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-	.sidebar-scroll { flex: 1; }
+	.sidebar-scroll { flex: 1; display: flex; flex-direction: column; gap: 0; }
 	
 	/* Shared modal */
 	.modal { border: none; background: transparent; padding: 0; margin: 0; }
