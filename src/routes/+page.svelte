@@ -61,6 +61,7 @@
 		const url = URL.createObjectURL(svgBlob);
 
 		const img = new Image();
+		img.crossOrigin = 'anonymous';
 		img.onload = () => {
 			const dpr = window.devicePixelRatio || 1;
 			const canvas = document.createElement('canvas');
@@ -70,23 +71,41 @@
 			if (!ctx) { URL.revokeObjectURL(url); return; }
 			ctx.scale(dpr, dpr);
 			ctx.drawImage(img, 0, 0, w, h);
-			URL.revokeObjectURL(url);
 
-			canvas.toBlob(async (blob) => {
-				if (!blob) return;
-				try {
-					await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-					flashBtn(btn, checkIcon);
-				} catch {
-					const a = document.createElement('a');
-					a.href = URL.createObjectURL(blob);
-					a.download = 'mermaid-diagram.png';
-					a.click();
-					URL.revokeObjectURL(a.href);
-					flashBtn(btn, checkIcon);
-				}
-			}, 'image/png');
+			try {
+				canvas.toBlob(async (blob) => {
+					if (!blob) {
+						URL.revokeObjectURL(url);
+						downloadAsSvg();
+						return;
+					}
+					URL.revokeObjectURL(url);
+					try {
+						await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+						flashBtn(btn, checkIcon);
+					} catch {
+						const a = document.createElement('a');
+						a.href = URL.createObjectURL(blob);
+						a.download = 'mermaid-diagram.png';
+						a.click();
+						URL.revokeObjectURL(a.href);
+						flashBtn(btn, checkIcon);
+					}
+				}, 'image/png');
+			} catch {
+				downloadAsSvg();
+			}
 		};
+
+		function downloadAsSvg() {
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = 'mermaid-diagram.svg';
+			a.click();
+			URL.revokeObjectURL(url);
+			flashBtn(btn, checkIcon);
+		}
+
 		img.src = url;
 	}
 
