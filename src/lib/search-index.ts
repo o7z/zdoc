@@ -6,6 +6,7 @@ import rehypeSlug from 'rehype-slug';
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { readDirMeta, type PageMeta } from './meta.js';
+import { createAsyncDocsCache } from './docs-cache.js';
 import type { Element, ElementContent, Root, RootContent } from 'hast';
 
 export interface SearchEntry {
@@ -147,9 +148,13 @@ async function scanDir(dir: string, root: string, out: SearchEntry[]): Promise<v
 	}
 }
 
+const indexCache = createAsyncDocsCache<SearchEntry[]>('search-index');
+
 export async function buildSearchIndex(docsDir: string): Promise<SearchEntry[]> {
-	if (!existsSync(docsDir)) return [];
-	const out: SearchEntry[] = [];
-	await scanDir(docsDir, docsDir, out);
-	return out;
+	return indexCache.get(docsDir, async () => {
+		if (!existsSync(docsDir)) return [];
+		const out: SearchEntry[] = [];
+		await scanDir(docsDir, docsDir, out);
+		return out;
+	});
 }

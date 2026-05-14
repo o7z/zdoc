@@ -1,6 +1,7 @@
 import { readdirSync, existsSync, statSync, readFileSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { readDirMeta, type Lifecycle, type PageMeta } from './meta.js';
+import { createDocsCache } from './docs-cache.js';
 
 export interface SidebarGroup {
 	text: string;
@@ -64,7 +65,13 @@ function isSpecKitFile(relPath: string, specKitSet: SpecKitSet): boolean {
 	return false;
 }
 
+const sidebarCache = createDocsCache<SidebarGroup[]>('sidebar');
+
 export function buildSidebar(docsDir: string): SidebarGroup[] {
+	return sidebarCache.get(docsDir, () => buildSidebarUncached(docsDir));
+}
+
+function buildSidebarUncached(docsDir: string): SidebarGroup[] {
 	if (!existsSync(docsDir)) return [];
 	const specKitSet = parseTocYml(docsDir);
 	return scanDir(docsDir, docsDir, specKitSet);
