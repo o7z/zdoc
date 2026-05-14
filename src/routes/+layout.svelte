@@ -348,6 +348,7 @@
 				<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
 			</div>
 			<h3 class="about-title">zdoc</h3>
+			<p class="about-version">v{data.version}</p>
 			<p class="about-desc">Zero-config Markdown docs site</p>
 			<div class="about-links">
 				<a href="https://github.com/o7z/zdoc" target="_blank" rel="noopener" class="about-link">
@@ -595,7 +596,8 @@
 	.about-modal { width: 280px; max-width: 90vw; }
 	.about-body { text-align: center; padding: 24px; }
 	.about-logo { margin-bottom: 12px; }
-	.about-title { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+	.about-title { font-size: 18px; font-weight: 700; margin: 0 0 2px; }
+	.about-version { font-size: 13px; color: var(--text-muted); margin: 0 0 2px; font-family: var(--font-mono); }
 	.about-desc { font-size: 13px; color: var(--text-muted); margin: 0 0 16px; }
 	.about-links { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 180px; margin: 0 auto; }
 	.about-links a, .about-link { width: 100%; padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text-muted); text-decoration: none; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }

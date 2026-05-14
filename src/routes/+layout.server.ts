@@ -2,7 +2,21 @@ import { buildSidebar } from '$lib/sidebar.js';
 import { buildSearchIndex } from '$lib/search-index.js';
 import { getConfig } from '$lib/config.js';
 import { resolveDocsDir, isSpecKitAvailable } from '$lib/mode.js';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { LayoutServerLoad } from './$types';
+
+function readAppVersion(): string {
+	try {
+		const __dirname = fileURLToPath(new URL('.', import.meta.url));
+		const pkgPath = join(__dirname, '..', 'package.json');
+		const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+		return pkg.version;
+	} catch {
+		return '0.0.0';
+	}
+}
 
 function readCollapsedGroups(raw: string | undefined): string[] {
 	if (!raw) return [];
@@ -36,5 +50,6 @@ export const load: LayoutServerLoad = async ({ url, cookies }) => {
 		downloadEnabled: config.downloadEnabled,
 		specKitEnabled,
 		mode,
+		version: readAppVersion(),
 	};
 };
