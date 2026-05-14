@@ -1,5 +1,5 @@
-import { readdirSync, existsSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { readdirSync, existsSync, statSync, readFileSync } from 'node:fs';
+import { join, relative, dirname } from 'node:path';
 import { readDirMeta, type Lifecycle, type PageMeta } from './meta.js';
 
 export interface SidebarGroup {
@@ -9,27 +9,75 @@ export interface SidebarGroup {
 	items?: SidebarGroup[];
 	lifecycle?: Lifecycle;
 	superseded?: boolean;
+	specKit?: boolean;
 }
 
 const IS_PROD = process.env.NODE_ENV === 'production';
+
+type SpecKitSet = Set<string>;
 
 function visible(meta: PageMeta): boolean {
 	if (meta.env === 'prod' && !IS_PROD) return false;
 	return true;
 }
 
+interface TocEntry {
+	href?: string;
+	items?: TocEntry[];
+}
+
+function parseTocYml(docsDir: string): SpecKitSet {
+	const tocPath = join(docsDir, 'toc.yml');
+	if (!existsSync(tocPath)) return new Set();
+
+	const content = readFileSync(tocPath, 'utf-8');
+	const hrefs: string[] = [];
+	const hrefRe = /href:\s*(.+)$/gm;
+	let m;
+	while ((m = hrefRe.exec(content)) !== null) {
+		hrefs.push(m[1].trim());
+	}
+
+	const paths = new Set<string>();
+	const dirs = new Set<string>();
+	for (const h of hrefs) {
+		paths.add(h);
+		const parent = dirname(h).replace(/\\/g, '/');
+		if (parent !== '.') dirs.add(parent);
+	}
+
+	const result = new Set<string>();
+	for (const p of paths) result.add(p);
+	for (const d of dirs) result.add(d);
+	return result;
+}
+
+function isSpecKitFile(relPath: string, specKitSet: SpecKitSet): boolean {
+	if (specKitSet.has(relPath)) return true;
+	for (const prefix of specKitSet) {
+		if (prefix.endsWith('/')) {
+			if (relPath.startsWith(prefix)) return true;
+		} else {
+			if (relPath.startsWith(prefix + '/')) return true;
+		}
+	}
+	return false;
+}
+
 export function buildSidebar(docsDir: string): SidebarGroup[] {
 	if (!existsSync(docsDir)) return [];
-	return scanDir(docsDir, docsDir);
+	const specKitSet = parseTocYml(docsDir);
+	return scanDir(docsDir, docsDir, specKitSet);
 }
 
 interface SortableItem {
 	item: SidebarGroup;
 	order: number;
 	text: string;
+	specKit: boolean;
 }
 
-function scanDir(dir: string, root: string): SidebarGroup[] {
+function scanDir(dir: string, root: string, specKitSet: SpecKitSet): SidebarGroup[] {
 	const items: SortableItem[] = [];
 
 	const entries = readdirSync(dir, { withFileTypes: true }).filter((e) => !e.name.startsWith('.'));
@@ -40,15 +88,20 @@ function scanDir(dir: string, root: string): SidebarGroup[] {
 		const meta = readDirMeta(join(fullPath, '_meta.yaml'));
 		if (!meta || !meta.title || !visible(meta)) continue;
 
-		const children = scanDir(fullPath, root);
+		const children = scanDir(fullPath, root, specKitSet);
+
+		const dirRelPath = relative(root, fullPath).replace(/\\/g, '/');
+		const dirIsSpecKit = children.length > 0 && children.every((c) => c.specKit);
 
 		items.push({
 			order: meta.order ?? 999,
 			text: meta.title,
+			specKit: dirIsSpecKit,
 			item: {
 				text: meta.title,
 				collapsed: false,
 				items: children.length > 0 ? children : undefined,
+				specKit: dirIsSpecKit,
 			},
 		});
 	}
@@ -63,15 +116,18 @@ function scanDir(dir: string, root: string): SidebarGroup[] {
 
 		const rel = relative(root, targetPath).replace(/\\/g, '/');
 		const link = '/' + rel;
+		const fileIsSpecKit = isSpecKitFile(rel, specKitSet);
 
 		items.push({
 			order: meta.order ?? 999,
 			text: meta.title,
+			specKit: fileIsSpecKit,
 			item: {
 				text: meta.title,
 				link,
 				lifecycle: meta.lifecycle,
 				superseded: Boolean(meta.superseded_by),
+				specKit: fileIsSpecKit,
 			},
 		});
 	}

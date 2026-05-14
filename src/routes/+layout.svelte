@@ -508,6 +508,7 @@
 			>
 				<svg class="chevron" class:collapsed={isCollapsed} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
 				<span>{group.text}</span>
+				{#if group.specKit}<span class="sidebar-badge sidebar-badge-speckit" title="Spec Kit">SK</span>{/if}
 			</button>
 			{#if !isCollapsed}
 				<div class="group-items">
@@ -528,6 +529,7 @@
 				<span class="sidebar-link-text">{group.text}</span>
 				{#if group.lifecycle === 'archived'}<span class="sidebar-badge sidebar-badge-archived" title="Archived">🗄</span>{/if}
 				{#if group.superseded}<span class="sidebar-badge sidebar-badge-superseded" title="Superseded">↗</span>{/if}
+				{#if group.specKit}<span class="sidebar-badge sidebar-badge-speckit" title="Spec Kit">SK</span>{/if}
 			</a>
 		</div>
 	{:else}
@@ -572,9 +574,10 @@
 	.sidebar-link.archived { opacity: 0.55; }
 	.sidebar-link.archived:hover { opacity: 0.85; }
 	.sidebar-link-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.sidebar-badge { font-size: 11px; line-height: 1; flex-shrink: 0; opacity: 0.75; }
+	.sidebar-badge { font-size: 10px; line-height: 1; flex-shrink: 0; padding: 1px 4px; border-radius: 3px; font-weight: 600; letter-spacing: 0.3px; }
 	.sidebar-badge-archived { filter: grayscale(1); }
 	.sidebar-badge-superseded { color: var(--brand); }
+	.sidebar-badge-speckit { background: var(--brand-soft, #e0e7ff); color: var(--brand, #6366f1); border-radius: 4px; font-size: 10px; }
 	.sidebar-label { display: block; padding: 6px 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 	.sidebar-scroll { flex: 1; display: flex; flex-direction: column; gap: 0; }
 	
