@@ -125,33 +125,60 @@
 			const url = URL.createObjectURL(svgBlob);
 
 			const img = new Image();
+			img.crossOrigin = 'anonymous';
 			img.onload = () => {
-				const dpr = window.devicePixelRatio || 1;
-				const canvas = document.createElement('canvas');
-				canvas.width = w * dpr;
-				canvas.height = h * dpr;
-				const ctx = canvas.getContext('2d');
-				if (!ctx) { URL.revokeObjectURL(url); return; }
-				ctx.scale(dpr, dpr);
-				ctx.drawImage(img, 0, 0, w, h);
-				URL.revokeObjectURL(url);
+				try {
+					const dpr = window.devicePixelRatio || 1;
+					const canvas = document.createElement('canvas');
+					canvas.width = w * dpr;
+					canvas.height = h * dpr;
+					const ctx = canvas.getContext('2d');
+					if (!ctx) { URL.revokeObjectURL(url); return; }
+					ctx.scale(dpr, dpr);
+					ctx.drawImage(img, 0, 0, w, h);
 
-				canvas.toBlob(async (blob) => {
-					if (!blob) return;
 					try {
-						await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-						flashBtn(btn, checkIcon);
+						canvas.toBlob(async (blob) => {
+							if (!blob) {
+								URL.revokeObjectURL(url);
+								downloadAsSvg();
+								return;
+							}
+							URL.revokeObjectURL(url);
+							try {
+								await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+								flashBtn(btn, checkIcon);
+							} catch {
+								const a = document.createElement('a');
+								a.href = URL.createObjectURL(blob);
+								a.download = 'mermaid-diagram.png';
+								a.click();
+								URL.revokeObjectURL(a.href);
+								flashBtn(btn, checkIcon);
+							}
+						}, 'image/png');
 					} catch {
-						const a = document.createElement('a');
-						a.href = URL.createObjectURL(blob);
-						a.download = 'mermaid-diagram.png';
-						a.click();
-						URL.revokeObjectURL(a.href);
-						flashBtn(btn, checkIcon);
+						downloadAsSvg();
 					}
-				}, 'image/png');
+				} catch {
+					downloadAsSvg();
+				}
+			};
+			img.onerror = () => {
+				downloadAsSvg();
 			};
 			img.src = url;
+
+			function downloadAsSvg() {
+				try {
+					const a = document.createElement('a');
+					a.href = url;
+					a.download = 'mermaid-diagram.svg';
+					a.click();
+					URL.revokeObjectURL(url);
+					flashBtn(btn, checkIcon);
+				} catch { URL.revokeObjectURL(url); }
+			}
 		}
 
 		async function initMermaid() {
