@@ -5,7 +5,7 @@
 	// generated form, and (c) a live preview pane backed by the Worker
 	// sandbox. Re-renders are debounced and runtime errors are surfaced
 	// without clobbering the last successful output.
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, untrack } from 'svelte';
 	import { extractTemplate, type Shape } from './extract.js';
 	import {
 		defaultDataForShape,
@@ -20,7 +20,7 @@
 
 	let { template }: { template: string } = $props();
 
-	const extraction = extractTemplate(template);
+	const extraction = extractTemplate(untrack(() => template));
 	const shape: Shape & { kind: 'object' } = extraction.ok
 		? extraction.shape
 		: { kind: 'object', properties: {} };
