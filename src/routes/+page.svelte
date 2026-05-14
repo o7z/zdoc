@@ -1,5 +1,173 @@
 <script>
+	import { onMount } from 'svelte';
 	let { data } = $props();
+
+	onMount(() => {
+		initMermaid();
+	});
+
+	$effect(() => {
+		data.html;
+		if (typeof window !== 'undefined') {
+			requestAnimationFrame(() => {
+				initMermaid();
+			});
+		}
+	});
+
+	function flashBtn(btn, checkSvg) {
+		const orig = btn.innerHTML;
+		btn.innerHTML = checkSvg;
+		setTimeout(() => { btn.innerHTML = orig; }, 1500);
+	}
+
+	const checkIcon = `<svg class="lucide lucide-check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+
+	async function copyMermaidSource(code, btn) {
+		try {
+			await navigator.clipboard.writeText(code);
+			flashBtn(btn, checkIcon);
+		} catch { /* noop */ }
+	}
+
+	async function copyMermaidImage(viewport, btn) {
+		const svgEl = viewport.querySelector('svg');
+		if (!svgEl) return;
+
+		const clone = svgEl.cloneNode(true);
+		const allEls = clone.querySelectorAll('*');
+		const origAllEls = svgEl.querySelectorAll('*');
+		const props = ['fill', 'stroke', 'color', 'font-family', 'font-size', 'background'];
+
+		allEls.forEach((el, i) => {
+			const orig = origAllEls[i];
+			if (!orig) return;
+			const cs = getComputedStyle(orig);
+			for (const p of props) {
+				const v = cs.getPropertyValue(p);
+				if (v) el.style.setProperty(p, v);
+			}
+		});
+
+		const vb = svgEl.getAttribute('viewBox')?.split(' ').map(Number);
+		const w = vb?.[2] || svgEl.getBoundingClientRect().width;
+		const h = vb?.[3] || svgEl.getBoundingClientRect().height;
+		clone.setAttribute('width', String(w));
+		clone.setAttribute('height', String(h));
+
+		const serializer = new XMLSerializer();
+		const svgStr = serializer.serializeToString(clone);
+		const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+		const url = URL.createObjectURL(svgBlob);
+
+		const img = new Image();
+		img.onload = () => {
+			const dpr = window.devicePixelRatio || 1;
+			const canvas = document.createElement('canvas');
+			canvas.width = w * dpr;
+			canvas.height = h * dpr;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) { URL.revokeObjectURL(url); return; }
+			ctx.scale(dpr, dpr);
+			ctx.drawImage(img, 0, 0, w, h);
+			URL.revokeObjectURL(url);
+
+			canvas.toBlob(async (blob) => {
+				if (!blob) return;
+				try {
+					await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+					flashBtn(btn, checkIcon);
+				} catch {
+					const a = document.createElement('a');
+					a.href = URL.createObjectURL(blob);
+					a.download = 'mermaid-diagram.png';
+					a.click();
+					URL.revokeObjectURL(a.href);
+					flashBtn(btn, checkIcon);
+				}
+			}, 'image/png');
+		};
+		img.src = url;
+	}
+
+	async function initMermaid() {
+		if (typeof window === 'undefined') return;
+		const blocks = document.querySelectorAll('pre.mermaid');
+		if (blocks.length === 0) return;
+
+		const mermaid = (await import('mermaid')).default;
+		const panzoom = (await import('@panzoom/panzoom')).default;
+
+		const isDark = document.documentElement.classList.contains('dark');
+		mermaid.initialize({
+			startOnLoad: false,
+			theme: isDark ? 'dark' : 'default',
+			securityLevel: 'loose',
+		});
+
+		for (const block of blocks) {
+			if (block.dataset.rendered) continue;
+			block.dataset.rendered = 'true';
+
+			const code = block.textContent || '';
+			const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
+			try {
+				const { svg } = await mermaid.render(id, code);
+
+				const wrapper = document.createElement('div');
+				wrapper.className = 'mermaid-rendered';
+
+				const toolbar = document.createElement('div');
+				toolbar.className = 'mermaid-viewer-control-panel';
+				toolbar.innerHTML = `
+					<button class="mvcp-btn" data-action="zoom-in" title="Zoom in" aria-label="Zoom in"><svg class="lucide lucide-zoom-in" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></button>
+					<button class="mvcp-btn" data-action="zoom-out" title="Zoom out" aria-label="Zoom out"><svg class="lucide lucide-zoom-out" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg></button>
+					<button class="mvcp-btn" data-action="reset" title="Reset view" aria-label="Reset view"><svg class="lucide lucide-rotate-ccw" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></button>
+					<button class="mvcp-btn" data-action="copy-source" title="Copy source" aria-label="Copy source"><svg class="lucide lucide-copy" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button>
+					<button class="mvcp-btn" data-action="copy-image" title="Copy as image" aria-label="Copy as image"><svg class="lucide lucide-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></button>
+				`;
+
+				const viewport = document.createElement('div');
+				viewport.className = 'mermaid-viewport';
+				viewport.innerHTML = svg;
+
+				wrapper.appendChild(toolbar);
+				wrapper.appendChild(viewport);
+
+				block.replaceWith(wrapper);
+
+				if (!viewport.isConnected) {
+					await new Promise(resolve => requestAnimationFrame(resolve));
+				}
+
+				const pzInstance = panzoom(viewport, {
+					smoothScroll: true,
+					maxZoom: 5,
+					minZoom: 0.3,
+					startScale: 1,
+					contain: false,
+					force3d: false,
+				});
+
+				toolbar.querySelector('[data-action="zoom-in"]')?.addEventListener('click', () => pzInstance.zoomIn());
+				toolbar.querySelector('[data-action="zoom-out"]')?.addEventListener('click', () => pzInstance.zoomOut());
+				toolbar.querySelector('[data-action="reset"]')?.addEventListener('click', () => pzInstance.reset());
+				toolbar.querySelector('[data-action="copy-source"]')?.addEventListener('click', (e) => {
+					copyMermaidSource(code, e.currentTarget);
+				});
+				toolbar.querySelector('[data-action="copy-image"]')?.addEventListener('click', (e) => {
+					copyMermaidImage(viewport, e.currentTarget);
+				});
+
+				viewport.addEventListener('dblclick', (e) => {
+					e.preventDefault();
+					pzInstance.reset();
+				});
+			} catch (e) {
+				console.error('Mermaid render error:', e);
+			}
+		}
+	}
 </script>
 
 <svelte:head>
@@ -143,5 +311,53 @@
 		padding: 32px 48px 96px;
 		max-width: 900px;
 		margin: 0 auto;
+	}
+
+	:global(.mermaid-rendered) {
+		position: relative;
+		border: 1px solid var(--border);
+		border-radius: 10px;
+		background: var(--bg-soft);
+		margin: 16px 0;
+		overflow: visible;
+	}
+
+	:global(.mermaid-viewport) {
+		min-height: 200px;
+		cursor: grab;
+	}
+	:global(.mermaid-viewport:active) {
+		cursor: grabbing;
+	}
+	:global(.mermaid-viewport svg) {
+		display: block;
+	}
+
+	:global(.mermaid-viewer-control-panel) {
+		display: flex;
+		gap: 4px;
+		padding: 8px 10px;
+		border-bottom: 1px solid var(--border);
+	}
+	:global(.mvcp-btn) {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border: none;
+		background: transparent;
+		border-radius: 6px;
+		cursor: pointer;
+		color: var(--text-muted);
+		transition: color 0.12s, background 0.12s;
+	}
+	:global(.mvcp-btn:hover) {
+		color: var(--text);
+		background: var(--bg-hover, rgba(128,128,128,0.1));
+	}
+	:global(.mvcp-btn svg) {
+		width: 18px;
+		height: 18px;
 	}
 </style>

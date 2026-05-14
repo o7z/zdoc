@@ -199,6 +199,10 @@
 
 				block.replaceWith(wrapper);
 
+				if (!viewport.isConnected) {
+					await new Promise(resolve => requestAnimationFrame(resolve));
+				}
+
 				const pzInstance = panzoom(viewport, {
 					smoothScroll: true,
 					maxZoom: 5,
@@ -211,12 +215,12 @@
 				toolbar.querySelector('[data-action="zoom-in"]')?.addEventListener('click', () => pzInstance.zoomIn());
 				toolbar.querySelector('[data-action="zoom-out"]')?.addEventListener('click', () => pzInstance.zoomOut());
 				toolbar.querySelector('[data-action="reset"]')?.addEventListener('click', () => pzInstance.reset());
-			toolbar.querySelector('[data-action="copy-source"]')?.addEventListener('click', (e) => {
-				copyMermaidSource(code, e.currentTarget);
-			});
-			toolbar.querySelector('[data-action="copy-image"]')?.addEventListener('click', (e) => {
-				copyMermaidImage(viewport, e.currentTarget);
-			});
+				toolbar.querySelector('[data-action="copy-source"]')?.addEventListener('click', (e) => {
+					copyMermaidSource(code, e.currentTarget);
+				});
+				toolbar.querySelector('[data-action="copy-image"]')?.addEventListener('click', (e) => {
+					copyMermaidImage(viewport, e.currentTarget);
+				});
 
 				viewport.addEventListener('dblclick', (e) => {
 					e.preventDefault();
