@@ -1,10 +1,11 @@
 import type { Handle } from '@sveltejs/kit';
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { getConfig } from '$lib/config.js';
 import { getDocsDir } from '$lib/docs-dir.js';
 import { resolveDocsAsset } from '$lib/docs-asset.js';
 import { createSession, validateSession } from '$lib/sessions.js';
+import { isSpecKitPath, stripSkPrefix, resolveDocsDir } from '$lib/mode.js';
 
 const FAVICON_NAMES = ['favicon.ico', 'favicon.png', 'favicon.svg', 'favicon.gif'];
 
@@ -32,8 +33,8 @@ function tryFavicon(): Response | null {
 	return null;
 }
 
-function tryServeAsset(pathname: string): Response | null {
-	const asset = resolveDocsAsset(getDocsDir(), pathname);
+function tryServeAsset(pathname: string, docsDir: string): Response | null {
+	const asset = resolveDocsAsset(docsDir, pathname);
 	if (!asset) return null;
 	return new Response(readFileSync(asset.filePath), {
 		headers: {
@@ -53,7 +54,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const password = getConfig().password;
 
 	if (!password) {
-		const asset = tryServeAsset(event.url.pathname);
+		const docsDir = resolveDocsDir(event.url.pathname) ?? getDocsDir();
+		const asset = tryServeAsset(event.url.pathname, docsDir);
 		if (asset) return asset;
 		return resolve(event);
 	}
@@ -83,7 +85,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const cookieHeader = event.request.headers.get('cookie') || '';
 	const match = cookieHeader.match(/docs_session=([^;]+)/);
 	if (match && validateSession(match[1])) {
-		const asset = tryServeAsset(event.url.pathname);
+		const docsDir = resolveDocsDir(event.url.pathname) ?? getDocsDir();
+		const asset = tryServeAsset(event.url.pathname, docsDir);
 		if (asset) return asset;
 		return resolve(event);
 	}

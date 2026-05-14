@@ -1,0 +1,5 @@
+{
+  "title": "zdoc",
+  "docsDir": ".",
+  "specKitDir": "../../github/spec-kit/docs"
+}

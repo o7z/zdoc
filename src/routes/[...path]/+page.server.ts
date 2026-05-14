@@ -2,7 +2,7 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, basename, join, resolve, sep } from 'node:path';
 import { error, redirect } from '@sveltejs/kit';
 import { renderMarkdown } from '$lib/markdown.js';
-import { getDocsDir } from '$lib/docs-dir.js';
+import { resolveDocsDir, stripSkPrefix, isSpecKitPath } from '$lib/mode.js';
 import { readDirMeta, type Lifecycle, type PageMeta } from '$lib/meta.js';
 import type { PageServerLoad } from './$types';
 
@@ -43,9 +43,11 @@ function safeJoin(root: string, slug: string): string | null {
 	return resolved;
 }
 
-export const load: PageServerLoad = async ({ params }) => {
-	const docsDir = getDocsDir();
-	const slug = params.path || '';
+export const load: PageServerLoad = async ({ params, url }) => {
+	const pathname = url.pathname;
+	const rawSlug = isSpecKitPath(pathname) ? stripSkPrefix(pathname) : (params.path || '');
+	const docsDir = resolveDocsDir(pathname) ?? resolve(process.cwd());
+	const slug = rawSlug || '';
 
 	if (/\.pdf$/i.test(slug)) {
 		const pdfPath = safeJoin(docsDir, slug);

@@ -1,6 +1,7 @@
 import { buildSidebar } from '$lib/sidebar.js';
 import { buildSearchIndex } from '$lib/search-index.js';
 import { getConfig } from '$lib/config.js';
+import { resolveDocsDir, isSpecKitAvailable } from '$lib/mode.js';
 import type { LayoutServerLoad } from './$types';
 
 function readCollapsedGroups(raw: string | undefined): string[] {
@@ -14,10 +15,17 @@ function readCollapsedGroups(raw: string | undefined): string[] {
 	}
 }
 
-export const load: LayoutServerLoad = async ({ cookies }) => {
+export const load: LayoutServerLoad = async ({ url, cookies }) => {
+	const pathname = url.pathname;
+	const docsDir = resolveDocsDir(pathname);
 	const config = getConfig();
-	const sidebar = buildSidebar(config.docsDir);
-	const searchIndex = await buildSearchIndex(config.docsDir);
+	const mode = docsDir === config.specKitDir ? 'spec-kit' : 'zdoc';
+
+	let sidebar = buildSidebar(docsDir);
+	let searchIndex = await buildSearchIndex(docsDir);
+
+	const specKitEnabled = isSpecKitAvailable();
+
 	const collapsedGroups = readCollapsedGroups(cookies.get('zdoc-collapsed'));
 	return {
 		sidebar,
@@ -26,5 +34,7 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 		repoUrl: process.env.ZDOC_REPO_URL ?? '',
 		collapsedGroups,
 		downloadEnabled: config.downloadEnabled,
+		specKitEnabled,
+		mode,
 	};
 };

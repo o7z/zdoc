@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { renderMarkdown } from '$lib/markdown.js';
-import { getDocsDir } from '$lib/docs-dir.js';
+import { resolveDocsDir, isSpecKitAvailable, isSpecKitPath } from '$lib/mode.js';
 import { readDirMeta } from '$lib/meta.js';
 import type { PageServerLoad } from './$types';
 
@@ -24,8 +24,9 @@ interface Hero {
 	actions: HeroAction[];
 }
 
-export const load: PageServerLoad = async () => {
-	const docsDir = getDocsDir();
+export const load: PageServerLoad = async ({ url }) => {
+	const pathname = url.pathname;
+	const docsDir = resolveDocsDir(pathname) ?? resolve(process.cwd());
 
 	const rootMeta = readDirMeta(join(docsDir, '_meta.yaml'));
 	const rootTitle = rootMeta?.title ?? 'Docs';
