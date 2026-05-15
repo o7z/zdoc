@@ -142,3 +142,7 @@ function scanDir(dir: string, root: string, specKitSet: SpecKitSet): SidebarGrou
 	items.sort((a, b) => a.order - b.order || a.text.localeCompare(b.text));
 	return items.map((i) => i.item);
 }
+
+export function clearSidebarCache(): void {
+	sidebarCache.clear();
+}

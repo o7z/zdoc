@@ -9,6 +9,7 @@ import { isSpecKitPath, stripSkPrefix, resolveDocsDir } from '$lib/mode.js';
 import { buildSidebar } from '$lib/sidebar.js';
 import { buildSearchIndex } from '$lib/search-index.js';
 import { renderMarkdownCached } from '$lib/markdown.js';
+import { setupDocsWatcher } from '$lib/docs-watcher.js';
 
 // Pre-warm caches at process startup so the first user navigation already lands
 // on warm caches. Runs once per Node worker; fire-and-forget so HTTP listening
@@ -65,8 +66,10 @@ async function preloadDocsCache(docsDir: string): Promise<void> {
 void (async () => {
 	const config = getConfig();
 	preloadDocsCache(config.docsDir);
+	await setupDocsWatcher(config.docsDir);
 	if (config.specKitDir && existsSync(config.specKitDir)) {
 		preloadDocsCache(config.specKitDir);
+		await setupDocsWatcher(config.specKitDir);
 	}
 })();
 

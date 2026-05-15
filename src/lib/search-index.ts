@@ -158,3 +158,7 @@ export async function buildSearchIndex(docsDir: string): Promise<SearchEntry[]> 
 		return out;
 	});
 }
+
+export function clearSearchCache(): void {
+	indexCache.clear();
+}
