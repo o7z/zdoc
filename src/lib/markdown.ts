@@ -6,6 +6,7 @@ import rehypeStringify from 'rehype-stringify';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeSlug from 'rehype-slug';
 import { visit } from 'unist-util-visit';
+import { readFileSync, statSync } from 'node:fs';
 import type { Plugin } from 'unified';
 import type { Root, Element, ElementContent } from 'hast';
 
@@ -193,4 +194,65 @@ export async function renderMarkdown(md: string): Promise<RenderResult> {
 	const html = String(result);
 
 	return { html, headings };
+}
+
+interface RenderCacheEntry {
+	mtimeMs: number;
+	size: number;
+	result: RenderResult;
+}
+
+const renderCache = new Map<string, RenderCacheEntry>();
+const renderInFlight = new Map<string, Promise<RenderResult>>();
+
+function deepFreezeResult(r: RenderResult): RenderResult {
+	Object.freeze(r);
+	Object.freeze(r.headings);
+	for (const h of r.headings) Object.freeze(h);
+	return r;
+}
+
+// Cached wrapper around renderMarkdown keyed by absolute file path + mtime + size.
+// Reading the file is included inside the cached path so repeated navigations to
+// the same doc skip both readFileSync and the unified pipeline.
+export async function renderMarkdownCached(absPath: string): Promise<RenderResult> {
+	let st: { mtimeMs: number; size: number };
+	try {
+		st = statSync(absPath);
+	} catch {
+		// File vanished between caller's existsSync and here; fall through to a
+		// readFileSync that will throw the original ENOENT for the caller.
+		const raw = readFileSync(absPath, 'utf-8');
+		return renderMarkdown(raw);
+	}
+
+	const cached = renderCache.get(absPath);
+	if (cached && cached.mtimeMs === st.mtimeMs && cached.size === st.size) {
+		return cached.result;
+	}
+
+	const existing = renderInFlight.get(absPath);
+	if (existing) return existing;
+
+	const promise = (async () => {
+		try {
+			const raw = readFileSync(absPath, 'utf-8');
+			const result = deepFreezeResult(await renderMarkdown(raw));
+			renderCache.set(absPath, { mtimeMs: st.mtimeMs, size: st.size, result });
+			return result;
+		} finally {
+			renderInFlight.delete(absPath);
+		}
+	})();
+	renderInFlight.set(absPath, promise);
+	return promise;
+}
+
+export function clearRenderCache(): void {
+	renderCache.clear();
+	renderInFlight.clear();
+}
+
+export function getRenderCacheSize(): number {
+	return renderCache.size;
 }

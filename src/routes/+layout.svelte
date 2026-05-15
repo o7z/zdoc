@@ -1,5 +1,5 @@
 <script>
-	import { page } from '$app/stores';
+	import { page, navigating } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { tick } from 'svelte';
 	import LinkPreview from '$lib/LinkPreview.svelte';
@@ -275,6 +275,10 @@
 	});
 </script>
 
+{#if $navigating}
+	<div class="nav-progress" role="progressbar" aria-label="Loading"><div class="nav-progress-bar"></div></div>
+{/if}
+
 <div class="layout">
 	<header>
 		<button class="menu-toggle" onclick={() => sidebarOpen = !sidebarOpen} aria-label="Toggle menu">
@@ -542,6 +546,13 @@
 
 <style>
 	* { box-sizing: border-box; }
+	.nav-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: transparent; z-index: 1000; pointer-events: none; overflow: hidden; }
+	.nav-progress-bar { height: 100%; width: 30%; background: var(--brand); border-radius: 0 2px 2px 0; animation: nav-progress-slide 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite; box-shadow: 0 0 8px var(--brand); }
+	@keyframes nav-progress-slide {
+		0% { transform: translateX(-100%); width: 30%; }
+		50% { width: 45%; }
+		100% { transform: translateX(360%); width: 30%; }
+	}
 	:global(.doc-content p, .doc-content li) { font-size: 16px; line-height: 1.8; }
 	:global(.doc-content a) { color: var(--brand); text-decoration: none; }
 	:global(.doc-content a:hover) { text-decoration: underline; }

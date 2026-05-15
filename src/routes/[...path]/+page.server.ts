@@ -1,7 +1,7 @@
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { dirname, basename, join, resolve, sep } from 'node:path';
 import { error, redirect } from '@sveltejs/kit';
-import { renderMarkdown } from '$lib/markdown.js';
+import { renderMarkdownCached } from '$lib/markdown.js';
 import { resolveDocsDir, stripSkPrefix, isSpecKitPath } from '$lib/mode.js';
 import { readDirMeta, type Lifecycle, type PageMeta } from '$lib/meta.js';
 import type { PageServerLoad } from './$types';
@@ -84,8 +84,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 			error(404, `Page not found: ${slug}`);
 		}
 
-		const raw = readFileSync(asFile, 'utf-8');
-		const { html, headings } = await renderMarkdown(raw);
+		const { html, headings } = await renderMarkdownCached(asFile);
 		return {
 			kind: 'md' as const,
 			title: pageMeta.title!,

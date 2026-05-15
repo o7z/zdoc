@@ -1,11 +1,74 @@
 import type { Handle } from '@sveltejs/kit';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { getConfig } from '$lib/config.js';
 import { getDocsDir } from '$lib/docs-dir.js';
 import { resolveDocsAsset } from '$lib/docs-asset.js';
 import { createSession, validateSession } from '$lib/sessions.js';
 import { isSpecKitPath, stripSkPrefix, resolveDocsDir } from '$lib/mode.js';
+import { buildSidebar } from '$lib/sidebar.js';
+import { buildSearchIndex } from '$lib/search-index.js';
+import { renderMarkdownCached } from '$lib/markdown.js';
+
+// Pre-warm caches at process startup so the first user navigation already lands
+// on warm caches. Runs once per Node worker; fire-and-forget so HTTP listening
+// is not blocked. If preload fails partway, lazy paths still work.
+async function preloadDocsCache(docsDir: string): Promise<void> {
+	if (!docsDir || !existsSync(docsDir)) return;
+	const label = `[zdoc preload] ${docsDir}`;
+	const started = Date.now();
+	try {
+		buildSidebar(docsDir);
+		await buildSearchIndex(docsDir);
+
+		const mdFiles: string[] = [];
+		const walk = (dir: string) => {
+			let entries: ReturnType<typeof readdirSync>;
+			try {
+				entries = readdirSync(dir, { withFileTypes: true });
+			} catch {
+				return;
+			}
+			for (const e of entries) {
+				if (e.name.startsWith('.')) continue;
+				const full = join(dir, e.name);
+				if (e.isDirectory()) walk(full);
+				else if (e.isFile() && e.name.endsWith('.md')) mdFiles.push(full);
+			}
+		};
+		walk(docsDir);
+
+		// Render in parallel but cap concurrency so unified instances don't all
+		// initialize at once on a small Node thread pool.
+		const CONCURRENCY = 4;
+		let cursor = 0;
+		await Promise.all(
+			Array.from({ length: CONCURRENCY }, async () => {
+				while (cursor < mdFiles.length) {
+					const i = cursor++;
+					try {
+						await renderMarkdownCached(mdFiles[i]);
+					} catch {
+						/* skip unreadable file */
+					}
+				}
+			}),
+		);
+
+		const ms = Date.now() - started;
+		console.log(`${label}: ${mdFiles.length} pages warmed in ${ms}ms`);
+	} catch (err) {
+		console.warn(`${label}: preload aborted`, err);
+	}
+}
+
+void (async () => {
+	const config = getConfig();
+	preloadDocsCache(config.docsDir);
+	if (config.specKitDir && existsSync(config.specKitDir)) {
+		preloadDocsCache(config.specKitDir);
+	}
+})();
 
 const FAVICON_NAMES = ['favicon.ico', 'favicon.png', 'favicon.svg', 'favicon.gif'];
 
