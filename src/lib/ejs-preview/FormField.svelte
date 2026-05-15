@@ -3,6 +3,7 @@
 	// control. Operations bubble up via `onOp` carrying a path relative to the
 	// root data tree, so the top-level EjsPreview can apply set/add/remove
 	// edits with the helpers from form-gen.ts.
+	import { untrack } from 'svelte';
 	import type { Shape } from './extract.js';
 	import type { PathSegment } from './form-gen.js';
 	import Self from './FormField.svelte';
@@ -29,7 +30,9 @@
 		depth?: number;
 	} = $props();
 
-	let folded = $state(depth >= 3);
+	// `depth` seeds the initial fold state; subsequent toggles are user-driven,
+	// so untrack so the compiler doesn't bind `folded` to later `depth` changes.
+	let folded = $state(untrack(() => depth >= 3));
 
 	const fieldId = `ejs-field-${Math.random().toString(36).slice(2, 9)}`;
 
