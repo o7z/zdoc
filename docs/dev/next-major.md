@@ -6,10 +6,25 @@
 
 | 项目 | 状态 |
 |------|------|
-| 当前版本 | 1.15.x |
-| 目标版本 | 2.0(无具体日期) |
-| 触发条件 | 已决定项积累到值得发布的程度 |
+| 当前版本 | 2.0(开发期,见下方"v2.0 实际策略") |
+| 目标版本 | 3.0(无具体日期) |
+| 触发条件 | 3.0 已决定项积累到值得发布的程度 |
 | 维护方式 | 决定一项加一条;放弃的提议挪到「明确不做」并保留记录 |
+
+## v2.0 实际策略
+
+v2.0 的设计偏向"宽容运行 + 强力提示",而非 hard breaking:
+
+- **Parser 仍接受 v1 写法**(pages:、env: 等)在内存层面归一化;老用户的 docs 不会立刻 crash。
+- **Lint 升级到 error**:`meta-legacy-schema` / `meta-legacy-env-key` 是 error 级别,build / CI 跑 lint 会失败,迫使用户跑 `zdoc fix`。
+- **启动 banner**:`zdoc serve / dev` 启动时检测到 v1 schema,显示醒目 banner 引导。**永不自动改盘**。
+- **新增 fix recipes / lint 规则修各种常见错**:
+  - `normalize-link-suffix` recipe + `meta-link-missing-suffix` warning:链接缺 .md/.pdf 后缀。
+  - `normalize-frontmatter-keys` recipe + `meta-frontmatter-typo` warning:`desc → description` 等拼写错位。
+  - `meta-heading-skip` warning:标题层级跳跃。
+  - YAML 解析错误现在带 tab / 冒号等可执行 hint。
+
+升级路径:用户从任意 v1.x 装 2.0 → 启动看到 banner → 跑 `zdoc fix --apply` 一步迁移。
 
 ## 1.x 配套工作(为 2.0 迁移铺路)
 

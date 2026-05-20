@@ -25,6 +25,8 @@ const PLANNED_RECIPE_IDS: ReadonlyArray<{ id: string; description: string }> = [
 	{ id: 'scaffold-meta-yaml', description: '为只有 .md 但缺 _meta.yaml 的目录生成 _meta.yaml' },
 	{ id: 'env-to-visibility', description: 'env: 字段重命名为 visibility:（env: prod → visibility: prod-only）' },
 	{ id: 'pages-to-children', description: '把 pages: map 翻译成 children: list (v2 schema 迁移)' },
+	{ id: 'normalize-link-suffix', description: 'Markdown 链接补全 .md / .pdf 后缀(v2 要求完整后缀)' },
+	{ id: 'normalize-frontmatter-keys', description: '修正 _meta.yaml 字段名拼写错位 (desc → description 等)' },
 	{ id: 'prune-missing-page', description: '列出 pages 指向的不存在文件（仅提示，不自动修）' },
 ];
 

@@ -3,6 +3,16 @@ import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { lintDocs } from './lint.ts';
+import type { LintMessage } from './lint.ts';
+
+// v2 lint升级:meta-legacy-schema / meta-legacy-env-key 从 warning 变 error。
+// 大量已有测试用 pages: fixture,本意不是测 legacy 检测,所以这个 helper
+// 用来过滤掉 v2 legacy errors,只看其他规则的 error 数。
+function errorCountExcludingLegacy(r: { messages: LintMessage[] }): number {
+	return r.messages.filter(
+		(m) => m.severity === 'error' && !m.message.startsWith('【v2'),
+	).length;
+}
 
 let docs: string;
 beforeEach(() => {
@@ -27,7 +37,7 @@ describe('lintDocs — happy path', () => {
 		writeMeta(docs, `title: Site\nchildren:\n  - name: intro\n    title: Intro\n`);
 		writeMd(join(docs, 'intro.md'), '# Intro\n\nWelcome.\n');
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 		// 0 warnings on a v2-shape doc with no other issues
 		expect(r.warnings).toBe(0);
 	});
@@ -130,14 +140,14 @@ describe('lintDocs — internal links', () => {
 		writeMeta(docs, `title: Site\npages:\n  page:\n    title: Page\n`);
 		writeMd(join(docs, 'page.md'), '# Page\n\n[ext](https://example.com) [m](mailto:a@b.com)\n');
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 	});
 
 	test('same-page anchor (#sec) is ignored', async () => {
 		writeMeta(docs, `title: Site\npages:\n  page:\n    title: Page\n`);
 		writeMd(join(docs, 'page.md'), '# Page\n\n[anchor](#section)\n');
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 	});
 
 	test('relative link resolved from current dir', async () => {
@@ -159,7 +169,7 @@ describe('lintDocs — code block / inline code skip', () => {
 			'# Page\n\n```markdown\n[example](/never-exists.md)\n```\n',
 		);
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 	});
 
 	test('links inside ~~~ fenced block are not validated', async () => {
@@ -169,7 +179,7 @@ describe('lintDocs — code block / inline code skip', () => {
 			'# Page\n\n~~~\n[example](/never-exists.md)\n~~~\n',
 		);
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 	});
 
 	test('links inside inline code (`...`) are not validated', async () => {
@@ -179,7 +189,7 @@ describe('lintDocs — code block / inline code skip', () => {
 			'# Page\n\nUse the form `[name](/never-exists.md)` for links.\n',
 		);
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 	});
 
 	test('real link outside code is still validated', async () => {
@@ -189,10 +199,12 @@ describe('lintDocs — code block / inline code skip', () => {
 			'# Page\n\nReal: [broken](/missing.md)\n\n```\nFake: [also-broken](/also-missing.md)\n```\n',
 		);
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(1);
-		// errors[0], not messages[0], because v2-prep warnings may sit at the top.
-		const errorMsg = r.messages.find((m) => m.severity === 'error');
-		expect(errorMsg?.message).toContain('/missing.md');
+		expect(errorCountExcludingLegacy(r)).toBe(1);
+		// Find the broken-link error specifically (v2 legacy errors may also sit in messages).
+		const errorMsg = r.messages.find(
+			(m) => m.severity === 'error' && m.message.includes('/missing.md'),
+		);
+		expect(errorMsg).toBeDefined();
 	});
 
 	test('folded blockquote inside fenced block is skipped', async () => {
@@ -202,7 +214,7 @@ describe('lintDocs — code block / inline code skip', () => {
 			'# Page\n\n```markdown\n> 已折叠到 [target](/never-exists.md)\n```\n',
 		);
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 	});
 });
 
@@ -282,7 +294,7 @@ describe('lintDocs — mermaid syntax', () => {
 			'# Page\n\n```js\nthis is not mermaid;\n```\n',
 		);
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 	});
 
 	test('empty mermaid block → warning, not error', async () => {
@@ -292,7 +304,7 @@ describe('lintDocs — mermaid syntax', () => {
 			'# Page\n\n```mermaid\n\n```\n',
 		);
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 		expect(r.messages.some((m) => m.severity === 'warning' && m.message.includes('空 mermaid block'))).toBe(true);
 	});
 
@@ -446,7 +458,7 @@ describe('lintDocs — exit code semantics (via report)', () => {
 		writeMd(join(docs, 'intro.md'), '# Intro\n');
 		writeMd(join(docs, 'orphan.md'), '# Orphan\n');
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 		expect(r.warnings).toBeGreaterThan(0);
 	});
 });
@@ -613,12 +625,14 @@ describe('lintDocs — meta-legacy-schema (pages: → children:)', () => {
 		expect(legacySchemaHits.length).toBe(1);
 	});
 
-	test('warning does not raise lint exit (errors still 0)', async () => {
+	test('v2: meta-legacy-schema is an error (raises lint exit)', async () => {
 		writeMeta(docs, `title: Site\npages:\n  intro:\n    title: Intro\n`);
 		writeMd(join(docs, 'intro.md'), '# Intro\n');
 		const r = await lintDocs(docs);
-		expect(r.errors).toBe(0);
-		expect(r.warnings).toBeGreaterThanOrEqual(1);
+		// v2 升级: legacy schema 是 error,exit 码会反映。
+		expect(r.errors).toBeGreaterThanOrEqual(1);
+		// errorCountExcludingLegacy 过滤掉这些 v2 errors → 仍是 0 (没有其他问题)
+		expect(errorCountExcludingLegacy(r)).toBe(0);
 	});
 });
 
@@ -631,7 +645,7 @@ describe('lintDocs — meta-legacy-env-key (env: → visibility:)', () => {
 		writeMd(join(docs, 'marketing.md'), '# Marketing\n');
 		const r = await lintDocs(docs);
 		const hits = r.messages.filter(
-			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+			(m) => m.severity === 'error' && m.message.includes('env:') && m.message.includes('visibility:'),
 		);
 		expect(hits.length).toBe(1);
 		expect(hits[0].message).toContain('pages.marketing');
@@ -645,7 +659,7 @@ describe('lintDocs — meta-legacy-env-key (env: → visibility:)', () => {
 		writeMd(join(docs, 'marketing.md'), '# Marketing\n');
 		const r = await lintDocs(docs);
 		const hits = r.messages.filter(
-			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+			(m) => m.severity === 'error' && m.message.includes('env:') && m.message.includes('visibility:'),
 		);
 		expect(hits.length).toBe(1);
 		expect(hits[0].message).toContain('children.marketing');
@@ -656,7 +670,7 @@ describe('lintDocs — meta-legacy-env-key (env: → visibility:)', () => {
 		writeMd(join(docs, 'foo.md'), '# Foo\n');
 		const r = await lintDocs(docs);
 		const hits = r.messages.filter(
-			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+			(m) => m.severity === 'error' && m.message.includes('env:') && m.message.includes('visibility:'),
 		);
 		expect(hits.length).toBe(1);
 	});
@@ -669,7 +683,7 @@ describe('lintDocs — meta-legacy-env-key (env: → visibility:)', () => {
 		writeMd(join(docs, 'marketing.md'), '# Marketing\n');
 		const r = await lintDocs(docs);
 		const hits = r.messages.filter(
-			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+			(m) => m.severity === 'error' && m.message.includes('env:') && m.message.includes('visibility:'),
 		);
 		expect(hits.length).toBe(0);
 	});
@@ -683,8 +697,70 @@ describe('lintDocs — meta-legacy-env-key (env: → visibility:)', () => {
 		writeMd(join(docs, 'b.md'), '# B\n');
 		const r = await lintDocs(docs);
 		const hits = r.messages.filter(
-			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+			(m) => m.severity === 'error' && m.message.includes('env:') && m.message.includes('visibility:'),
 		);
 		expect(hits.length).toBe(3); // top-level + pages.a + pages.b
 	});
 });
+
+// v2.0: heading-level-skip warning (US-004)
+describe('lintDocs — meta-heading-skip', () => {
+	test('healthy heading hierarchy → no warning', async () => {
+		writeMeta(docs, `title: Site\nchildren:\n  - name: page\n    title: Page\n`);
+		writeMd(join(docs, 'page.md'), '# H1\n\n## H2\n\n### H3\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter((m) => m.message.includes('跳过'));
+		expect(hits.length).toBe(0);
+	});
+
+	test('H1 → H3 skip → 1 warning', async () => {
+		writeMeta(docs, `title: Site\nchildren:\n  - name: page\n    title: Page\n`);
+		writeMd(join(docs, 'page.md'), '# H1\n\n### H3\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter((m) => m.message.includes('H1') && m.message.includes('H3'));
+		expect(hits.length).toBe(1);
+		expect(hits[0].severity).toBe('warning');
+	});
+
+	test('first heading is H2 → warning', async () => {
+		writeMeta(docs, `title: Site\nchildren:\n  - name: page\n    title: Page\n`);
+		writeMd(join(docs, 'page.md'), '## Starts at H2\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter((m) => m.message.includes('首个标题应是 H1'));
+		expect(hits.length).toBe(1);
+	});
+
+	test('# inside fenced code block does not trigger', async () => {
+		writeMeta(docs, `title: Site\nchildren:\n  - name: page\n    title: Page\n`);
+		writeMd(join(docs, 'page.md'), '# H1\n\n```\n### Fake H3 inside fence\n```\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter((m) => m.message.includes('跳过') || m.message.includes('H3'));
+		expect(hits.length).toBe(0);
+	});
+});
+
+// v2.0: meta-frontmatter-typo warning (US-005)
+describe('lintDocs — meta-frontmatter-typo', () => {
+	test('"desc" → "description" typo warns', async () => {
+		writeMeta(
+			docs,
+			`title: Site\nchildren:\n  - name: foo\n    title: Foo\n    desc: short desc\n`,
+		);
+		writeMd(join(docs, 'foo.md'), '# Foo\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter((m) => m.message.includes('desc') && m.message.includes('description'));
+		expect(hits.length).toBe(1);
+	});
+
+	test('when canonical key also present → no warning (no conflict-rewrite)', async () => {
+		writeMeta(
+			docs,
+			`title: Site\nchildren:\n  - name: foo\n    title: Foo\n    desc: typo\n    description: real\n`,
+		);
+		writeMd(join(docs, 'foo.md'), '# Foo\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter((m) => m.message.includes('desc'));
+		expect(hits.length).toBe(0);
+	});
+});
+

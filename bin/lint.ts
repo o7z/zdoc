@@ -200,9 +200,10 @@ function lintMetaYamlMissing(scan: DocsScan): LintMessage[] {
 	return out;
 }
 
-// v2-prep Rule: meta-legacy-schema (warning)
-// _meta.yaml uses the legacy `pages:` map. v2 will replace it with the new
-// `children:` list schema. See docs/dev/next-major.md "已决定" → schema.
+// v2 Rule: meta-legacy-schema (ERROR in v2)
+// _meta.yaml uses the legacy `pages:` map. v2 requires `children:` list
+// schema. Lint fails the build; `zdoc fix --recipe=pages-to-children`
+// performs the migration. See docs/dev/next-major.md "已决定" → schema.
 function lintMetaLegacySchema(scan: DocsScan): LintMessage[] {
 	const out: LintMessage[] = [];
 	for (const meta of scan.metaFiles) {
@@ -214,18 +215,18 @@ function lintMetaLegacySchema(scan: DocsScan): LintMessage[] {
 		}
 		if ('pages' in parsed && parsed.pages !== undefined && parsed.pages !== null) {
 			out.push({
-				severity: 'warning',
+				severity: 'error',
 				file: rel(scan.docsDir, meta),
 				line: 1,
 				message:
-					'pages: 是 v1 schema，v2 将改用 children: 列表（运行 `zdoc fix --recipe=pages-to-children` 在 v2 开发期可机械迁移）',
+					'【v2 必须迁移】pages: 是 v1 schema，v2 改用 children: 列表。跑 `zdoc fix --recipe=pages-to-children --apply` 完成迁移。',
 			});
 		}
 	}
 	return out;
 }
 
-// v2-prep Rule: meta-legacy-env-key (warning)
+// v2 Rule: meta-legacy-env-key (ERROR in v2)
 // `env:` field is renamed to `visibility:` in v2 (env: prod → visibility:
 // prod-only). Walk the raw parseYaml result so we catch every occurrence
 // (top-level, under pages.*, under children[]).
@@ -242,11 +243,11 @@ function lintMetaLegacyEnvKey(scan: DocsScan): LintMessage[] {
 			continue;
 		}
 		const relPath = rel(scan.docsDir, meta);
-		const baseMsg = '字段 env: 在 v2 已重命名为 visibility:（env: prod → visibility: prod-only）';
+		const baseMsg = '【v2 必须迁移】env: 已重命名为 visibility:（env: prod → visibility: prod-only）。跑 `zdoc fix --recipe=env-to-visibility --apply`。';
 
 		// Top-level
 		if (hasEnvKey(parsed)) {
-			out.push({ severity: 'warning', file: relPath, line: 1, message: baseMsg });
+			out.push({ severity: 'error', file: relPath, line: 1, message: baseMsg });
 		}
 
 		// pages.*
@@ -255,7 +256,7 @@ function lintMetaLegacyEnvKey(scan: DocsScan): LintMessage[] {
 			for (const [key, page] of Object.entries(pagesRaw as Record<string, unknown>)) {
 				if (hasEnvKey(page)) {
 					out.push({
-						severity: 'warning',
+						severity: 'error',
 						file: relPath,
 						line: 1,
 						message: `${baseMsg}（pages.${key}）`,
@@ -272,11 +273,172 @@ function lintMetaLegacyEnvKey(scan: DocsScan): LintMessage[] {
 				const r = item as Record<string, unknown>;
 				const label = typeof r.name === 'string' && r.name ? r.name : `[${idx}]`;
 				out.push({
-					severity: 'warning',
+					severity: 'error',
 					file: relPath,
 					line: 1,
 					message: `${baseMsg}（children.${label}）`,
 				});
+			});
+		}
+	}
+	return out;
+}
+
+// v2 Rule: meta-link-missing-suffix (warning)
+// Paired with normalize-link-suffix fix recipe. In v2 zdoc renders multiple
+// file extensions, so [foo](/foo) is ambiguous — link must include the full
+// extension (.md / .pdf / etc).
+const KNOWN_LINK_EXTS = ['.md', '.pdf'];
+function lintLinkMissingSuffix(scan: DocsScan): LintMessage[] {
+	const out: LintMessage[] = [];
+	const linkRe = /\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+	const fenceRe = /^\s*(```|~~~)/;
+	const inlineCodeRe = /`[^`]*`/g;
+	for (const md of scan.mdFiles) {
+		const content = readFileSync(md, 'utf-8');
+		const lines = content.split(/\r?\n/);
+		let inFence = false;
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
+			if (fenceRe.test(line)) {
+				inFence = !inFence;
+				continue;
+			}
+			if (inFence) continue;
+			const stripped = line.replace(inlineCodeRe, '');
+			let m: RegExpExecArray | null;
+			linkRe.lastIndex = 0;
+			while ((m = linkRe.exec(stripped)) !== null) {
+				const href = m[2];
+				if (!isInternalDocLink(href)) continue;
+				const pathOnly = href.split('#')[0];
+				if (!pathOnly) continue;
+				if (KNOWN_LINK_EXTS.some((ext) => pathOnly.toLowerCase().endsWith(ext))) continue;
+				out.push({
+					severity: 'warning',
+					file: rel(scan.docsDir, md),
+					line: i + 1,
+					message: `链接 \`${href}\` 缺后缀(v2 要求完整 .md / .pdf 等;运行 \`zdoc fix --recipe=normalize-link-suffix --apply\`)`,
+				});
+			}
+		}
+	}
+	return out;
+}
+
+// v2 Rule: meta-heading-skip (warning)
+// Markdown heading levels should not skip — # → ## → ### is good, # → ###
+// (skipping ##) is a warning. First heading must start at H1. Tracks fence
+// state so example headings inside ``` blocks don't trip.
+function lintHeadingSkip(scan: DocsScan): LintMessage[] {
+	const out: LintMessage[] = [];
+	const headingRe = /^(#{1,6})\s+/;
+	const fenceRe = /^\s*(```|~~~)/;
+	const inlineCodeRe = /`[^`]*`/g;
+	for (const md of scan.mdFiles) {
+		const content = readFileSync(md, 'utf-8');
+		const lines = content.split(/\r?\n/);
+		let inFence = false;
+		let prevLevel = 0; // 0 means no heading seen yet
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
+			if (fenceRe.test(line)) {
+				inFence = !inFence;
+				continue;
+			}
+			if (inFence) continue;
+			// Skip inline-code spans (won't normally contain a # at line start
+			// but normalize just in case for # mid-line — not our concern).
+			const stripped = line.replace(inlineCodeRe, '');
+			const m = stripped.match(headingRe);
+			if (!m) continue;
+			const level = m[1].length;
+			if (prevLevel === 0) {
+				if (level !== 1) {
+					out.push({
+						severity: 'warning',
+						file: rel(scan.docsDir, md),
+						line: i + 1,
+						message: `首个标题应是 H1,实际是 H${level} (跳过了 H1)`,
+					});
+				}
+			} else if (level > prevLevel + 1) {
+				out.push({
+					severity: 'warning',
+					file: rel(scan.docsDir, md),
+					line: i + 1,
+					message: `标题层级从 H${prevLevel} 跳到 H${level},跳过了中间层`,
+				});
+			}
+			prevLevel = level;
+		}
+	}
+	return out;
+}
+
+// v2 Rule: meta-frontmatter-typo (warning)
+// Detect known typos / common misspellings of PageMeta field names in
+// _meta.yaml entries. Paired with the normalize-frontmatter-keys fix recipe.
+const FRONTMATTER_TYPO_MAP: Readonly<Record<string, string>> = {
+	desc: 'description',
+	descripton: 'description',
+	discription: 'description',
+	modifed: 'modified',
+	modifyed: 'modified',
+	modify: 'modified',
+	autor: 'author',
+	auther: 'author',
+	lifestyle: 'lifecycle',
+	lifecyle: 'lifecycle',
+	visablity: 'visibility',
+	visiblity: 'visibility',
+	supersede_by: 'superseded_by',
+	superceded_by: 'superseded_by',
+	folded: 'folded_to',
+	folded_too: 'folded_to',
+};
+
+function lintFrontmatterTypo(scan: DocsScan): LintMessage[] {
+	const out: LintMessage[] = [];
+	for (const meta of scan.metaFiles) {
+		let parsed: Record<string, unknown>;
+		try {
+			parsed = parseYaml(readFileSync(meta, 'utf-8'));
+		} catch {
+			continue;
+		}
+		const relPath = rel(scan.docsDir, meta);
+
+		function checkEntry(entry: unknown, label: string): void {
+			if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return;
+			const r = entry as Record<string, unknown>;
+			for (const key of Object.keys(r)) {
+				const corrected = FRONTMATTER_TYPO_MAP[key];
+				if (!corrected) continue;
+				// Skip if the corrected name is already present (no conflict-rewrite)
+				if (corrected in r) continue;
+				out.push({
+					severity: 'warning',
+					file: relPath,
+					line: 1,
+					message: `${label}: 字段名 "${key}" 疑似 "${corrected}" 的拼写错位`,
+				});
+			}
+		}
+
+		checkEntry(parsed, '顶层');
+		const pagesRaw = parsed.pages;
+		if (pagesRaw && typeof pagesRaw === 'object' && !Array.isArray(pagesRaw)) {
+			for (const [key, page] of Object.entries(pagesRaw as Record<string, unknown>)) {
+				checkEntry(page, `pages.${key}`);
+			}
+		}
+		const childrenRaw = parsed.children;
+		if (Array.isArray(childrenRaw)) {
+			childrenRaw.forEach((item, idx) => {
+				const r = item && typeof item === 'object' ? (item as Record<string, unknown>) : {};
+				const label = typeof r.name === 'string' && r.name ? r.name : `[${idx}]`;
+				checkEntry(item, `children.${label}`);
 			});
 		}
 	}
@@ -864,6 +1026,9 @@ export async function lintDocs(docsDir: string): Promise<LintReport> {
 		...lintMetaYamlMissing(scan),
 		...lintMetaLegacySchema(scan),
 		...lintMetaLegacyEnvKey(scan),
+		...lintLinkMissingSuffix(scan),
+		...lintHeadingSkip(scan),
+		...lintFrontmatterTypo(scan),
 		...lintLifecycleTargets(scan),
 		...lintInternalLinks(scan),
 		...lintFoldedBlockquotes(scan),
@@ -883,8 +1048,11 @@ Checks performed:
   • meta-subdir-as-file: pages key points to a directory, not a .md file
   • meta-missing-title: pages key has no title field
   • meta-yaml-missing: directory has .md files but no _meta.yaml
-  • meta-legacy-schema: _meta.yaml uses v1 pages: (v2 → children:)
-  • meta-legacy-env-key: env: field used (v2 → visibility:)
+  • meta-legacy-schema: _meta.yaml uses v1 pages: (v2 ERROR — must migrate to children:)
+  • meta-legacy-env-key: env: field used (v2 ERROR — must rename to visibility:)
+  • meta-link-missing-suffix: Markdown 链接缺 .md/.pdf 后缀 (v2 要求完整后缀)
+  • meta-heading-skip: Markdown 标题层级跳跃 (# → ### 跳过 ##)
+  • meta-frontmatter-typo: _meta.yaml 字段名拼写错位 (desc → description 等)
   • Internal markdown link existence
   • Lifecycle target existence (superseded_by / folded_to)
   • Folded blockquote convention ("> 已折叠到 [text](path)")

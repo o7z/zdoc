@@ -415,3 +415,15 @@ describe('top-level PageMeta fields preserved on DirMeta', () => {
 		);
 	});
 });
+
+// v2.0: parseYaml errors now include actionable hints (US-006).
+describe('parseYaml error messages (v2.0 hints)', () => {
+	test('YAML with tab indent → error mentions tab', () => {
+		// Tab is at the start of a value line — parsed as a malformed line
+		expect(() => parseYaml('title: T\npages:\n\tintro: A\n')).toThrow(/tab/);
+	});
+
+	test('malformed line includes line number', () => {
+		expect(() => parseYaml('title: T\n@@@\n')).toThrow(/第 2 行/);
+	});
+});

@@ -26,6 +26,8 @@ import removeSubdirAsFile from './recipes/remove-subdir-as-file.js';
 import deriveMissingTitle from './recipes/derive-missing-title.js';
 import envToVisibility from './recipes/env-to-visibility.js';
 import pagesToChildren from './recipes/pages-to-children.js';
+import normalizeLinkSuffix from './recipes/normalize-link-suffix.js';
+import normalizeFrontmatterKeys from './recipes/normalize-frontmatter-keys.js';
 import pruneMissingPage from './recipes/prune-missing-page.js';
 // Compile-time recipe registry. Order matters for apply() — findings are
 // processed in the registration order, threading source through each
@@ -43,8 +45,11 @@ export const RECIPES = [
     registerOrphan,
     removeSubdirAsFile,
     deriveMissingTitle,
+    normalizeFrontmatterKeys, // run BEFORE env-to-visibility / pages-to-children so
+    // typo'd fields (e.g. visablity) are corrected first
     envToVisibility,
     pagesToChildren,
+    normalizeLinkSuffix,
     pruneMissingPage,
 ];
 function walkDocs(docsDir) {
@@ -77,6 +82,14 @@ function scanFs(docsDir) {
             sources.set(meta, source);
             shas.set(meta, sha256Hex(source));
         }
+    }
+    // v2: also snapshot .md files so recipes that mutate markdown content
+    // (e.g. normalize-link-suffix) can run through the standard apply path
+    // with SHA-based optimistic concurrency, the same as _meta.yaml.
+    for (const md of mds) {
+        const source = readFileSync(md, 'utf-8');
+        sources.set(md, source);
+        shas.set(md, sha256Hex(source));
     }
     const scan = {
         docsDir,

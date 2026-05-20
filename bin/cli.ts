@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { getLatestVersion, getCurrentVersion } from './update.js';
 import { detectInstallMode, formatUpgradeHint } from './install-mode.js';
 import { detectAiAgent, formatAgentHint } from './agent-detect.js';
+import { printLegacySchemaBannerIfNeeded } from './legacy-banner.js';
 
 interface Args {
 	dir: string;
@@ -244,6 +245,10 @@ async function main(): Promise<void> {
 		process.stderr.write(`Error: docs directory not found: ${docsDir}\n`);
 		process.exit(1);
 	}
+
+	// v2: check for legacy schema (pages: / env:) and show a banner if found.
+	// Silent when docs/ is clean. Banner only — never auto-modifies files.
+	printLegacySchemaBannerIfNeeded(docsDir);
 
 	const port = await findFreePort(startPort);
 

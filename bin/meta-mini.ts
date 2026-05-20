@@ -179,9 +179,22 @@ function parseBlock(lines: Line[], start: number, baseIndent: number): [Record<s
 	while (i < lines.length) {
 		const line = lines[i];
 		if (line.indent < baseIndent) break;
-		if (line.indent > baseIndent) throw new Error(`Unexpected indent on line ${line.num}`);
+		if (line.indent > baseIndent) {
+			throw new Error(
+				`第 ${line.num} 行缩进异常 (期望 ${baseIndent} 空格,实际 ${line.indent} 空格)。YAML 不接受 tab,请用 2 空格缩进。`,
+			);
+		}
 		const m = line.content.match(KEY_VALUE_RE);
-		if (!m) throw new Error(`Malformed line ${line.num}: ${line.content}`);
+		if (!m) {
+			// Diagnose common errors and give an actionable hint.
+			const hints: string[] = [];
+			// Tab indent (since lines already strip leading spaces; tab elsewhere?)
+			if (line.content.includes('\t')) hints.push("内含 tab,YAML 不接受 tab,请用空格");
+			// Missing space after colon: foo:bar
+			if (/^[A-Za-z0-9_-]+:[^\s].*/.test(line.content)) hints.push("冒号后应有空格:`foo:bar` 应写成 `foo: bar`");
+			const hintStr = hints.length > 0 ? ` (可能原因: ${hints.join('; ')})` : '';
+			throw new Error(`第 ${line.num} 行格式错误: ${line.content}${hintStr}`);
+		}
 		let key = m[1];
 		if (key.startsWith('"') || key.startsWith("'")) key = key.slice(1, -1);
 		const valueStr = m[2].trim();
