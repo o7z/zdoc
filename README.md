@@ -134,25 +134,25 @@ Every directory that should appear in the sidebar needs a `_meta.yaml`. It decla
 ```yaml
 title: Getting Started      # required — sidebar label for the directory
 order: 1                     # optional — sort weight (lower = earlier). Default 999
-env: prod                    # optional — set to "prod" to hide in non-prod
+visibility: prod-only        # optional — hide in non-prod (NODE_ENV !== 'production')
 
-pages:
-  install:                   # key = filename without .md
+children:                    # v2 schema — ordered list; array position is render order
+  - name: install            # required — filename without .md (or full PDF filename)
     title: Install           # required — without this, the file is hidden
-    order: 1
     modified: 2026-04-18
     version: 1.0.1
     description: Step-by-step install for npm, bun, and global use.
     author: o7z
-  config:
+  - name: config
     title: Config
-    order: 2
-  report.pdf:                # PDFs: use the full filename including extension
+  - name: report.pdf         # PDFs: use the full filename including extension
     title: Q4 Report
-    order: 3
+  - name: tutorials          # subdir entries: just `name`, title lives in subdir's own _meta.yaml
 ```
 
-Directories without `_meta.yaml` are hidden entirely. `.md` files not listed under `pages` are not routable (404) and don't appear in the sidebar.
+Directories without `_meta.yaml` are hidden entirely. `.md` files not listed under `children` are not routable (404) and don't appear in the sidebar.
+
+**Upgrading from v1.x?** Old projects using `pages:` map + `env:` field still parse (no crash), but `zdoc lint` reports them as errors. Run `zdoc fix --apply` once to migrate to v2 schema mechanically.
 
 ### Per-page fields
 
@@ -164,7 +164,7 @@ Directories without `_meta.yaml` are hidden entirely. `.md` files not listed und
 | `description`   | No       | Short summary, shown above the article body.                                             |
 | `version`       | No       | Document version (e.g. `1.0.1`), shown as a chip in the metadata bar.                    |
 | `author`        | No       | Author name, shown as a chip in the metadata bar.                                        |
-| `env`           | No       | Set to `prod` to hide in development (`NODE_ENV !== 'production'`).                      |
+| `visibility`    | No       | Set to `prod-only` to hide in development (`NODE_ENV !== 'production'`).                |
 | `lifecycle`     | No       | `draft` / `stable` / `archived`. `archived` greys the sidebar entry and excludes it from search. |
 | `superseded_by` | No       | Path to the doc that replaces this one. Renders a banner at the top + ↗ in sidebar.      |
 | `folded_to`     | No       | Path (with optional `#anchor`) where this doc's content has been folded. Renders a banner. |
@@ -187,15 +187,15 @@ docs/
 ├── _meta.yaml              # title: My Docs
 ├── index.md                # site home (plain Markdown)
 ├── getting-started/
-│   ├── _meta.yaml          # title: Getting Started; order: 1; pages: {install:…, config:…}
+│   ├── _meta.yaml          # title: Getting Started; order: 1; children: [install, config]
 │   ├── install.md          # pure content, listed in _meta.yaml
 │   └── config.md
 ├── guide/
-│   ├── _meta.yaml          # title: Guide; order: 2; pages: {basics:…, advanced:…}
+│   ├── _meta.yaml          # title: Guide; order: 2; children: [basics, advanced]
 │   ├── basics.md
 │   └── advanced.md
 └── reports/
-    ├── _meta.yaml          # title: Reports; order: 3; pages: {Q4.pdf: {title: Q4 Report}}
+    ├── _meta.yaml          # title: Reports; order: 3; children: [{name: Q4.pdf, title: Q4 Report}]
     └── Q4.pdf
 ```
 
@@ -249,7 +249,7 @@ zdoc lint -d ./docs      # lint a specific directory
 
 What it checks:
 
-- **`_meta.yaml` consistency** — pages listed under `pages:` must have matching `.md` (or `.pdf`) files; markdown files not listed in any `_meta.yaml` are flagged as orphans (warning).
+- **`_meta.yaml` consistency** — entries listed under `children:` must have matching `.md` (or `.pdf`) files or be subdirs with their own `_meta.yaml`; markdown files not listed in any `_meta.yaml` are flagged as orphans (warning).
 - **Internal markdown link health** — `[text](/path.md)` and `[text](./relative.md)` targets must exist. External URLs, `mailto:`, and same-page anchors (`#section`) are ignored. Links inside fenced code blocks (` ``` ` / `~~~`) and inline code (`` ` ``) are skipped (they're documentation examples).
 - **Lifecycle target existence** — `superseded_by` and `folded_to` paths must point to a file that exists (warning if not).
 - **Folded blockquote convention** — lines like `> 已折叠到 [text](/path.md#anchor)` get their target validated.

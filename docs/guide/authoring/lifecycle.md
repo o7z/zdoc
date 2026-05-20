@@ -1,6 +1,6 @@
 # 文档生命周期：lifecycle / superseded_by / folded_to
 
-zdoc 的 `_meta.yaml` 单文档元数据除了 `title / order / description / version / author / modified / env` 之外，还支持三个**生命周期**字段。它们都是可选的——不写则行为和不加这套之前完全一致。
+zdoc 的 `_meta.yaml` 单文档元数据除了 `title / order / description / version / author / modified / visibility` 之外,还支持三个**生命周期**字段。它们都是可选的——不写则行为和不加这套之前完全一致。
 
 这三个字段的设计目标是：让长期项目的文档在「**变多 → 变旧 → 被取代**」的过程中保持可读、可搜索、对 AI agent 友好。
 
@@ -9,15 +9,15 @@ zdoc 的 `_meta.yaml` 单文档元数据除了 `title / order / description / ve
 ```yaml
 # docs/guide/intro/_meta.yaml
 title: Intro
-pages:
-  legacy-design:
+children:
+  - name: legacy-design
     title: 旧版方案
     lifecycle: archived
     superseded_by: /docs/guide/intro/v2-design.md
-  draft-spec:
+  - name: draft-spec
     title: 草案
     lifecycle: draft
-  manifest-research:
+  - name: manifest-research
     title: Manifest 研究
     folded_to: /docs/04-implementation/02-data-model/01-schema.md#manifest
 ```
@@ -46,9 +46,9 @@ pages:
 ### 1. 旧方案被新方案完全取代
 
 ```yaml
-pages:
-  v1-architecture:
-    title: v1 架构（已弃用）
+children:
+  - name: v1-architecture
+    title: v1 架构(已弃用)
     lifecycle: archived
     superseded_by: /docs/architecture/v2.md
 ```
@@ -60,8 +60,8 @@ pages:
 研究文档常常一边讲"为什么"（背景 / 选项对比 / 决策记录）、一边讲"是什么"（schema / 字段清单 / 接口）。当后者稳定下来后，把"是什么"那部分**搬到**权威实现文档，研究文档原位置保留指针：
 
 ```yaml
-pages:
-  data-source-manifest-design:
+children:
+  - name: data-source-manifest-design
     title: 数据源 Manifest 设计研究
     folded_to: /docs/04-implementation/02-data-model/01-schema.md#manifest
 ```
@@ -71,11 +71,11 @@ pages:
 ### 3. 还在草稿阶段的预留位
 
 ```yaml
-pages:
-  api-spec:
+children:
+  - name: api-spec
     title: API 规范
     lifecycle: draft
-    description: v0.1 计划 8 个端点，目前仅大纲。
+    description: v0.1 计划 8 个端点,目前仅大纲。
 ```
 
 `draft` 当前不渲染特殊视觉，但语义上明确告诉协作者（人 + agent）此文档尚未稳定。将来 zdoc 可能给 draft 加 ⏳ 角标，现在先把字段标好。

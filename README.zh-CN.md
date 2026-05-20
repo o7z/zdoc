@@ -81,26 +81,26 @@ zdoc -w hunter2 -p 8080 -d ./site   # 全参数覆盖
 
 ```yaml
 title: 快速开始              # 必填 —— 侧边栏显示的目录名
-order: 1                    # 可选 —— 排序权重（越小越靠前），默认 999
-env: prod                   # 可选 —— 设为 "prod" 表示仅生产环境显示
+order: 1                    # 可选 —— 排序权重(越小越靠前),默认 999
+visibility: prod-only       # 可选 —— 非生产环境(NODE_ENV !== 'production')隐藏
 
-pages:
-  install:                  # key = 去掉 .md 的文件名
-    title: 安装             # 必填，没有则该文件隐藏
-    order: 1
+children:                   # v2 schema —— 有序列表,数组位置即渲染顺序
+  - name: install           # 必填 —— 去掉 .md 的文件名(或 PDF 完整文件名)
+    title: 安装             # 必填,没有则该文件隐藏
     modified: 2026-04-18
     version: 1.0.1
     description: npm、bun 以及全局安装的分步指南。
     author: o7z
-  config:
+  - name: config
     title: 配置
-    order: 2
-  report.pdf:               # PDF 文件：key 保留完整文件名（含扩展名）
+  - name: report.pdf        # PDF 文件:name 保留完整文件名(含扩展名)
     title: 第四季度报告
-    order: 3
+  - name: tutorials         # 子目录条目:只写 name,title 来自子目录自身的 _meta.yaml
 ```
 
-没有 `_meta.yaml` 的目录**不会显示**。没有列在 `pages` 里的 `.md` 文件既不能被路由访问（404），也不出现在侧边栏。
+没有 `_meta.yaml` 的目录**不会显示**。没有列在 `children` 里的 `.md` 文件既不能被路由访问(404),也不出现在侧边栏。
+
+**从 v1.x 升级?** 老项目用 `pages:` map + `env:` 字段仍然能 parse(老用户不会 crash),但 `zdoc lint` 会报 error。跑一次 `zdoc fix --apply` 一步迁移到 v2 schema。
 
 ### 单文档字段
 
@@ -112,7 +112,7 @@ pages:
 | `description` | 否   | 简短描述，渲染在正文上方。                                                         |
 | `version`     | 否   | 文档版本（如 `1.0.1`），作为 chip 出现在元数据条上。                                  |
 | `author`      | 否   | 作者名，作为 chip 出现在元数据条上。                                                |
-| `env`         | 否   | 设为 `prod` 表示仅生产环境显示（开发模式下 `NODE_ENV !== 'production'` 时隐藏）。      |
+| `visibility`  | 否   | 设为 `prod-only` 表示仅生产环境显示(开发模式下 `NODE_ENV !== 'production'` 时隐藏)。 |
 
 `description`、`version`、`author`、`modified` 对 `.md` 和 `.pdf` 都生效；只要其中任意一个有值，页面顶部就会渲染一个小型元数据条。
 
@@ -123,7 +123,7 @@ pages:
 - `<docsDir>/_meta.yaml` 声明站点标题
 - `<docsDir>/index.md` 即站点首页（纯 Markdown，另支持下文可选的 hero frontmatter）
 
-侧边栏上的目录节点只负责折叠/展开，不会跳转。如果你想让某个目录下有一个单独的入口页面，请在该目录的 `_meta.yaml` 的 `pages` 里加一个条目。
+侧边栏上的目录节点只负责折叠/展开,不会跳转。如果你想让某个目录下有一个单独的入口页面,请在该目录自己的 `_meta.yaml` 的 `children` 列表里把入口页排在第一项 —— v2 把目录 URL `/<dir>/` 解析为 `children[0]`。
 
 ### 目录结构示例
 
@@ -132,15 +132,15 @@ docs/
 ├── _meta.yaml              # title: 我的文档
 ├── index.md                # 站点首页（纯 Markdown）
 ├── getting-started/
-│   ├── _meta.yaml          # title: 快速开始; order: 1; pages: {install:…, config:…}
+│   ├── _meta.yaml          # title: 快速开始; order: 1; children: [install, config]
 │   ├── install.md          # 纯内容，在 _meta.yaml 里列出
 │   └── config.md
 ├── guide/
-│   ├── _meta.yaml          # title: 指南; order: 2; pages: {basics:…, advanced:…}
+│   ├── _meta.yaml          # title: 指南; order: 2; children: [basics, advanced]
 │   ├── basics.md
 │   └── advanced.md
 └── reports/
-    ├── _meta.yaml          # title: 报告; order: 3; pages: {Q4.pdf: {title: Q4 报告}}
+    ├── _meta.yaml          # title: 报告; order: 3; children: [{name: Q4.pdf, title: Q4 报告}]
     └── Q4.pdf
 ```
 

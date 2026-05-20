@@ -23,20 +23,21 @@ After ANY edit under `<docs-dir>`, run `npx @o7z/zdoc lint` (it reads the same c
 
 `lint` also validates fenced ` ```mermaid ` blocks by routing them through `mermaid.parse()` under a jsdom shim — diagram syntax errors fail the gate too. See `docs/dev/reference/mermaid-lint.md` for the implementation.
 
+If lint reports `【v2 必须迁移】` errors (legacy `pages:` map or `env:` field), run `npx @o7z/zdoc fix --apply` to mechanically migrate to v2 schema. The fix engine also auto-repairs common authoring mistakes: links missing `.md` suffix, frontmatter typos (`desc` → `description` etc.), orphan `.md` files, and self-discovered subdirs missing from the parent's `children:` list.
+
 ## Project conventions
 
 - `.md` files are pure content — never add YAML frontmatter, never add HTML comments. Metadata lives in `_meta.yaml`.
-- Each directory in the sidebar has a `_meta.yaml` with `title:` + `pages:` map.
-- Pages NOT listed under `pages:` are NOT routable — adding a `.md` without registering it makes it invisible. **Exception**: a subdirectory's `index.md` is whitelisted by lint and does not need to be registered (it can still be registered if you want it to appear as an explicit sidebar entry inside that group).
-- Directory landing pages — `<dir>/foo.md` and `<dir>/sub/index.md` are NOT interchangeable; pick the right registration:
-  - `<dir>/foo.md` → register `foo:` under `<dir>/_meta.yaml`'s `pages:` map.
-  - `<dir>/sub/index.md` → do NOT register `sub:` in `<dir>/_meta.yaml.pages` (that key is always resolved to `<dir>/sub.md` and lint will error). Instead give `<dir>/sub/` its own `_meta.yaml` with a `title:` so it shows as a sidebar group; the `index.md` becomes the group's landing page, reachable from the site-home hero `actions.link`, sibling docs, or by registering `index:` in the subdirectory's own `_meta.yaml.pages`.
-  - zdoc has no "directory-as-link" fallback — sidebar group titles are not clickable on their own.
-- Internal links MUST keep the `.md` suffix: `[install](/getting-started/install.md)` ✓ / `[install](/getting-started/install)` ✗ (404).
-- Lifecycle metadata (all optional, all in `_meta.yaml`):
+- Each directory in the sidebar has a `_meta.yaml` with `title:` + `children:` list (v2 schema).
+- Entries NOT listed under `children:` are NOT routable — adding a `.md` without registering it makes it invisible. The sidebar order follows the `children:` array position.
+- Subdirectories must also be registered in the parent's `children:` (just `- name: <subdir>`); v2 has no self-discovery fallback. Subdir entries take `title` from the subdir's own `_meta.yaml`, not the parent's listing.
+- Directory landing pages — put the entry page at the top of the subdir's own `children:` list. v2 resolves `<dir>/` URLs to `children[0]` recursively, so the first item is the implicit landing page (the filename can be `index`, `overview`, `intro`, anything).
+- Internal links MUST keep the `.md` (or `.pdf`) suffix: `[install](/getting-started/install.md)` ✓ / `[install](/getting-started/install)` ✗ — v2 lint warns and `zdoc fix --recipe=normalize-link-suffix` auto-completes when there's exactly one matching file on disk.
+- Lifecycle metadata (all optional, all in `_meta.yaml`'s `children` entries):
   - `lifecycle: draft | stable | archived` — archived pages drop out of search and grey out in sidebar.
   - `superseded_by: /path/new.md` — banner pointing to successor.
   - `folded_to: /path/auth.md#section` — content moved elsewhere; this page is now a stub.
+- Hide a page in development only: `visibility: prod-only` (legacy `env: prod` still parses but lint errors and `fix` auto-migrates).
 - Internal links and lifecycle pointers (`superseded_by`, `folded_to`) are **root-relative paths to the docs root** — they do NOT include the docs-dir name as a prefix. With `docsDir: ./docs` and a target at `<docs-dir>/api/auth.md`, write `/api/auth.md`, not `/docs/api/auth.md`.
 - Section-level folding uses **plain markdown blockquote** (NOT a custom callout):
 
@@ -134,11 +135,13 @@ After non-trivial changes:
 - Update the corresponding doc in the same change. If no doc exists
   and the change introduces behavior worth documenting, add one
   under the docs directory and register it in the parent
-  `_meta.yaml`.
+  `_meta.yaml`'s `children:` list.
 - If a doc is being replaced rather than edited, set
-  `superseded_by` in `_meta.yaml` — don't delete.
+  `superseded_by` in the child entry — don't delete.
 
 Run `zdoc lint` before committing. Errors block; fix them.
+Common auto-fixable issues — link missing `.md` suffix, frontmatter
+field typos, orphan markdown — run `zdoc fix --apply`.
 ````
 
 ### Don't expand the snippet through this flow
