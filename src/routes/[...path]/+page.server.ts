@@ -3,7 +3,7 @@ import { dirname, basename, join, resolve, sep } from 'node:path';
 import { error, redirect } from '@sveltejs/kit';
 import { renderMarkdownCached } from '$lib/markdown.js';
 import { resolveDocsDir, stripSkPrefix, isSpecKitPath } from '$lib/mode.js';
-import { readDirMeta, type Lifecycle, type PageMeta } from '$lib/meta.js';
+import { readDirMeta, type DirMeta, type Lifecycle, type PageMeta } from '$lib/meta.js';
 import type { PageServerLoad } from './$types';
 
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -19,8 +19,22 @@ interface DocMeta {
 
 function visible(meta: PageMeta): boolean {
 	if (!meta.title) return false;
-	if (meta.env === 'prod' && !IS_PROD) return false;
+	// v2: visibility: prod-only is the canonical spelling; env: prod is
+	// the legacy form (still accepted at parse time).
+	const prodOnly = meta.visibility === 'prod-only' || meta.env === 'prod';
+	if (prodOnly && !IS_PROD) return false;
 	return true;
+}
+
+// v2 schema lookup: prefer `children` list, fall back to legacy `pages` map.
+// Matches the sidebar's resolution order (src/lib/sidebar.ts).
+function findEntry(parentMeta: DirMeta | null, key: string): PageMeta | undefined {
+	if (!parentMeta) return undefined;
+	if (parentMeta.children) {
+		const hit = parentMeta.children.find((c) => c.name === key);
+		if (hit) return hit;
+	}
+	return parentMeta.pages?.[key];
 }
 
 function extractDocMeta(meta: PageMeta): DocMeta | undefined {
@@ -57,7 +71,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 
 		const filename = basename(pdfPath);
 		const parentMeta = readDirMeta(join(dirname(pdfPath), '_meta.yaml'));
-		const pageMeta = parentMeta?.pages?.[filename];
+		const pageMeta = findEntry(parentMeta, filename);
 		if (!pageMeta || !visible(pageMeta)) {
 			error(404, `Page not found: ${slug}`);
 		}
@@ -79,7 +93,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 
 		const key = basename(asFile).replace(/\.md$/, '');
 		const parentMeta = readDirMeta(join(dirname(asFile), '_meta.yaml'));
-		const pageMeta = parentMeta?.pages?.[key];
+		const pageMeta = findEntry(parentMeta, key);
 		if (!pageMeta || !visible(pageMeta)) {
 			error(404, `Page not found: ${slug}`);
 		}
@@ -100,7 +114,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	if (asFile && existsSync(asFile) && statSync(asFile).isFile()) {
 		const key = basename(asFile).replace(/\.md$/, '');
 		const parentMeta = readDirMeta(join(dirname(asFile), '_meta.yaml'));
-		const pageMeta = parentMeta?.pages?.[key];
+		const pageMeta = findEntry(parentMeta, key);
 		if (pageMeta && visible(pageMeta)) {
 			throw redirect(301, '/' + mdSlug);
 		}

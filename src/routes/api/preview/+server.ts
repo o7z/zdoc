@@ -76,7 +76,9 @@ export const GET: RequestHandler = async ({ url }) => {
 
 	const key = basename(filePath).replace(/\.md$/, '');
 	const parentMeta = readDirMeta(join(dirname(filePath), '_meta.yaml'));
-	const pageMeta = parentMeta?.pages?.[key];
+	// v2: look up in children: list first, fall back to legacy pages: map.
+	const pageMeta =
+		parentMeta?.children?.find((c) => c.name === key) ?? parentMeta?.pages?.[key];
 	if (!pageMeta || !pageMeta.title) {
 		error(404, 'Page not found');
 	}

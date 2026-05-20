@@ -22,7 +22,9 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const SKIP_TAGS = new Set(['pre', 'code', 'figure', 'style', 'script']);
 
 function visible(meta: PageMeta): boolean {
-	if (meta.env === 'prod' && !IS_PROD) return false;
+	// v2: visibility: prod-only is canonical; env: prod is legacy.
+	const prodOnly = meta.visibility === 'prod-only' || meta.env === 'prod';
+	if (prodOnly && !IS_PROD) return false;
 	return true;
 }
 
@@ -122,16 +124,23 @@ async function scanDir(dir: string, root: string, out: SearchEntry[]): Promise<v
 	if (!existsSync(dir)) return;
 	const dirMeta = readDirMeta(join(dir, '_meta.yaml'));
 	if (dirMeta && visible(dirMeta)) {
-		const pages = dirMeta.pages ?? {};
-		for (const [key, meta] of Object.entries(pages)) {
-			if (!meta.title || !visible(meta)) continue;
-			if (meta.lifecycle === 'archived') continue;
+		// v2: prefer children list, fall back to legacy pages map.
+		interface PageSrc { key: string; pmeta: PageMeta; }
+		const srcs: PageSrc[] = [];
+		if (dirMeta.children) {
+			for (const c of dirMeta.children) srcs.push({ key: c.name, pmeta: c });
+		} else if (dirMeta.pages) {
+			for (const [k, v] of Object.entries(dirMeta.pages)) srcs.push({ key: k, pmeta: v });
+		}
+		for (const { key, pmeta } of srcs) {
+			if (!pmeta.title || !visible(pmeta)) continue;
+			if (pmeta.lifecycle === 'archived') continue;
 			if (key.endsWith('.pdf')) continue;
 			const mdPath = join(dir, key + '.md');
 			if (!existsSync(mdPath) || !statSync(mdPath).isFile()) continue;
 			const rel = relative(root, mdPath).replace(/\\/g, '/');
 			const link = '/' + rel;
-			const fileEntries = await indexFile(mdPath, link, meta.title);
+			const fileEntries = await indexFile(mdPath, link, pmeta.title);
 			out.push(...fileEntries);
 		}
 	}

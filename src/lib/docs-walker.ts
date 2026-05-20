@@ -12,7 +12,9 @@ import { readDirMeta, type Lifecycle, type PageMeta } from './meta.js';
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 function visible(meta: PageMeta): boolean {
-	if (meta.env === 'prod' && !IS_PROD) return false;
+	// v2: visibility: prod-only is canonical; env: prod is legacy.
+	const prodOnly = meta.visibility === 'prod-only' || meta.env === 'prod';
+	if (prodOnly && !IS_PROD) return false;
 	return true;
 }
 
@@ -57,8 +59,22 @@ function scanDir(dir: string, root: string, parentTitles: string[]): DirNode | n
 		children: [],
 	};
 
-	const pages = meta.pages ?? {};
-	for (const [key, pmeta] of Object.entries(pages)) {
+	// v2: prefer children: list, fall back to legacy pages: map.
+	// Build a single iteration source { key, pmeta, order } so both schemas
+	// hit the same loop body.
+	interface PageSrc { key: string; pmeta: PageMeta; order: number; }
+	const srcs: PageSrc[] = [];
+	if (meta.children) {
+		meta.children.forEach((c, idx) => {
+			srcs.push({ key: c.name, pmeta: c, order: c.order ?? (idx + 1) * 10 });
+		});
+	} else if (meta.pages) {
+		for (const [key, pmeta] of Object.entries(meta.pages)) {
+			srcs.push({ key, pmeta, order: pmeta.order ?? 999 });
+		}
+	}
+
+	for (const { key, pmeta, order } of srcs) {
 		if (!pmeta.title || !visible(pmeta)) continue;
 		if (key.endsWith('.pdf')) continue; // PDFs are excluded from text-based AI consumption
 		const target = join(dir, key + '.md');
@@ -68,7 +84,7 @@ function scanDir(dir: string, root: string, parentTitles: string[]): DirNode | n
 			path: rel,
 			link: '/' + rel,
 			title: pmeta.title,
-			order: pmeta.order ?? 999,
+			order,
 			lifecycle: pmeta.lifecycle,
 			superseded_by: pmeta.superseded_by,
 			folded_to: pmeta.folded_to,
