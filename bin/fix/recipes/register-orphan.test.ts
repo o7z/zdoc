@@ -238,4 +238,123 @@ describe('register-orphan recipe', () => {
 		expect(findings).toHaveLength(1);
 		expect(findings[0].payload?.derivedTitle).toBe('Frontmatter Title');
 	});
+
+	// =========================================================================
+	// v1.17 extension: children schema parent + subdir orphans
+	// =========================================================================
+
+	test('children-schema parent: .md orphan appended to children list', () => {
+		const metaPath = writeMeta(docsDir, `title: Site\nchildren:\n  - name: intro\n    title: Intro\n`);
+		writeMd(join(docsDir, 'intro.md'), '# Intro\n');
+		const orphan = join(docsDir, 'extra.md');
+		writeMd(orphan, '# Extra Page\n');
+
+		const { scan, sources } = buildScan([metaPath], [join(docsDir, 'intro.md'), orphan]);
+		const findings = recipe.detect(scan, sources);
+
+		expect(findings.length).toBe(1);
+		expect(findings[0].payload?.entryType).toBe('file');
+		expect(findings[0].payload?.orphanKey).toBe('extra');
+		expect(findings[0].payload?.derivedTitle).toBe('Extra Page');
+
+		const before = sources.get(metaPath)!;
+		const after = recipe.apply!(findings[0], before);
+		expect(after).toContain('  - name: intro');
+		expect(after).toContain('  - name: extra');
+		expect(after).toContain('    title: Extra Page');
+		// Not added to pages
+		expect(after).not.toContain('pages:');
+	});
+
+	test('children-schema parent: subdir orphan appended (no title field)', () => {
+		const metaPath = writeMeta(docsDir, `title: Site\nchildren:\n  - name: intro\n    title: Intro\n`);
+		writeMd(join(docsDir, 'intro.md'), '# Intro\n');
+
+		// Subdir with its own _meta.yaml — not listed in parent children
+		const subdir = join(docsDir, 'guide');
+		mkdirSync(subdir);
+		writeMeta(subdir, `title: GuideSection\n`);
+
+		const { scan, sources } = buildScan([metaPath], [join(docsDir, 'intro.md')]);
+		const findings = recipe.detect(scan, sources);
+
+		// One finding for subdir 'guide'
+		const subdirFinding = findings.find((f) => f.payload?.entryType === 'subdir');
+		expect(subdirFinding).toBeDefined();
+		expect(subdirFinding?.payload?.orphanKey).toBe('guide');
+		expect(subdirFinding?.payload?.derivedTitle).toBeUndefined();
+
+		const before = sources.get(metaPath)!;
+		const after = recipe.apply!(subdirFinding!, before);
+		expect(after).toContain('  - name: guide');
+		// Subdir entry has only name, no title (title lives in subdir's own _meta.yaml)
+		const guideIdx = after.indexOf('  - name: guide');
+		const afterGuide = after.slice(guideIdx);
+		expect(afterGuide).not.toMatch(/^\s{4}title:/m);
+	});
+
+	test('pages-schema parent: subdir does NOT trigger orphan finding', () => {
+		// Parent uses legacy pages: schema
+		const metaPath = writeMeta(docsDir, `title: Site\npages:\n  intro:\n    title: Intro\n`);
+		writeMd(join(docsDir, 'intro.md'), '# Intro\n');
+
+		// Subdir with its own _meta.yaml
+		const subdir = join(docsDir, 'guide');
+		mkdirSync(subdir);
+		writeMeta(subdir, `title: GuideSection\n`);
+
+		const { scan, sources } = buildScan([metaPath], [join(docsDir, 'intro.md')]);
+		const findings = recipe.detect(scan, sources);
+
+		// No finding for the subdir under pages-schema (v1 self-discovery applies)
+		const subdirFindings = findings.filter((f) => f.payload?.entryType === 'subdir');
+		expect(subdirFindings.length).toBe(0);
+	});
+
+	test('subdir without _meta.yaml is NOT a finding (even on children parent)', () => {
+		const metaPath = writeMeta(docsDir, `children:\n  - name: intro\n    title: Intro\n`);
+		writeMd(join(docsDir, 'intro.md'), '# Intro\n');
+		// Subdir without _meta.yaml (e.g. assets folder)
+		mkdirSync(join(docsDir, 'assets'));
+
+		const { scan, sources } = buildScan([metaPath], [join(docsDir, 'intro.md')]);
+		const findings = recipe.detect(scan, sources);
+
+		const subdirFindings = findings.filter((f) => f.payload?.entryType === 'subdir');
+		expect(subdirFindings.length).toBe(0);
+	});
+
+	test('subdir already listed in children: not a finding', () => {
+		const metaPath = writeMeta(
+			docsDir,
+			`children:\n  - name: intro\n    title: Intro\n  - name: guide\n`,
+		);
+		writeMd(join(docsDir, 'intro.md'), '# Intro\n');
+
+		const subdir = join(docsDir, 'guide');
+		mkdirSync(subdir);
+		writeMeta(subdir, `title: Guide\n`);
+
+		const { scan, sources } = buildScan([metaPath], [join(docsDir, 'intro.md')]);
+		const findings = recipe.detect(scan, sources);
+
+		const subdirFindings = findings.filter((f) => f.payload?.entryType === 'subdir');
+		expect(subdirFindings.length).toBe(0);
+	});
+
+	test('apply is idempotent on children-schema parent', () => {
+		const metaPath = writeMeta(docsDir, `children:\n  - name: intro\n    title: Intro\n`);
+		writeMd(join(docsDir, 'intro.md'), '# Intro\n');
+		writeMd(join(docsDir, 'extra.md'), '# Extra\n');
+
+		const { scan, sources } = buildScan([metaPath], [join(docsDir, 'intro.md'), join(docsDir, 'extra.md')]);
+		const findings = recipe.detect(scan, sources);
+		expect(findings.length).toBe(1);
+
+		const before = sources.get(metaPath)!;
+		const after1 = recipe.apply!(findings[0], before);
+		// Second apply on the result should be a no-op (idempotency)
+		const after2 = recipe.apply!(findings[0], after1);
+		expect(after2).toBe(after1);
+	});
 });

@@ -1,13 +1,20 @@
 // zdoc fix recipe — register-orphan
 //
-// For every directory that has a _meta.yaml, find .md files that exist on
-// disk but are NOT listed under pages:. Emit one Finding per orphan so the
-// engine can append them to the _meta.yaml automatically.
+// For every directory that has a _meta.yaml, surface entries that exist on
+// disk but are NOT registered:
 //
-// US-005
+//   - file orphans: a `<name>.md` that exists but is missing from the
+//     parent's pages: map (v1) or children: list (v2).
+//   - subdir orphans (v2 only): a subdirectory that has its own _meta.yaml
+//     but is missing from the parent's children: list. v1 pages-schema
+//     parents do NOT trigger subdir orphans — those rely on v1's
+//     self-discovery (and adding a subdir as a pages: key is the well-known
+//     footgun that lint warns about; see lintMetaSubdirAsFile).
+//
+// US-005 (v1.15, file-only) + US-004 of v1.17 (subdir extension).
 
-import { readdirSync, readFileSync, existsSync } from 'node:fs';
-import { join, basename, dirname, sep } from 'node:path';
+import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
+import { join, basename, dirname } from 'node:path';
 import type { Recipe, Finding, DocsScan } from '../types.js';
 import { parseDirMetaFromString, dumpDirMeta } from '../yaml-io.js';
 
@@ -51,8 +58,29 @@ function extractH1(mdPath: string): string | null {
 // ---------------------------------------------------------------------------
 
 interface RegisterOrphanPayload {
-	orphanKey: string;      // basename without .md extension
-	derivedTitle: string;   // from H1 heading or fallback to basename
+	entryType: 'file' | 'subdir';
+	orphanKey: string;       // file stem (without .md) or subdir name
+	derivedTitle?: string;   // present for files; absent for subdirs (title
+	                         // comes from the subdir's own _meta.yaml)
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function parentSchema(meta: ReturnType<typeof parseDirMetaFromString>): 'children' | 'pages' {
+	// children: schema wins when present (v2 direction). When neither is
+	// present, treat as pages-schema (legacy default — recipes that add to
+	// pages won't break v1 docs).
+	if (meta?.children !== undefined) return 'children';
+	return 'pages';
+}
+
+function registeredNames(meta: ReturnType<typeof parseDirMetaFromString>): Set<string> {
+	const names = new Set<string>();
+	if (meta?.pages) for (const k of Object.keys(meta.pages)) names.add(k);
+	if (meta?.children) for (const c of meta.children) names.add(c.name);
+	return names;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,7 +90,7 @@ interface RegisterOrphanPayload {
 const recipe: Recipe<RegisterOrphanPayload> = {
 	id: 'register-orphan',
 	autoFix: true,
-	description: '把孤儿 .md 自动登记到父级 _meta.yaml',
+	description: '把孤儿 .md 自动登记到父级 _meta.yaml；children schema 下也补登未登记子目录',
 
 	detect(scan: DocsScan, sources: Map<string, string>): Finding<RegisterOrphanPayload>[] {
 		const findings: Finding<RegisterOrphanPayload>[] = [];
@@ -75,11 +103,10 @@ const recipe: Recipe<RegisterOrphanPayload> = {
 			if (!meta) continue;
 
 			const dir = dirname(metaPath);
+			const taken = registeredNames(meta);
+			const schema = parentSchema(meta);
 
-			// Build set of already-registered keys from pages:
-			const registeredKeys = new Set<string>(meta.pages ? Object.keys(meta.pages) : []);
-
-			// List all .md files in this directory (non-recursive)
+			// Enumerate directory contents
 			let entries: string[];
 			try {
 				entries = readdirSync(dir);
@@ -88,33 +115,56 @@ const recipe: Recipe<RegisterOrphanPayload> = {
 			}
 
 			for (const entry of entries) {
-				if (!entry.endsWith('.md')) continue;
+				const fullPath = join(dir, entry);
 
-				const mdPath = join(dir, entry);
+				// --- File orphans ---
+				if (entry.endsWith('.md')) {
+					// Whitelist: index.md (landing page) and README.md
+					if (entry === 'index.md' || entry === 'README.md') continue;
 
-				// Exclusion: skip index.md everywhere (root home + subdirs)
-				if (entry === 'index.md') continue;
+					// Verify it's in the scan's mdFiles set
+					if (!scan.mdFiles.has(fullPath)) continue;
 
-				// Exclusion: skip README.md
-				if (entry === 'README.md') continue;
+					const orphanKey = basename(entry, '.md');
+					if (taken.has(orphanKey)) continue;
 
-				// Verify it's actually in the scan's mdFiles set
-				if (!scan.mdFiles.has(mdPath)) continue;
+					const h1 = extractH1(fullPath);
+					const derivedTitle = h1 ?? orphanKey;
 
-				const orphanKey = basename(entry, '.md');
+					findings.push({
+						recipeId: recipe.id,
+						file: metaPath,
+						message: `"${entry}" 存在但未在 _meta.yaml 中登记（孤儿）`,
+						payload: { entryType: 'file', orphanKey, derivedTitle },
+					});
+					continue;
+				}
 
-				// Skip if already registered
-				if (registeredKeys.has(orphanKey)) continue;
+				// --- Subdir orphans (children schema only) ---
+				if (schema !== 'children') continue;
 
-				// Derive title from H1 or fall back to basename
-				const h1 = extractH1(mdPath);
-				const derivedTitle = h1 ?? orphanKey;
+				let isDir = false;
+				try {
+					isDir = statSync(fullPath).isDirectory();
+				} catch {
+					continue;
+				}
+				if (!isDir) continue;
+				if (entry.startsWith('.')) continue;
+
+				// Subdir must have its own _meta.yaml — otherwise it's not a
+				// "registered docs subdir" yet (lint's meta-yaml-missing rule
+				// catches that separately).
+				const subMeta = join(fullPath, '_meta.yaml');
+				if (!existsSync(subMeta)) continue;
+
+				if (taken.has(entry)) continue;
 
 				findings.push({
 					recipeId: recipe.id,
 					file: metaPath,
-					message: `"${entry}" 存在但未在 _meta.yaml 中登记（孤儿）`,
-					payload: { orphanKey, derivedTitle },
+					message: `子目录 "${entry}/" 有 _meta.yaml 但未在父级 children: 中登记`,
+					payload: { entryType: 'subdir', orphanKey: entry },
 				});
 			}
 		}
@@ -123,18 +173,33 @@ const recipe: Recipe<RegisterOrphanPayload> = {
 	},
 
 	apply(finding: Finding<RegisterOrphanPayload>, before: string): string {
-		const { orphanKey, derivedTitle } = finding.payload!;
 		const meta = parseDirMetaFromString(before);
 		if (!meta) return before;
 
+		const { entryType, orphanKey, derivedTitle } = finding.payload!;
+		const schema = parentSchema(meta);
+
+		// children-schema parent: always append to children list
+		if (schema === 'children') {
+			if (!meta.children) meta.children = [];
+			// Idempotency
+			if (meta.children.some((c) => c.name === orphanKey)) return dumpDirMeta(meta);
+
+			if (entryType === 'subdir') {
+				meta.children.push({ name: orphanKey });
+			} else {
+				meta.children.push({ name: orphanKey, title: derivedTitle ?? orphanKey });
+			}
+			return dumpDirMeta(meta);
+		}
+
+		// pages-schema parent: only file orphans land here (subdir orphans
+		// don't generate findings under pages-schema, see detect()).
+		if (entryType !== 'file') return dumpDirMeta(meta); // safety no-op
+
 		if (!meta.pages) meta.pages = {};
-
-		// Idempotency: if already registered, return as-is
 		if (meta.pages[orphanKey] !== undefined) return dumpDirMeta(meta);
-
-		// Append new entry at end of pages map
-		meta.pages[orphanKey] = { title: derivedTitle };
-
+		meta.pages[orphanKey] = { title: derivedTitle ?? orphanKey };
 		return dumpDirMeta(meta);
 	},
 };

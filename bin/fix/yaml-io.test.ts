@@ -347,3 +347,144 @@ describe('dumpDirMeta — sample output', () => {
 		expect(out).toBe('title: 指南\norder: 10\n');
 	});
 });
+
+// v2-prep: dumper emits children: list and visibility: field.
+describe('dumpDirMeta — children: list (v2 schema)', () => {
+	test('basic children list with mixed PageMeta fields', () => {
+		const meta: DirMeta = {
+			title: 'Authoring',
+			children: [
+				{ name: 'meta-yaml', title: '_meta.yaml' },
+				{ name: 'page-fields', title: 'Page fields', description: 'Per-page fields' },
+			],
+		};
+		const out = dumpDirMeta(meta);
+		expect(out).toBe(
+			'title: Authoring\n' +
+				'children:\n' +
+				'  - name: meta-yaml\n' +
+				'    title: _meta.yaml\n' +
+				'  - name: page-fields\n' +
+				'    title: Page fields\n' +
+				'    description: Per-page fields\n',
+		);
+	});
+
+	test('empty children list → children: header is omitted', () => {
+		const meta: DirMeta = { title: 'T', children: [] };
+		const out = dumpDirMeta(meta);
+		expect(out).toBe('title: T\n');
+	});
+
+	test('children + pages can coexist; pages first then children', () => {
+		const meta: DirMeta = {
+			title: 'Mixed',
+			pages: { legacy: { title: 'LegacyPage' } },
+			children: [{ name: 'modern', title: 'ModernPage' }],
+		};
+		const out = dumpDirMeta(meta);
+		expect(out).toBe(
+			'title: Mixed\n' +
+				'pages:\n' +
+				'  legacy:\n' +
+				'    title: LegacyPage\n' +
+				'children:\n' +
+				'  - name: modern\n' +
+				'    title: ModernPage\n',
+		);
+	});
+
+	test('child item carries every PageMeta field in FIELD_ORDER', () => {
+		const meta: DirMeta = {
+			children: [
+				{
+					name: 'foo',
+					title: 'Foo',
+					order: 10,
+					visibility: 'prod-only',
+					description: 'Hello',
+					author: 'alice',
+					modified: '2026-04-27',
+					lifecycle: 'stable',
+				},
+			],
+		};
+		const out = dumpDirMeta(meta);
+		expect(out).toBe(
+			'children:\n' +
+				'  - name: foo\n' +
+				'    title: Foo\n' +
+				'    order: 10\n' +
+				'    visibility: prod-only\n' +
+				'    description: Hello\n' +
+				'    author: alice\n' +
+				'    modified: 2026-04-27\n' +
+				'    lifecycle: stable\n',
+		);
+	});
+
+	test('roundtrip: dump → parse preserves children list', () => {
+		const meta: DirMeta = {
+			title: 'Roundtrip',
+			children: [
+				{ name: 'a', title: 'A', order: 10 },
+				{ name: 'b', title: 'B', visibility: 'prod-only' },
+				{ name: 'subdir' }, // shorthand: name-only (subdir entry)
+			],
+		};
+		const dumped = dumpDirMeta(meta);
+		const parsed = parseFromDump(dumped);
+		expect(parsed?.title).toBe('Roundtrip');
+		expect(parsed?.children?.length).toBe(3);
+		expect(parsed?.children?.[0].name).toBe('a');
+		expect(parsed?.children?.[0].order).toBe(10);
+		expect(parsed?.children?.[1].visibility).toBe('prod-only');
+		expect(parsed?.children?.[2].name).toBe('subdir');
+		expect(parsed?.children?.[2].title).toBeUndefined();
+	});
+});
+
+// v2-prep: visibility field in FIELD_ORDER emits at every position
+// (top-level, pages.*, children[]).
+describe('dumpDirMeta — visibility: field (v2 rename of env:)', () => {
+	test('top-level visibility is emitted after title/order/env', () => {
+		const meta: DirMeta = { title: 'T', visibility: 'prod-only' };
+		const out = dumpDirMeta(meta);
+		expect(out).toBe('title: T\nvisibility: prod-only\n');
+	});
+
+	test('visibility on a pages entry', () => {
+		const meta: DirMeta = {
+			pages: { marketing: { title: 'Marketing', visibility: 'prod-only' } as PageMeta },
+		};
+		const out = dumpDirMeta(meta);
+		expect(out).toBe(
+			'pages:\n' +
+				'  marketing:\n' +
+				'    title: Marketing\n' +
+				'    visibility: prod-only\n',
+		);
+	});
+
+	test('visibility ordering: emits between env and description', () => {
+		const meta: DirMeta = {
+			pages: {
+				foo: {
+					title: 'Foo',
+					env: 'prod',
+					visibility: 'prod-only',
+					description: 'Hello',
+				} as PageMeta,
+			},
+		};
+		const out = dumpDirMeta(meta);
+		expect(out).toBe(
+			'pages:\n' +
+				'  foo:\n' +
+				'    title: Foo\n' +
+				'    env: prod\n' +
+				'    visibility: prod-only\n' +
+				'    description: Hello\n',
+		);
+	});
+});

@@ -40,21 +40,28 @@ import scaffoldMetaYaml from './recipes/scaffold-meta-yaml.js';
 import registerOrphan from './recipes/register-orphan.js';
 import removeSubdirAsFile from './recipes/remove-subdir-as-file.js';
 import deriveMissingTitle from './recipes/derive-missing-title.js';
+import envToVisibility from './recipes/env-to-visibility.js';
+import pagesToChildren from './recipes/pages-to-children.js';
 import pruneMissingPage from './recipes/prune-missing-page.js';
 
 // Compile-time recipe registry. Order matters for apply() — findings are
 // processed in the registration order, threading source through each
 // recipe.apply(). Rationale for this order:
-//   1. scaffold-meta-yaml — creates new _meta.yaml files (no overlap with others)
-//   2. register-orphan    — adds entries to existing pages map
+//   1. scaffold-meta-yaml    — creates new _meta.yaml files (no overlap with others)
+//   2. register-orphan       — adds entries to existing pages/children
 //   3. remove-subdir-as-file — removes bad entries (footguns)
-//   4. derive-missing-title — fills in titles (won't re-fire on register-orphan's entries since those already have title)
-//   5. prune-missing-page — read-only (autoFix: false), engine auto-flags as manualReview
+//   4. derive-missing-title  — fills in titles
+//   5. env-to-visibility     — renames env: → visibility: BEFORE pages move to children,
+//                              so the rename happens once at the original location
+//   6. pages-to-children     — translates pages: map → children: list (v2 schema)
+//   7. prune-missing-page    — read-only (autoFix: false), engine auto-flags as manualReview
 export const RECIPES: Recipe[] = [
 	scaffoldMetaYaml,
 	registerOrphan,
 	removeSubdirAsFile,
 	deriveMissingTitle,
+	envToVisibility,
+	pagesToChildren,
 	pruneMissingPage,
 ];
 

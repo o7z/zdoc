@@ -120,7 +120,11 @@ describe('scenario 3 — derive missing title', () => {
 		);
 		writeMd(join(docs, 'intro.md'), '# Introduction\n\nWelcome.\n');
 
-		const result = scan(docs);
+		// Scope to derive-missing-title so the v1.17 pages-to-children migration
+		// recipe doesn't also fire on this v1-schema fixture. The recipe under
+		// test stays pages-aware; broader RECIPES interaction is covered by
+		// the recipe's own unit tests.
+		const result = scan(docs, { recipeId: 'derive-missing-title' });
 
 		const titleFindings = result.findings.filter((f) => f.recipeId === 'derive-missing-title');
 		expect(titleFindings).toHaveLength(1);
@@ -312,7 +316,10 @@ describe('scenario 8 — manual-review-only: prune-missing-page only', () => {
 		// No ghost.md written on disk → prune-missing-page fires
 		// No extra .md files → no orphan / scaffold findings
 
-		const result = scan(docs);
+		// Scope to prune-missing-page: keeps the manual-review-only invariant
+		// without v1.17's pages-to-children recipe also auto-firing on the
+		// v1-schema fixture.
+		const result = scan(docs, { recipeId: 'prune-missing-page' });
 
 		const pruneFindings = result.findings.filter((f) => f.recipeId === 'prune-missing-page');
 		expect(pruneFindings.length).toBeGreaterThan(0);

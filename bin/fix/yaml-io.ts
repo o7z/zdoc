@@ -158,9 +158,13 @@ function quoteString(s: string): string {
 
 /** Field order for both dir-level and page-level entries. */
 const FIELD_ORDER: ReadonlyArray<string> = [
-	'title', 'order', 'env', 'description', 'author',
+	'title', 'order', 'env', 'visibility', 'description', 'author',
 	'modified', 'lifecycle', 'superseded_by', 'folded_to',
 ];
+
+/** Field order inside a children: list item. Same as FIELD_ORDER but
+ * 'name' is the inline (first) key (emitted via '- name: ...'). */
+const CHILD_FIELD_ORDER: ReadonlyArray<string> = FIELD_ORDER;
 
 function emitPageFields(obj: Record<string, unknown>, indent: string): string {
 	let out = '';
@@ -182,7 +186,7 @@ function emitPageFields(obj: Record<string, unknown>, indent: string): string {
 export function dumpDirMeta(meta: DirMeta): string {
 	let out = '';
 
-	// Top-level scalar fields (same order as FIELD_ORDER, minus 'pages')
+	// Top-level scalar fields (same order as FIELD_ORDER, minus 'pages'/'children')
 	const topLevel = meta as unknown as Record<string, unknown>;
 	out += emitPageFields(topLevel, '');
 
@@ -198,6 +202,31 @@ export function dumpDirMeta(meta: DirMeta): string {
 				const body = emitPageFields(pageFields, '    ');
 				if (body) {
 					out += body;
+				}
+			}
+		}
+	}
+
+	// children block (v2 schema)
+	const children = meta.children;
+	if (Array.isArray(children) && children.length > 0) {
+		out += 'children:\n';
+		for (const child of children) {
+			const c = child as unknown as Record<string, unknown>;
+			const name = typeof c.name === 'string' ? c.name : '';
+			// '- name: <name>' inline first key (CHILD_FIELD_ORDER excludes 'name')
+			out += `  - name: ${quoteString(name)}\n`;
+			// Remaining fields at 4-space indent
+			for (const field of CHILD_FIELD_ORDER) {
+				if (field === 'name') continue;
+				const val = c[field];
+				if (val === undefined || val === null) continue;
+				if (typeof val === 'number') {
+					out += `    ${field}: ${val}\n`;
+				} else if (typeof val === 'string') {
+					out += `    ${field}: ${quoteString(val)}\n`;
+				} else if (typeof val === 'boolean') {
+					out += `    ${field}: ${val}\n`;
 				}
 			}
 		}

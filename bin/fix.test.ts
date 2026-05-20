@@ -88,7 +88,8 @@ describe('runFix — clean fixture (no findings)', () => {
 	});
 
 	test('dry-run on a fixture with _meta.yaml but no recipes registered → 0 findings', async () => {
-		writeFileSync(join(docs, '_meta.yaml'), 'title: Site\npages:\n  intro:\n    title: Intro\n');
+		// Use children schema so v1.17's pages-to-children recipe doesn't fire.
+		writeFileSync(join(docs, '_meta.yaml'), 'title: Site\nchildren:\n  - name: intro\n    title: Intro\n');
 		mkdirSync(join(docs, 'sub'), { recursive: true });
 		writeFileSync(join(docs, 'intro.md'), '# Intro\n');
 		const { capture, restore } = captureIO();
@@ -236,7 +237,9 @@ describe('runFix US-011 — dry-run diff output', () => {
 
 		const { capture, restore } = captureIO();
 		try {
-			const code = await runFix(['-d', docs]);
+			// Scope to prune-missing-page so the v1.17 pages-to-children recipe
+			// doesn't also produce a diff on this v1-schema fixture.
+			const code = await runFix(['-d', docs, '--recipe=prune-missing-page']);
 			expect(code).toBe(0);
 			const out = capture.stdout;
 			expect(out).toContain('需要人工裁决');

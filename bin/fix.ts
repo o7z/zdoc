@@ -19,10 +19,12 @@ import type { Finding } from './fix/types.js';
 // When a recipe is implemented its entry will move into engine.ts's
 // RECIPES array, and this list becomes the documented spec only.
 const PLANNED_RECIPE_IDS: ReadonlyArray<{ id: string; description: string }> = [
-	{ id: 'register-orphan', description: '把孤儿 .md 自动登记到父级 _meta.yaml' },
+	{ id: 'register-orphan', description: '把孤儿 .md（与 children schema 下的子目录）自动登记到父级 _meta.yaml' },
 	{ id: 'remove-subdir-as-file', description: '删除把子目录误写成 page key 的条目' },
 	{ id: 'derive-missing-title', description: '从首个 H1 推导缺失的 title' },
 	{ id: 'scaffold-meta-yaml', description: '为只有 .md 但缺 _meta.yaml 的目录生成 _meta.yaml' },
+	{ id: 'env-to-visibility', description: 'env: 字段重命名为 visibility:（env: prod → visibility: prod-only）' },
+	{ id: 'pages-to-children', description: '把 pages: map 翻译成 children: list (v2 schema 迁移)' },
 	{ id: 'prune-missing-page', description: '列出 pages 指向的不存在文件（仅提示，不自动修）' },
 ];
 
