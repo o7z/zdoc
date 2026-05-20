@@ -26,6 +26,7 @@ export interface PageMeta {
 	visibility?: string;
 	description?: string;
 	author?: string;
+	version?: string;
 	lifecycle?: Lifecycle;
 	superseded_by?: string;
 	folded_to?: string;
@@ -36,11 +37,9 @@ export interface ChildEntry extends PageMeta {
 	name: string;
 }
 
-export interface DirMeta {
-	title?: string;
-	order?: number;
-	env?: string;
-	visibility?: string;
+// DirMeta carries all PageMeta fields at the top level plus the container
+// fields pages/children. See bin/meta-mini.ts for the same shape.
+export interface DirMeta extends PageMeta {
 	pages?: Record<string, PageMeta>;
 	children?: ChildEntry[];
 }

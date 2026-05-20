@@ -1,2 +1,6 @@
 title: 指南
 order: 10
+children:
+  - name: intro
+  - name: authoring
+  - name: advanced

@@ -18,6 +18,7 @@ export interface PageMeta {
 	visibility?: string;
 	description?: string;
 	author?: string;
+	version?: string;
 	lifecycle?: Lifecycle;
 	superseded_by?: string;
 	folded_to?: string;
@@ -30,11 +31,10 @@ export interface ChildEntry extends PageMeta {
 	name: string;
 }
 
-export interface DirMeta {
-	title?: string;
-	order?: number;
-	env?: string;
-	visibility?: string;
+// DirMeta carries all PageMeta fields at the top level (a directory's own
+// metadata mirrors what a page can have — title/order/visibility/version/
+// description/etc) plus the container fields pages/children.
+export interface DirMeta extends PageMeta {
 	pages?: Record<string, PageMeta>;
 	children?: ChildEntry[];
 }
@@ -249,6 +249,7 @@ function coercePageMeta(raw: unknown): PageMeta {
 		visibility: typeof r.visibility === 'string' ? r.visibility : undefined,
 		description: typeof r.description === 'string' ? r.description : undefined,
 		author: typeof r.author === 'string' ? r.author : undefined,
+		version: typeof r.version === 'string' ? r.version : undefined,
 		lifecycle: coerceLifecycle(r.lifecycle),
 		superseded_by: typeof r.superseded_by === 'string' ? r.superseded_by : undefined,
 		folded_to: typeof r.folded_to === 'string' ? r.folded_to : undefined,
@@ -273,23 +274,20 @@ export function readDirMeta(metaPath: string): DirMeta | null {
 	try {
 		const parsed = parseYaml(readFileSync(metaPath, 'utf-8'));
 		const base = coercePageMeta(parsed);
-		const out: DirMeta = {
-			title: base.title,
-			order: base.order,
-			env: base.env,
-			visibility: base.visibility,
-		};
 		const pagesRaw = parsed.pages;
+		let pages: Record<string, PageMeta> | undefined;
 		if (pagesRaw && typeof pagesRaw === 'object') {
-			const pages: Record<string, PageMeta> = {};
+			pages = {};
 			for (const [k, v] of Object.entries(pagesRaw as Record<string, unknown>)) {
 				pages[k] = coercePageMeta(v);
 			}
-			out.pages = pages;
 		}
 		const children = coerceChildEntries(parsed.children);
-		if (children) out.children = children;
-		return out;
+		return {
+			...base,
+			...(pages ? { pages } : {}),
+			...(children ? { children } : {}),
+		};
 	} catch {
 		return null;
 	}

@@ -58,6 +58,7 @@ function coercePageMeta(raw: unknown): PageMeta {
 		visibility: typeof r.visibility === 'string' ? r.visibility : undefined,
 		description: typeof r.description === 'string' ? r.description : undefined,
 		author: typeof r.author === 'string' ? r.author : undefined,
+		version: typeof r.version === 'string' ? r.version : undefined,
 		lifecycle: coerceLifecycle(r.lifecycle),
 		superseded_by: typeof r.superseded_by === 'string' ? r.superseded_by : undefined,
 		folded_to: typeof r.folded_to === 'string' ? r.folded_to : undefined,
@@ -81,23 +82,20 @@ export function parseDirMetaFromString(source: string): DirMeta | null {
 	try {
 		const parsed = parseYaml(source);
 		const base = coercePageMeta(parsed);
-		const out: DirMeta = {
-			title: base.title,
-			order: base.order,
-			env: base.env,
-			visibility: base.visibility,
-		};
 		const pagesRaw = parsed.pages;
+		let pages: Record<string, PageMeta> | undefined;
 		if (pagesRaw && typeof pagesRaw === 'object') {
-			const pages: Record<string, PageMeta> = {};
+			pages = {};
 			for (const [k, v] of Object.entries(pagesRaw as Record<string, unknown>)) {
 				pages[k] = coercePageMeta(v);
 			}
-			out.pages = pages;
 		}
 		const children = coerceChildEntries(parsed.children);
-		if (children) out.children = children;
-		return out;
+		return {
+			...base,
+			...(pages ? { pages } : {}),
+			...(children ? { children } : {}),
+		};
 	} catch {
 		return null;
 	}
@@ -159,7 +157,7 @@ function quoteString(s: string): string {
 /** Field order for both dir-level and page-level entries. */
 const FIELD_ORDER: ReadonlyArray<string> = [
 	'title', 'order', 'env', 'visibility', 'description', 'author',
-	'modified', 'lifecycle', 'superseded_by', 'folded_to',
+	'modified', 'version', 'lifecycle', 'superseded_by', 'folded_to',
 ];
 
 /** Field order inside a children: list item. Same as FIELD_ORDER but

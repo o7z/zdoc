@@ -110,8 +110,10 @@ describe('pages-to-children — apply', () => {
 		expect(out).not.toContain('    order:');
 	});
 
-	test('self-discovered subdir gets appended to children', () => {
-		// Build a parent dir with a _meta.yaml using pages, plus a subdir with its own _meta.yaml
+	test('self-discovered subdir gets merged into children (interleaved by order+name)', () => {
+		// Parent uses pages: intro (no order); subdir guide has its own
+		// _meta.yaml (no order). Both default to order=999 → sorted by name:
+		// guide < intro, so guide ends up first.
 		writeMeta(docs, `title: Parent\npages:\n  intro:\n    title: Intro\n`);
 		const sub = join(docs, 'guide');
 		mkdirSync(sub);
@@ -121,13 +123,35 @@ describe('pages-to-children — apply', () => {
 		const source = `title: Parent\npages:\n  intro:\n    title: Intro\n`;
 		const out = runRecipe(source, metaFile);
 
-		// children should have intro first, then guide (subdir)
+		// Both entries present
 		expect(out).toContain('  - name: intro');
 		expect(out).toContain('  - name: guide');
-		// guide should have no title field (came from subdir self-meta)
+		// guide should have no title field (subdir entry — title lives in subdir's own _meta.yaml)
 		const guideIdx = out.indexOf('  - name: guide');
-		const afterGuide = out.slice(guideIdx);
-		expect(afterGuide).not.toContain('    title:');
+		const nextItemIdx = out.indexOf('  - name:', guideIdx + 1);
+		const guideBlock = nextItemIdx > 0 ? out.slice(guideIdx, nextItemIdx) : out.slice(guideIdx);
+		expect(guideBlock).not.toContain('    title:');
+	});
+
+	test('pages and subdirs merge by order+name (v1 sidebar parity)', () => {
+		writeMeta(docs, `pages:\n  alpha:\n    title: Alpha\n    order: 30\n  zeta:\n    title: Zeta\n    order: 5\n`);
+		// Subdir 'middle' with order=10
+		const sub = join(docs, 'middle');
+		mkdirSync(sub);
+		writeMeta(sub, `title: Middle\norder: 10\n`);
+		writeFileSync(join(docs, 'alpha.md'), '# Alpha\n');
+		writeFileSync(join(docs, 'zeta.md'), '# Zeta\n');
+
+		const out = runRecipe(
+			`pages:\n  alpha:\n    title: Alpha\n    order: 30\n  zeta:\n    title: Zeta\n    order: 5\n`,
+			join(docs, '_meta.yaml'),
+		);
+		// Expected order: zeta(5), middle(10), alpha(30)
+		const names = out
+			.split('\n')
+			.filter((l) => l.startsWith('  - name:'))
+			.map((l) => l.replace('  - name: ', '').trim());
+		expect(names).toEqual(['zeta', 'middle', 'alpha']);
 	});
 
 	test('subdir without _meta.yaml is NOT appended', () => {
@@ -150,17 +174,20 @@ describe('pages-to-children — apply', () => {
 		expect(fooCount).toBe(1);
 	});
 
-	test('empty pages map → children only contains self-discovered subdirs', () => {
+	test('empty pages map → case 2 fires; children gains self-discovered subdir', () => {
 		writeMeta(docs, `title: T\npages:\n`);
 		const sub = join(docs, 'inner');
 		mkdirSync(sub);
 		writeMeta(sub, `title: Inner\n`);
 
+		// `pages:` with no entries is parsed as null → meta.pages is undefined.
+		// With v1.18's case-2 detect, the title-only + self-discovered subdir
+		// scenario triggers a finding and the inner subdir is registered.
 		const source = `title: T\npages:\n`;
 		const out = runRecipe(source, join(docs, '_meta.yaml'));
-		// pages: with no entries is parsed as null → meta.pages is undefined → detect skips
-		// So output is unchanged
-		expect(out).toBe(source);
+		expect(out).toContain('title: T');
+		expect(out).toContain('children:');
+		expect(out).toContain('  - name: inner');
 	});
 
 	test('idempotent: post-migration source produces no finding, apply is no-op', () => {
@@ -189,5 +216,32 @@ describe('pages-to-children — apply', () => {
 		expect(out).toContain('env: prod');
 		expect(out).not.toContain('pages:');
 		expect(out).toContain('children:');
+	});
+
+	// v1.18 addition: title-only parent + self-discovered subdirs → register them.
+	test('title-only parent with self-discovered subdirs registers them as children', () => {
+		writeMeta(docs, `title: Guide\norder: 10\n`);
+		// Three subdirs each with their own _meta.yaml
+		for (const name of ['intro', 'authoring', 'advanced']) {
+			const sub = join(docs, name);
+			mkdirSync(sub);
+			writeMeta(sub, `title: ${name}\n`);
+		}
+
+		const out = runRecipe(`title: Guide\norder: 10\n`, join(docs, '_meta.yaml'));
+		expect(out).toContain('title: Guide');
+		expect(out).toContain('children:');
+		// All three subdirs registered (lexicographic order from listSubdirsWithMeta)
+		expect(out).toContain('  - name: advanced');
+		expect(out).toContain('  - name: authoring');
+		expect(out).toContain('  - name: intro');
+	});
+
+	test('title-only parent without subdirs is a no-op (no finding, no change)', () => {
+		writeMeta(docs, `title: Solo\n`);
+		const source = `title: Solo\n`;
+		const out = runRecipe(source);
+		// No finding → runRecipe returns the original source unchanged
+		expect(out).toBe(source);
 	});
 });

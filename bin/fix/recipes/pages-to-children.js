@@ -17,7 +17,7 @@
 // run FIRST so env fields inside pages entries get renamed before the
 // pages-to-children translation copies them across. The engine RECIPES
 // array enforces this ordering.
-import { readdirSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { parseDirMetaFromString, dumpDirMeta } from '../yaml-io.js';
 function listSubdirsWithMeta(dir) {
@@ -26,7 +26,23 @@ function listSubdirsWithMeta(dir) {
             .filter((e) => e.isDirectory() && !e.name.startsWith('.'))
             .map((e) => e.name)
             .filter((name) => existsSync(join(dir, name, '_meta.yaml')))
-            .sort();
+            .map((name) => {
+            let order = 999;
+            try {
+                const subMeta = parseDirMetaFromString(readFileSync(join(dir, name, '_meta.yaml'), 'utf-8'));
+                if (typeof subMeta?.order === 'number')
+                    order = subMeta.order;
+            }
+            catch {
+                /* keep default order */
+            }
+            return { name, order };
+        })
+            .sort((a, b) => {
+            if (a.order !== b.order)
+                return a.order - b.order;
+            return a.name.localeCompare(b.name);
+        });
     }
     catch {
         return [];
@@ -45,17 +61,31 @@ const recipe = {
             const meta = parseDirMetaFromString(source);
             if (!meta)
                 continue;
-            // Trigger when pages: is present in the parsed model (i.e. user
-            // wrote v1 schema). Empty pages map ({}) still triggers — the recipe
-            // will simply drop the empty pages key and possibly add subdir
-            // entries to children.
+            // Case 1: pages: is present (classic v1 schema) → migrate.
             if (meta.pages !== undefined) {
                 findings.push({
                     recipeId: recipe.id,
                     file: metaPath,
                     message: 'pages: 翻译为 children: list（附带自发现子目录的显式登记）',
-                    payload: {},
+                    payload: { caseType: 'pages-migration' },
                 });
+                continue;
+            }
+            // Case 2: no pages, no children, but self-discovered subdirs need
+            // explicit registration before v2 cuts off self-discovery. This
+            // catches "title-only" parents like docs/guide/_meta.yaml whose
+            // child sections come up via self-discovery in v1.
+            if (meta.children === undefined) {
+                const dir = dirname(metaPath);
+                const subdirs = listSubdirsWithMeta(dir);
+                if (subdirs.length > 0) {
+                    findings.push({
+                        recipeId: recipe.id,
+                        file: metaPath,
+                        message: '把自发现的子目录显式登记到 children: list',
+                        payload: { caseType: 'subdir-only' },
+                    });
+                }
             }
         }
         return findings;
@@ -64,41 +94,57 @@ const recipe = {
         const meta = parseDirMetaFromString(before);
         if (!meta)
             return before;
-        // If pages is absent (e.g. already migrated), this is a no-op.
-        const pagesObj = meta.pages;
-        if (pagesObj === undefined)
-            return dumpDirMeta(meta);
-        // Start from existing children (in case the file is mid-migration).
-        const childList = meta.children ? [...meta.children] : [];
-        const taken = new Set(childList.map((c) => c.name));
-        // Stable-sort pages entries by (order ?? 999, key alphabetical).
-        const pageEntries = Object.entries(pagesObj);
-        pageEntries.sort(([ak, av], [bk, bv]) => {
-            const ao = av.order ?? 999;
-            const bo = bv.order ?? 999;
-            if (ao !== bo)
-                return ao - bo;
-            return ak.localeCompare(bk);
-        });
-        // Convert each page entry to a ChildEntry, dropping `order`.
-        for (const [key, pageMeta] of pageEntries) {
-            if (taken.has(key))
-                continue; // children already won — don't overwrite
-            const { order: _drop, ...rest } = pageMeta;
-            childList.push({ name: key, ...rest });
-            taken.add(key);
-        }
-        // Append children for self-discovered subdirs (subdir/_meta.yaml exists,
-        // name not yet listed). This keeps subdirs visible after v2 cuts off
-        // self-discovery (see docs/dev/next-major.md "自发现规则:未登记 = 不显示").
+        const existingChildren = meta.children ?? [];
+        const taken = new Set(existingChildren.map((c) => c.name));
         const dir = dirname(finding.file);
-        for (const subdirName of listSubdirsWithMeta(dir)) {
-            if (taken.has(subdirName))
-                continue;
-            childList.push({ name: subdirName });
-            taken.add(subdirName);
+        const caseType = finding.payload?.caseType ?? 'pages-migration';
+        // Subdir-only case: append self-discovered subdirs to existing
+        // children (preserving original children order); leave pages alone.
+        // Another recipe may have added entries to pages during this apply
+        // pass — leave them for a future zdoc fix run to explicitly migrate.
+        if (caseType === 'subdir-only') {
+            const childList = [...existingChildren];
+            for (const { name } of listSubdirsWithMeta(dir)) {
+                if (taken.has(name))
+                    continue;
+                childList.push({ name });
+                taken.add(name);
+            }
+            if (childList.length === 0)
+                return dumpDirMeta(meta);
+            const migrated = { ...meta };
+            migrated.children = childList;
+            return dumpDirMeta(migrated);
         }
-        // Build the migrated meta: remove pages, set children.
+        const cands = [];
+        // pages entries → candidates
+        const pagesObj = meta.pages;
+        if (pagesObj) {
+            for (const [key, pageMeta] of Object.entries(pagesObj)) {
+                if (taken.has(key))
+                    continue;
+                const order = pageMeta.order ?? 999;
+                const { order: _drop, ...rest } = pageMeta;
+                cands.push({ order, name: key, entry: { name: key, ...rest } });
+                taken.add(key);
+            }
+        }
+        // self-discovered subdir entries → candidates
+        for (const sub of listSubdirsWithMeta(dir)) {
+            if (taken.has(sub.name))
+                continue;
+            cands.push({ order: sub.order, name: sub.name, entry: { name: sub.name } });
+            taken.add(sub.name);
+        }
+        // Stable-sort by (order, name)
+        cands.sort((a, b) => {
+            if (a.order !== b.order)
+                return a.order - b.order;
+            return a.name.localeCompare(b.name);
+        });
+        // Compose final child list: existing children first (preserve their
+        // position), then sorted new candidates.
+        const childList = [...existingChildren, ...cands.map((c) => c.entry)];
         const migrated = { ...meta };
         delete migrated.pages;
         migrated.children = childList;

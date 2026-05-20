@@ -339,12 +339,16 @@ describe('dumpDirMeta — pages insertion order', () => {
 // ---------------------------------------------------------------------------
 
 describe('dumpDirMeta — sample output', () => {
-	test('docs/guide/_meta.yaml dumps to expected minimal form', () => {
+	test('docs/guide/_meta.yaml dumps to expected v2 form', () => {
+		// After v1.18 dogfood migration: guide/_meta.yaml carries children
+		// list with intro/authoring/advanced (subdirs sorted by their own
+		// order field).
 		const guidePath = join(import.meta.dir, '../../docs/guide/_meta.yaml');
 		const result = readDirMetaWithSha(guidePath);
 		const out = dumpDirMeta(result!.meta!);
-		// guide/_meta.yaml has title and order only, no pages
-		expect(out).toBe('title: 指南\norder: 10\n');
+		expect(out).toBe(
+			'title: 指南\norder: 10\nchildren:\n  - name: intro\n  - name: authoring\n  - name: advanced\n',
+		);
 	});
 });
 
@@ -486,5 +490,89 @@ describe('dumpDirMeta — visibility: field (v2 rename of env:)', () => {
 				'    visibility: prod-only\n' +
 				'    description: Hello\n',
 		);
+	});
+});
+
+// v1.18 prep: dumpDirMeta emits version: field at the position after
+// modified: (chip-style fields cluster). Round-trip preserves it.
+describe('dumpDirMeta — version: field (v1.18 dogfooding fix)', () => {
+	test('version on a pages entry is emitted after modified', () => {
+		const meta: DirMeta = {
+			pages: {
+				api: {
+					title: 'API',
+					modified: '2026-04-20',
+					version: '1.2.3',
+				} as PageMeta,
+			},
+		};
+		const out = dumpDirMeta(meta);
+		expect(out).toBe(
+			'pages:\n' +
+				'  api:\n' +
+				'    title: API\n' +
+				'    modified: 2026-04-20\n' +
+				'    version: 1.2.3\n',
+		);
+	});
+
+	test('version on a children entry is emitted', () => {
+		const meta: DirMeta = {
+			children: [{ name: 'mermaid', title: 'Mermaid', version: '0.1.0' }],
+		};
+		const out = dumpDirMeta(meta);
+		expect(out).toBe(
+			'children:\n' +
+				'  - name: mermaid\n' +
+				'    title: Mermaid\n' +
+				'    version: 0.1.0\n',
+		);
+	});
+
+	test('top-level version is emitted', () => {
+		const meta: DirMeta = { title: 'T', version: '2.0.0' };
+		const out = dumpDirMeta(meta);
+		expect(out).toBe('title: T\nversion: 2.0.0\n');
+	});
+
+	test('roundtrip: dump → parse preserves version at all positions', () => {
+		const meta: DirMeta = {
+			title: 'Roundtrip',
+			version: 'dir-v',
+			pages: { p: { title: 'P', version: 'page-v' } as PageMeta },
+			children: [{ name: 'c', title: 'C', version: 'child-v' }],
+		};
+		const dumped = dumpDirMeta(meta);
+		const parsed = parseFromDump(dumped);
+		expect(parsed?.version).toBe('dir-v');
+		expect(parsed?.pages?.p.version).toBe('page-v');
+		expect(parsed?.children?.[0].version).toBe('child-v');
+	});
+});
+
+// v1.18 prep: parseDirMetaFromString preserves ALL top-level PageMeta
+// fields — not just title/order/env/visibility (the v1.15 dumper bug).
+describe('parseDirMetaFromString — full top-level PageMeta preservation', () => {
+	test('top-level description + modified + author + lifecycle + version survive round-trip', () => {
+		const input: DirMeta = {
+			title: 'Section',
+			order: 80,
+			description: 'A section.',
+			modified: '2026-04-24',
+			author: 'alice',
+			lifecycle: 'stable',
+			version: '1.0.0',
+			children: [{ name: 'sub', title: 'Sub' }],
+		};
+		const dumped = dumpDirMeta(input);
+		const parsed = parseFromDump(dumped);
+		expect(parsed?.title).toBe('Section');
+		expect(parsed?.order).toBe(80);
+		expect(parsed?.description).toBe('A section.');
+		expect(parsed?.modified).toBe('2026-04-24');
+		expect(parsed?.author).toBe('alice');
+		expect(parsed?.lifecycle).toBe('stable');
+		expect(parsed?.version).toBe('1.0.0');
+		expect(parsed?.children?.length).toBe(1);
 	});
 });

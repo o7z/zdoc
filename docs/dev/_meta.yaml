@@ -1,11 +1,9 @@
 title: 开发者
 order: 20
-
-pages:
-  next-major:
+children:
+  - name: next-major
     title: 2.0 规划
-    order: 10
     description: 下一个 major 版本的设计变更与迁移计划(攒齐再发布)。
-  release:
+  - name: reference
+  - name: release
     title: 发布规范
-    order: 20

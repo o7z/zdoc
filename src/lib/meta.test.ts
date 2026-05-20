@@ -346,3 +346,72 @@ describe('readDirMeta — children list + visibility field', () => {
 		);
 	});
 });
+
+// v1.18 prep: `version` field is part of PageMeta and must survive
+// parse → coerce → dump round-trips (was previously dropped silently).
+describe('version field (v1.18 dogfooding fix)', () => {
+	test('version on a pages entry is preserved', () => {
+		withMeta(
+			`title: Group\npages:\n  api:\n    title: API\n    version: 1.2.3\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.pages?.api.version).toBe('1.2.3');
+			},
+		);
+	});
+
+	test('version on a child entry is preserved', () => {
+		withMeta(
+			`children:\n  - name: api\n    title: API\n    version: 0.1.0\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.children?.[0].version).toBe('0.1.0');
+			},
+		);
+	});
+
+	test('top-level version is preserved (dir-scoped chip)', () => {
+		withMeta(`title: Group\nversion: 2.0.0\n`, (p) => {
+			const m = readDirMeta(p);
+			expect(m?.version).toBe('2.0.0');
+		});
+	});
+
+	test('non-string version is ignored (coerce returns undefined)', () => {
+		// Numeric "version: 1.0" is parsed as number 1.0 by the YAML parser;
+		// coercePageMeta only carries through strings.
+		withMeta(`pages:\n  foo:\n    title: Foo\n    version: 1.0\n`, (p) => {
+			const m = readDirMeta(p);
+			expect(m?.pages?.foo.version).toBeUndefined();
+		});
+	});
+});
+
+// v1.18 prep: full top-level PageMeta fields (description / modified /
+// author / lifecycle / version / superseded_by / folded_to) must survive
+// readDirMeta — not just title/order/env/visibility.
+describe('top-level PageMeta fields preserved on DirMeta', () => {
+	test('description + modified + author at dir level survive', () => {
+		withMeta(
+			`title: Section\ndescription: A section.\nmodified: 2026-04-24\nauthor: alice\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.title).toBe('Section');
+				expect(m?.description).toBe('A section.');
+				expect(m?.modified).toBe('2026-04-24');
+				expect(m?.author).toBe('alice');
+			},
+		);
+	});
+
+	test('lifecycle + version at dir level survive', () => {
+		withMeta(
+			`title: Section\nlifecycle: stable\nversion: 1.0.0\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.lifecycle).toBe('stable');
+				expect(m?.version).toBe('1.0.0');
+			},
+		);
+	});
+});

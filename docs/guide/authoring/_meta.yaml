@@ -1,34 +1,27 @@
 title: 编写文档
 order: 20
-
-pages:
-  meta-yaml:
+children:
+  - name: meta-yaml
     title: _meta.yaml
-    order: 10
     description: 每个目录的元数据文件，决定该目录如何出现在侧边栏。
-  page-fields:
+  - name: page-fields
     title: 单文档字段
-    order: 20
     description: title / order / description / version / author / modified / env。
-  links-and-routes:
+  - name: links-and-routes
     title: 链接与路由
-    order: 30
     description: Markdown 内部链接的写法 —— 绝对路径、不带 .md 后缀。
-  code-blocks:
+  - name: code-blocks
     title: 代码块全家桶
-    order: 40
     description: zdoc 的 4 种代码块渲染模式 —— 语法高亮、行内 code、Mermaid 图表、EJS 模板预览的导览。
-  mermaid:
+  - name: mermaid
     title: Mermaid 图表全集
-    order: 50
     description: 覆盖流程图、时序图、类图、ER 图、状态图、甘特图、饼图、Git 图、用户旅程、思维导图、时间线、架构图、C4 模型等全部图表类型。
     version: 0.1.0
-  ejs-preview:
+  - name: ejs-preview
     title: EJS 代码块预览
-    order: 60
-    description: ```ejs 围栏块自动生成可交互预览面板 —— 作者只写模板，读者填表 + 实时看渲染结果。
+    description: "```ejs 围栏块自动生成可交互预览面板 —— 作者只写模板，读者填表 + 实时看渲染结果。"
     version: 0.1.0
-  lifecycle:
+  - name: lifecycle
     title: 文档生命周期
-    order: 70
     description: lifecycle / superseded_by / folded_to —— 让 docs 跨 30+ 篇仍可读、可搜、对 AI 友好。
+  - name: choose-a-structure

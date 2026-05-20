@@ -1,20 +1,15 @@
 title: 参考
 order: 10
-
-pages:
-  cli:
+children:
+  - name: cli
     title: 命令行参数
-    order: 10
     description: zdoc 所有 CLI 选项、默认值与典型组合。
-  config:
+  - name: config
     title: config.json 配置
-    order: 20
     description: 配置文件字段、优先级、环境变量。
-  mermaid-lint:
+  - name: mermaid-lint
     title: Mermaid 语法 lint
-    order: 30
     description: zdoc lint 如何校验 mermaid 代码块；为何用 mermaid.parse()；mermaid 内部使用 Jison + Langium。
-  fix-engine:
+  - name: fix-engine
     title: zdoc fix 引擎
-    order: 40
     description: v1.15 落地的修复子命令设计与实现现状 —— 处理 _meta.yaml 配置错误、常用使用错误；旧版 schema 迁移（pages-to-children）延后到 v2。

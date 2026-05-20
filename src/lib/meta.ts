@@ -10,6 +10,7 @@ export interface PageMeta {
 	visibility?: string;
 	description?: string;
 	author?: string;
+	version?: string;
 	lifecycle?: Lifecycle;
 	superseded_by?: string;
 	folded_to?: string;
@@ -259,6 +260,7 @@ function coercePageMeta(raw: unknown): PageMeta {
 		visibility: typeof r.visibility === 'string' ? r.visibility : undefined,
 		description: typeof r.description === 'string' ? r.description : undefined,
 		author: typeof r.author === 'string' ? r.author : undefined,
+		version: typeof r.version === 'string' ? r.version : undefined,
 		lifecycle: coerceLifecycle(r.lifecycle),
 		superseded_by: typeof r.superseded_by === 'string' ? r.superseded_by : undefined,
 		folded_to: typeof r.folded_to === 'string' ? r.folded_to : undefined,
