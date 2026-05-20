@@ -22,11 +22,13 @@ function writeMd(path: string, body: string) {
 }
 
 describe('lintDocs — happy path', () => {
-	test('healthy docs: 0 errors, 0 warnings', async () => {
-		writeMeta(docs, `title: Site\npages:\n  intro:\n    title: Intro\n`);
+	test('healthy docs: 0 errors, no consistency warnings', async () => {
+		// Use the new children: schema so meta-legacy-schema doesn't fire.
+		writeMeta(docs, `title: Site\nchildren:\n  - name: intro\n    title: Intro\n`);
 		writeMd(join(docs, 'intro.md'), '# Intro\n\nWelcome.\n');
 		const r = await lintDocs(docs);
 		expect(r.errors).toBe(0);
+		// 0 warnings on a v2-shape doc with no other issues
 		expect(r.warnings).toBe(0);
 	});
 });
@@ -54,7 +56,12 @@ describe('lintDocs — _meta.yaml consistency', () => {
 		writeMd(join(docs, 'index.md'), '# Home\n');
 		writeMd(join(docs, 'README.md'), '# Readme\n');
 		const r = await lintDocs(docs);
-		expect(r.warnings).toBe(0);
+		// Filter out v2-prep warnings (meta-legacy-schema etc.) so we
+		// assert specifically on the orphan rule.
+		const orphanWarnings = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('孤儿'),
+		);
+		expect(orphanWarnings.length).toBe(0);
 	});
 });
 
@@ -183,7 +190,9 @@ describe('lintDocs — code block / inline code skip', () => {
 		);
 		const r = await lintDocs(docs);
 		expect(r.errors).toBe(1);
-		expect(r.messages[0].message).toContain('/missing.md');
+		// errors[0], not messages[0], because v2-prep warnings may sit at the top.
+		const errorMsg = r.messages.find((m) => m.severity === 'error');
+		expect(errorMsg?.message).toContain('/missing.md');
 	});
 
 	test('folded blockquote inside fenced block is skipped', async () => {
@@ -572,5 +581,110 @@ describe('lintDocs — meta-yaml-missing', () => {
 		writeFileSync(join(docs, 'assets', 'image.png'), 'fake png');
 		const r = await lintDocs(docs);
 		expect(r.messages.some((m) => m.message.includes('缺少 _meta.yaml'))).toBe(false);
+	});
+});
+
+// v2-prep: meta-legacy-schema + meta-legacy-env-key warnings.
+// See docs/dev/next-major.md "已决定".
+describe('lintDocs — meta-legacy-schema (pages: → children:)', () => {
+	test('pages-only doc → meta-legacy-schema warning', async () => {
+		writeMeta(docs, `title: Site\npages:\n  intro:\n    title: Intro\n`);
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		const r = await lintDocs(docs);
+		expect(r.messages.some((m) => m.message.includes('pages:') && m.message.includes('children:'))).toBe(true);
+	});
+
+	test('children-only doc → 0 legacy-schema warning', async () => {
+		writeMeta(docs, `title: Site\nchildren:\n  - name: intro\n    title: Intro\n`);
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		const r = await lintDocs(docs);
+		expect(r.messages.some((m) => m.message.includes('v1 schema'))).toBe(false);
+	});
+
+	test('mixed pages+children → meta-legacy-schema warning fires once (only the pages: key triggers it)', async () => {
+		writeMeta(
+			docs,
+			`title: Site\npages:\n  legacy:\n    title: Legacy\nchildren:\n  - name: modern\n    title: Modern\n`,
+		);
+		writeMd(join(docs, 'legacy.md'), '# Legacy\n');
+		writeMd(join(docs, 'modern.md'), '# Modern\n');
+		const r = await lintDocs(docs);
+		const legacySchemaHits = r.messages.filter((m) => m.message.includes('v1 schema'));
+		expect(legacySchemaHits.length).toBe(1);
+	});
+
+	test('warning does not raise lint exit (errors still 0)', async () => {
+		writeMeta(docs, `title: Site\npages:\n  intro:\n    title: Intro\n`);
+		writeMd(join(docs, 'intro.md'), '# Intro\n');
+		const r = await lintDocs(docs);
+		expect(r.errors).toBe(0);
+		expect(r.warnings).toBeGreaterThanOrEqual(1);
+	});
+});
+
+describe('lintDocs — meta-legacy-env-key (env: → visibility:)', () => {
+	test('pages entry with env: prod → meta-legacy-env-key warning', async () => {
+		writeMeta(
+			docs,
+			`title: Site\npages:\n  marketing:\n    title: Marketing\n    env: prod\n`,
+		);
+		writeMd(join(docs, 'marketing.md'), '# Marketing\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+		);
+		expect(hits.length).toBe(1);
+		expect(hits[0].message).toContain('pages.marketing');
+	});
+
+	test('children entry with env: prod → meta-legacy-env-key warning', async () => {
+		writeMeta(
+			docs,
+			`title: Site\nchildren:\n  - name: marketing\n    title: Marketing\n    env: prod\n`,
+		);
+		writeMd(join(docs, 'marketing.md'), '# Marketing\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+		);
+		expect(hits.length).toBe(1);
+		expect(hits[0].message).toContain('children.marketing');
+	});
+
+	test('top-level env: also triggers meta-legacy-env-key warning', async () => {
+		writeMeta(docs, `title: Internal\nenv: prod\nchildren:\n  - name: foo\n    title: Foo\n`);
+		writeMd(join(docs, 'foo.md'), '# Foo\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+		);
+		expect(hits.length).toBe(1);
+	});
+
+	test('visibility: prod-only on a child entry → 0 legacy-env-key warning', async () => {
+		writeMeta(
+			docs,
+			`title: Site\nchildren:\n  - name: marketing\n    title: Marketing\n    visibility: prod-only\n`,
+		);
+		writeMd(join(docs, 'marketing.md'), '# Marketing\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+		);
+		expect(hits.length).toBe(0);
+	});
+
+	test('multiple env: occurrences each produce one warning', async () => {
+		writeMeta(
+			docs,
+			`title: Site\nenv: prod\npages:\n  a:\n    title: A\n    env: prod\n  b:\n    title: B\n    env: prod\n`,
+		);
+		writeMd(join(docs, 'a.md'), '# A\n');
+		writeMd(join(docs, 'b.md'), '# B\n');
+		const r = await lintDocs(docs);
+		const hits = r.messages.filter(
+			(m) => m.severity === 'warning' && m.message.includes('env:') && m.message.includes('visibility:'),
+		);
+		expect(hits.length).toBe(3); // top-level + pages.a + pages.b
 	});
 });

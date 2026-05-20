@@ -5,7 +5,7 @@
 
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, resolve, dirname, relative, sep } from 'node:path';
-import { readDirMeta } from './meta-mini.js';
+import { readDirMeta, parseYaml } from './meta-mini.js';
 
 // -----------------------------------------------------------------------------
 // Lint engine
@@ -53,6 +53,14 @@ function scanDocs(docsDir: string): DocsScan {
 			if (dm?.pages) {
 				for (const key of Object.keys(dm.pages)) {
 					const fileName = key.endsWith('.pdf') ? key : key + '.md';
+					listedFiles.add(resolve(d, fileName));
+				}
+			}
+			// v2-prep: children: entries also count toward "listed" so
+			// children-only docs don't trip the orphan-md warning.
+			if (dm?.children) {
+				for (const child of dm.children) {
+					const fileName = child.name.endsWith('.pdf') ? child.name : child.name + '.md';
 					listedFiles.add(resolve(d, fileName));
 				}
 			}
@@ -186,6 +194,89 @@ function lintMetaYamlMissing(scan: DocsScan): LintMessage[] {
 				file: rel(scan.docsDir, dir),
 				line: 1,
 				message: '目录有 .md 文件但缺少 _meta.yaml',
+			});
+		}
+	}
+	return out;
+}
+
+// v2-prep Rule: meta-legacy-schema (warning)
+// _meta.yaml uses the legacy `pages:` map. v2 will replace it with the new
+// `children:` list schema. See docs/dev/next-major.md "已决定" → schema.
+function lintMetaLegacySchema(scan: DocsScan): LintMessage[] {
+	const out: LintMessage[] = [];
+	for (const meta of scan.metaFiles) {
+		let parsed: Record<string, unknown>;
+		try {
+			parsed = parseYaml(readFileSync(meta, 'utf-8'));
+		} catch {
+			continue; // malformed yaml — already reported by lintMetaConsistency
+		}
+		if ('pages' in parsed && parsed.pages !== undefined && parsed.pages !== null) {
+			out.push({
+				severity: 'warning',
+				file: rel(scan.docsDir, meta),
+				line: 1,
+				message:
+					'pages: 是 v1 schema，v2 将改用 children: 列表（运行 `zdoc fix --recipe=pages-to-children` 在 v2 开发期可机械迁移）',
+			});
+		}
+	}
+	return out;
+}
+
+// v2-prep Rule: meta-legacy-env-key (warning)
+// `env:` field is renamed to `visibility:` in v2 (env: prod → visibility:
+// prod-only). Walk the raw parseYaml result so we catch every occurrence
+// (top-level, under pages.*, under children[]).
+function lintMetaLegacyEnvKey(scan: DocsScan): LintMessage[] {
+	const out: LintMessage[] = [];
+	function hasEnvKey(obj: unknown): boolean {
+		return !!obj && typeof obj === 'object' && !Array.isArray(obj) && 'env' in (obj as Record<string, unknown>);
+	}
+	for (const meta of scan.metaFiles) {
+		let parsed: Record<string, unknown>;
+		try {
+			parsed = parseYaml(readFileSync(meta, 'utf-8'));
+		} catch {
+			continue;
+		}
+		const relPath = rel(scan.docsDir, meta);
+		const baseMsg = '字段 env: 在 v2 已重命名为 visibility:（env: prod → visibility: prod-only）';
+
+		// Top-level
+		if (hasEnvKey(parsed)) {
+			out.push({ severity: 'warning', file: relPath, line: 1, message: baseMsg });
+		}
+
+		// pages.*
+		const pagesRaw = parsed.pages;
+		if (pagesRaw && typeof pagesRaw === 'object' && !Array.isArray(pagesRaw)) {
+			for (const [key, page] of Object.entries(pagesRaw as Record<string, unknown>)) {
+				if (hasEnvKey(page)) {
+					out.push({
+						severity: 'warning',
+						file: relPath,
+						line: 1,
+						message: `${baseMsg}（pages.${key}）`,
+					});
+				}
+			}
+		}
+
+		// children[]
+		const childrenRaw = parsed.children;
+		if (Array.isArray(childrenRaw)) {
+			childrenRaw.forEach((item, idx) => {
+				if (!hasEnvKey(item)) return;
+				const r = item as Record<string, unknown>;
+				const label = typeof r.name === 'string' && r.name ? r.name : `[${idx}]`;
+				out.push({
+					severity: 'warning',
+					file: relPath,
+					line: 1,
+					message: `${baseMsg}（children.${label}）`,
+				});
 			});
 		}
 	}
@@ -771,6 +862,8 @@ export async function lintDocs(docsDir: string): Promise<LintReport> {
 		...lintMetaSubdirAsFile(scan),
 		...lintMetaMissingTitle(scan),
 		...lintMetaYamlMissing(scan),
+		...lintMetaLegacySchema(scan),
+		...lintMetaLegacyEnvKey(scan),
 		...lintLifecycleTargets(scan),
 		...lintInternalLinks(scan),
 		...lintFoldedBlockquotes(scan),
@@ -790,6 +883,8 @@ Checks performed:
   • meta-subdir-as-file: pages key points to a directory, not a .md file
   • meta-missing-title: pages key has no title field
   • meta-yaml-missing: directory has .md files but no _meta.yaml
+  • meta-legacy-schema: _meta.yaml uses v1 pages: (v2 → children:)
+  • meta-legacy-env-key: env: field used (v2 → visibility:)
   • Internal markdown link existence
   • Lifecycle target existence (superseded_by / folded_to)
   • Folded blockquote convention ("> 已折叠到 [text](path)")

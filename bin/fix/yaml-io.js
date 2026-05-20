@@ -42,12 +42,28 @@ function coercePageMeta(raw) {
         order: Number.isFinite(order) ? order : undefined,
         modified: typeof r.modified === 'string' ? r.modified : undefined,
         env: typeof r.env === 'string' ? r.env : undefined,
+        visibility: typeof r.visibility === 'string' ? r.visibility : undefined,
         description: typeof r.description === 'string' ? r.description : undefined,
         author: typeof r.author === 'string' ? r.author : undefined,
         lifecycle: coerceLifecycle(r.lifecycle),
         superseded_by: typeof r.superseded_by === 'string' ? r.superseded_by : undefined,
         folded_to: typeof r.folded_to === 'string' ? r.folded_to : undefined,
     };
+}
+function coerceChildEntries(raw) {
+    if (!Array.isArray(raw))
+        return undefined;
+    const out = [];
+    for (const item of raw) {
+        if (!item || typeof item !== 'object')
+            continue;
+        const r = item;
+        if (typeof r.name !== 'string' || r.name === '')
+            continue;
+        const meta = coercePageMeta(r);
+        out.push({ name: r.name, ...meta });
+    }
+    return out;
 }
 export function parseDirMetaFromString(source) {
     try {
@@ -57,6 +73,7 @@ export function parseDirMetaFromString(source) {
             title: base.title,
             order: base.order,
             env: base.env,
+            visibility: base.visibility,
         };
         const pagesRaw = parsed.pages;
         if (pagesRaw && typeof pagesRaw === 'object') {
@@ -66,6 +83,9 @@ export function parseDirMetaFromString(source) {
             }
             out.pages = pages;
         }
+        const children = coerceChildEntries(parsed.children);
+        if (children)
+            out.children = children;
         return out;
     }
     catch {

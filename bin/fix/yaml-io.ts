@@ -11,7 +11,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { readDirMeta, parseYaml } from '../meta-mini.js';
-import type { DirMeta, PageMeta, Lifecycle } from './types.js';
+import type { DirMeta, PageMeta, ChildEntry, Lifecycle } from './types.js';
 
 export interface DirMetaReadResult {
 	meta: DirMeta | null;   // null when parse failed (mirrors readDirMeta)
@@ -55,12 +55,26 @@ function coercePageMeta(raw: unknown): PageMeta {
 		order: Number.isFinite(order) ? (order as number) : undefined,
 		modified: typeof r.modified === 'string' ? r.modified : undefined,
 		env: typeof r.env === 'string' ? r.env : undefined,
+		visibility: typeof r.visibility === 'string' ? r.visibility : undefined,
 		description: typeof r.description === 'string' ? r.description : undefined,
 		author: typeof r.author === 'string' ? r.author : undefined,
 		lifecycle: coerceLifecycle(r.lifecycle),
 		superseded_by: typeof r.superseded_by === 'string' ? r.superseded_by : undefined,
 		folded_to: typeof r.folded_to === 'string' ? r.folded_to : undefined,
 	};
+}
+
+function coerceChildEntries(raw: unknown): ChildEntry[] | undefined {
+	if (!Array.isArray(raw)) return undefined;
+	const out: ChildEntry[] = [];
+	for (const item of raw) {
+		if (!item || typeof item !== 'object') continue;
+		const r = item as Record<string, unknown>;
+		if (typeof r.name !== 'string' || r.name === '') continue;
+		const meta = coercePageMeta(r);
+		out.push({ name: r.name, ...meta });
+	}
+	return out;
 }
 
 export function parseDirMetaFromString(source: string): DirMeta | null {
@@ -71,6 +85,7 @@ export function parseDirMetaFromString(source: string): DirMeta | null {
 			title: base.title,
 			order: base.order,
 			env: base.env,
+			visibility: base.visibility,
 		};
 		const pagesRaw = parsed.pages;
 		if (pagesRaw && typeof pagesRaw === 'object') {
@@ -80,6 +95,8 @@ export function parseDirMetaFromString(source: string): DirMeta | null {
 			}
 			out.pages = pages;
 		}
+		const children = coerceChildEntries(parsed.children);
+		if (children) out.children = children;
 		return out;
 	} catch {
 		return null;

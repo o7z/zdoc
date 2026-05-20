@@ -93,6 +93,7 @@ apply_fix(finding_id: string, confirm: true)
 | `scaffold-meta-yaml` | ✅ v1.15 | 目录里有 `.md` 但缺 `_meta.yaml` | 用目录名作 title，按文件名字典序生成 `pages:` | ✅ 新建文件 | `meta-yaml-missing`（v1.15 新增，warning） |
 | `prune-missing-page` | ✅ v1.15 | `pages:` 列了 key 但对应 `.md`/`.pdf` 都不存在 | **不自动修**（`autoFix: false`），作为 finding 暴露，提示用户人工裁决 | — | `meta-page-target-missing`（lint 已有，error） |
 | `pages-to-children` | v2 待加 | `_meta.yaml` 仍用 `pages:` map（v2 schema 迁移） | 机械翻译成 `children:` 列表，保留 `order:` 决定的相对顺序 | ✅ 完全机械 | `meta-legacy-schema`（v2 开发期随 dual-parser 一起落地） |
+| `env-to-visibility` | v2 待加 | `_meta.yaml` 条目带 `env: prod`（v2 字段重命名） | 机械替换为 `visibility: prod-only` | ✅ 完全机械 | `meta-legacy-env-key`（v2 开发期随 dual-key parser 一起落地） |
 
 `prune-missing-page` 是模糊 recipe 的代表 —— `zdoc fix --apply` 默认会**跳过**它，并在输出里提示"请人工裁决"。
 

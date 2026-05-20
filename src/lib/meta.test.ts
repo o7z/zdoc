@@ -2,7 +2,7 @@ import { test, expect, describe } from 'bun:test';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { readDirMeta } from './meta.js';
+import { readDirMeta, parseYaml } from './meta.js';
 
 function withMeta(yaml: string, run: (path: string) => void) {
 	const dir = mkdtempSync(join(tmpdir(), 'zdoc-meta-test-'));
@@ -173,6 +173,175 @@ describe('backward compatibility', () => {
 				expect(foo?.superseded_by).toBe('/docs/new.md');
 				expect(foo?.folded_to).toBe('/docs/auth.md#sec');
 				expect(foo?.author).toBe('bob');
+			},
+		);
+	});
+});
+
+// v2-prep: parseYaml supports list-of-mappings (the YAML shape behind the
+// new `children:` schema). See docs/dev/next-major.md.
+describe('parseYaml — list-of-mappings (children: shape)', () => {
+	test('basic list of mappings under a top-level key', () => {
+		const parsed = parseYaml(
+			`title: Authoring\nchildren:\n  - name: meta-yaml\n    title: _meta.yaml\n  - name: page-fields\n    title: Page fields\n`,
+		);
+		expect(parsed.title).toBe('Authoring');
+		expect(Array.isArray(parsed.children)).toBe(true);
+		const c = parsed.children as Array<Record<string, unknown>>;
+		expect(c.length).toBe(2);
+		expect(c[0].name).toBe('meta-yaml');
+		expect(c[0].title).toBe('_meta.yaml');
+		expect(c[1].name).toBe('page-fields');
+		expect(c[1].title).toBe('Page fields');
+	});
+
+	test('list item with only a name field (subdir shorthand)', () => {
+		const parsed = parseYaml(
+			`children:\n  - name: choose-a-structure\n  - name: lifecycle\n    title: Lifecycle\n`,
+		);
+		const c = parsed.children as Array<Record<string, unknown>>;
+		expect(c.length).toBe(2);
+		expect(c[0].name).toBe('choose-a-structure');
+		expect(c[0].title).toBeUndefined();
+		expect(c[1].name).toBe('lifecycle');
+		expect(c[1].title).toBe('Lifecycle');
+	});
+
+	test('list items carry PageMeta-shaped fields', () => {
+		const parsed = parseYaml(
+			`children:\n  - name: foo\n    title: Foo\n    order: 10\n    description: Hello\n    visibility: prod-only\n    lifecycle: stable\n`,
+		);
+		const c = parsed.children as Array<Record<string, unknown>>;
+		expect(c[0].name).toBe('foo');
+		expect(c[0].title).toBe('Foo');
+		expect(c[0].order).toBe(10);
+		expect(c[0].description).toBe('Hello');
+		expect(c[0].visibility).toBe('prod-only');
+		expect(c[0].lifecycle).toBe('stable');
+	});
+
+	test('pages and children can coexist in the same document', () => {
+		const parsed = parseYaml(
+			`title: Mixed\npages:\n  legacy:\n    title: Legacy\nchildren:\n  - name: modern\n    title: Modern\n`,
+		);
+		expect(parsed.title).toBe('Mixed');
+		expect(parsed.pages).toBeDefined();
+		expect((parsed.pages as Record<string, unknown>).legacy).toBeDefined();
+		expect(Array.isArray(parsed.children)).toBe(true);
+		const c = parsed.children as Array<Record<string, unknown>>;
+		expect(c.length).toBe(1);
+		expect(c[0].name).toBe('modern');
+	});
+
+	test('list-of-mappings does not break top-level pages parsing', () => {
+		// Regression guard: the legacy pages map must still parse correctly
+		// even after parseYaml gained list support.
+		const parsed = parseYaml(
+			`title: LegacyOnly\npages:\n  intro:\n    title: Intro\n    order: 1\n  guide:\n    title: Guide\n    order: 2\n`,
+		);
+		expect(parsed.children).toBeUndefined();
+		const pages = parsed.pages as Record<string, Record<string, unknown>>;
+		expect(pages.intro.title).toBe('Intro');
+		expect(pages.guide.order).toBe(2);
+	});
+
+	test('three or more items, preserving order', () => {
+		const parsed = parseYaml(
+			`children:\n  - name: a\n  - name: b\n  - name: c\n  - name: d\n`,
+		);
+		const c = parsed.children as Array<Record<string, unknown>>;
+		expect(c.map((x) => x.name)).toEqual(['a', 'b', 'c', 'd']);
+	});
+
+	test('empty children: key with no list items → null (not crash)', () => {
+		// `children:` followed by nothing (or only sibling top-level keys) is
+		// an edge case: parseYaml resolves the value to null, exactly as it
+		// does for any empty mapping/sequence key.
+		const parsed = parseYaml(`title: T\nchildren:\n`);
+		expect(parsed.title).toBe('T');
+		expect(parsed.children).toBeNull();
+	});
+});
+
+// v2-prep: readDirMeta exposes ChildEntry[] under DirMeta.children when the
+// file uses the new `children:` schema; visibility: field is recognized
+// alongside legacy env: field. See docs/dev/next-major.md.
+describe('readDirMeta — children list + visibility field', () => {
+	test('children: list is exposed as DirMeta.children with PageMeta fields', () => {
+		withMeta(
+			`title: Authoring\nchildren:\n  - name: meta-yaml\n    title: _meta.yaml\n    order: 10\n  - name: page-fields\n    title: Page fields\n    description: Doc fields\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.title).toBe('Authoring');
+				expect(m?.children?.length).toBe(2);
+				expect(m?.children?.[0].name).toBe('meta-yaml');
+				expect(m?.children?.[0].title).toBe('_meta.yaml');
+				expect(m?.children?.[0].order).toBe(10);
+				expect(m?.children?.[1].name).toBe('page-fields');
+				expect(m?.children?.[1].description).toBe('Doc fields');
+			},
+		);
+	});
+
+	test('child entry with missing name field is skipped', () => {
+		withMeta(
+			`children:\n  - name: kept\n    title: Kept\n  - title: NoName\n  - name: also-kept\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.children?.length).toBe(2);
+				expect(m?.children?.map((c) => c.name)).toEqual(['kept', 'also-kept']);
+			},
+		);
+	});
+
+	test('visibility: field on a page entry is recognized', () => {
+		withMeta(
+			`title: Group\npages:\n  marketing:\n    title: Marketing\n    visibility: prod-only\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.pages?.marketing.visibility).toBe('prod-only');
+			},
+		);
+	});
+
+	test('visibility: field on a child entry is recognized', () => {
+		withMeta(
+			`children:\n  - name: marketing\n    title: Marketing\n    visibility: prod-only\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.children?.[0].visibility).toBe('prod-only');
+				expect(m?.children?.[0].name).toBe('marketing');
+			},
+		);
+	});
+
+	test('visibility: field at top level (dir-scoped) is recognized', () => {
+		withMeta(`title: Internal\nvisibility: prod-only\n`, (p) => {
+			const m = readDirMeta(p);
+			expect(m?.visibility).toBe('prod-only');
+			expect(m?.title).toBe('Internal');
+		});
+	});
+
+	test('env and visibility coexist without overriding each other', () => {
+		withMeta(
+			`pages:\n  foo:\n    title: Foo\n    env: prod\n    visibility: prod-only\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.pages?.foo.env).toBe('prod');
+				expect(m?.pages?.foo.visibility).toBe('prod-only');
+			},
+		);
+	});
+
+	test('pages and children coexist in the same DirMeta (lint reports it later)', () => {
+		withMeta(
+			`title: Mixed\npages:\n  legacy:\n    title: Legacy\nchildren:\n  - name: modern\n    title: Modern\n`,
+			(p) => {
+				const m = readDirMeta(p);
+				expect(m?.pages?.legacy.title).toBe('Legacy');
+				expect(m?.children?.length).toBe(1);
+				expect(m?.children?.[0].name).toBe('modern');
 			},
 		);
 	});

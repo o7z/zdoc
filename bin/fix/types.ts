@@ -23,6 +23,7 @@ export interface PageMeta {
 	order?: number;
 	modified?: string;
 	env?: string;
+	visibility?: string;
 	description?: string;
 	author?: string;
 	lifecycle?: Lifecycle;
@@ -30,11 +31,18 @@ export interface PageMeta {
 	folded_to?: string;
 }
 
+// v2-prep: children: list entries. See docs/dev/next-major.md.
+export interface ChildEntry extends PageMeta {
+	name: string;
+}
+
 export interface DirMeta {
 	title?: string;
 	order?: number;
 	env?: string;
+	visibility?: string;
 	pages?: Record<string, PageMeta>;
+	children?: ChildEntry[];
 }
 
 // -----------------------------------------------------------------------------

@@ -18,7 +18,12 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 type SpecKitSet = Set<string>;
 
 function visible(meta: PageMeta): boolean {
-	if (meta.env === 'prod' && !IS_PROD) return false;
+	// v2-prep: visibility: prod-only is the new spelling of env: prod.
+	// Both are accepted during the v1.x → 2.0 transition; either one
+	// triggers the "hide outside production" behavior. See
+	// docs/dev/next-major.md "env: → visibility: 字段重命名".
+	const prodOnly = meta.visibility === 'prod-only' || meta.env === 'prod';
+	if (prodOnly && !IS_PROD) return false;
 	return true;
 }
 
@@ -114,29 +119,69 @@ function scanDir(dir: string, root: string, specKitSet: SpecKitSet): SidebarGrou
 	}
 
 	const dirMeta = readDirMeta(join(dir, '_meta.yaml'));
-	const pages = dirMeta?.pages ?? {};
-	for (const [key, meta] of Object.entries(pages)) {
-		if (!meta.title || !visible(meta)) continue;
 
-		const targetPath = join(dir, key.endsWith('.pdf') ? key : key + '.md');
-		if (!existsSync(targetPath) || !statSync(targetPath).isFile()) continue;
+	// v2-prep: when the dir uses the new `children:` schema, render file
+	// entries from that list (preserving array order via implicit order =
+	// (idx+1)*10). Subdir entries in children are intentionally skipped —
+	// during v1.x they continue to surface through the 自发现 loop above,
+	// preserving v1 behavior. The 2.0 cutover will switch to strict
+	// position-based ordering.
+	if (dirMeta?.children) {
+		dirMeta.children.forEach((child, idx) => {
+			if (!child.title || !visible(child)) return;
+			// Skip when name maps to a directory (handled by 自发现)
+			const subdirPath = join(dir, child.name);
+			if (existsSync(subdirPath) && statSync(subdirPath).isDirectory()) return;
 
-		const rel = relative(root, targetPath).replace(/\\/g, '/');
-		const link = '/' + rel;
-		const fileIsSpecKit = isSpecKitFile(rel, specKitSet);
+			const targetPath = join(
+				dir,
+				child.name.endsWith('.pdf') ? child.name : child.name + '.md',
+			);
+			if (!existsSync(targetPath) || !statSync(targetPath).isFile()) return;
 
-		items.push({
-			order: meta.order ?? 999,
-			text: meta.title,
-			specKit: fileIsSpecKit,
-			item: {
-				text: meta.title,
-				link,
-				lifecycle: meta.lifecycle,
-				superseded: Boolean(meta.superseded_by),
+			const rel = relative(root, targetPath).replace(/\\/g, '/');
+			const link = '/' + rel;
+			const fileIsSpecKit = isSpecKitFile(rel, specKitSet);
+
+			items.push({
+				order: child.order ?? (idx + 1) * 10,
+				text: child.title,
 				specKit: fileIsSpecKit,
-			},
+				item: {
+					text: child.title,
+					link,
+					lifecycle: child.lifecycle,
+					superseded: Boolean(child.superseded_by),
+					specKit: fileIsSpecKit,
+				},
+			});
 		});
+	} else {
+		// v1: pages map (existing behavior unchanged)
+		const pages = dirMeta?.pages ?? {};
+		for (const [key, meta] of Object.entries(pages)) {
+			if (!meta.title || !visible(meta)) continue;
+
+			const targetPath = join(dir, key.endsWith('.pdf') ? key : key + '.md');
+			if (!existsSync(targetPath) || !statSync(targetPath).isFile()) continue;
+
+			const rel = relative(root, targetPath).replace(/\\/g, '/');
+			const link = '/' + rel;
+			const fileIsSpecKit = isSpecKitFile(rel, specKitSet);
+
+			items.push({
+				order: meta.order ?? 999,
+				text: meta.title,
+				specKit: fileIsSpecKit,
+				item: {
+					text: meta.title,
+					link,
+					lifecycle: meta.lifecycle,
+					superseded: Boolean(meta.superseded_by),
+					specKit: fileIsSpecKit,
+				},
+			});
+		}
 	}
 
 	items.sort((a, b) => a.order - b.order || a.text.localeCompare(b.text));

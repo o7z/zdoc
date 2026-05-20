@@ -89,38 +89,70 @@ children:
 - 父级**不允许**覆盖子目录 title:identity 归自身原则不松动。
 - 同级 `.md` 与子目录的渲染顺序由 `children:` 列表中的位置直接决定,不再有"file 优先"的 tie-breaker。
 
+#### 自发现规则:未登记 = 不显示
+
+v1 行为"子目录有 `_meta.yaml` 就自动出现在侧边栏末尾"在 v2 取消。子目录与 `.md` 文件一样必须在父级 `children:` 显式登记,否则不显示。
+
+设计延伸:**arrangement 归容器**贯穿 file 和 dir,父级 `children:` 是侧边栏顺序的唯一声明。
+
+**配套工具**:[`zdoc fix`](/dev/reference/fix-engine.md) 的 `register-orphan` recipe 在 v2 开发期从只管 `.md` 扩展到也管子目录 —— 子目录存在 `_meta.yaml` 但父级 `children:` 未列出 → 自动追加。新建子目录的体验仍是"扔进去 → `zdoc fix` → 齐",零配置体感由工具层承接。
+
+`pages-to-children` recipe 切换时同步把现有自发现的子目录登记到父级,避免迁移后从侧边栏消失。
+
+#### 目录入口由 `children[0]` 决定
+
+`<dir>/sub/index.md` 在 v2 取消特殊地位:
+
+- 跟其他 `.md` 一样必须在子目录自己的 `children:` 里显式登记;v1 的 lint 白名单豁免取消。
+- 直接访问目录 URL(例如 `/guide/authoring/choose-a-structure/`)时,parser 显示 `children:` 列表的**第一项**,而非按文件名 `index` fallback。
+- 若 `children[0]` 是子目录,parser **递归**进入该子目录继续找 `children[0]`,直到落到一个 `.md`。`children:` 为空或递归到底仍无 `.md` → lint error("目录无可显示的入口页")。
+
+设计延伸:文件名不承载特殊语义,arrangement 完全由 `children:` 顺序决定。"想让 X 作目录封面" → 把 X 排到首位,文件名是 `index` / `overview` / `intro` 都一样。
+
+附带:v1 在父级 pages 写 `sub:` 错把子目录当文件的 footgun 在 `children:` schema 下天然消失,[`_meta.yaml` 文档](/guide/authoring/meta-yaml.md) 与 `skills/zdoc/SKILL.md` 中对应警告段落可在 v2 文档更新时整段删。
+
+### `env:` → `visibility:` 字段重命名
+
+v1 的 `env: prod` 字面读起来像"声明归属",但实际语义是"production-only 显示, dev 模式隐藏",反向理解高发。v2 改字段名 + 改值表达,让字面对齐语义。
+
+#### 当前
+
+```yaml
+pages:
+  marketing-page:
+    title: 营销页
+    env: prod              # 实际: 只在 prod 显示, dev 隐藏
+```
+
+#### 之后
+
+```yaml
+children:
+  - name: marketing-page
+    title: 营销页
+    visibility: prod-only  # 字面直白
+```
+
+#### 设计选择
+
+- **字段名 `visibility:`** —— 维度对位,从"环境归属"换到"可见性"
+- **值 `prod-only`** —— 字面无需脑补 dev 行为
+- **扩展空间** —— 未来可无 schema 改动支持 `dev-only`、`hidden`(完全不显示)、需要时再加 staging 形式;不引入"每个环境一个键"的散落 schema
+
+#### 迁移策略
+
+- **v2 开发期**:dual-key parser,`env: prod` 和 `visibility: prod-only` 都接受;lint 出 `meta-legacy-env-key` warning 鼓励迁移
+- **2.0**:`env:` 字段移除,parser 只认 `visibility:`,lint 报 error
+- **工具**:[`zdoc fix`](/dev/reference/fix-engine.md) 新增 `env-to-visibility` recipe(机械翻译、可逆),在 v2 开发期与 `pages-to-children` 同期落地
+
+#### 边界确认
+
+- v2 首发只引入 `visibility: prod-only` 一个值(对应 v1 `env: prod`);其他值(`dev-only` / `hidden`)等真有需求再加,避免一次性引入未验证语义。
+- 不引入快捷写法(例如 `visibility: prod` 简写):统一 `<scope>-only` 后缀,避免歧义。
+
 ## 待评估候选
 
-> 以下条目尚未做决定,先记录,等讨论。每条挂 ⚠️ 表示**上层依赖待补**,不是当前状态。
-
-### `env:` 字段命名/语义
-
-**问题**:目前 `env: prod` 字面读起来像"在 production 显示",但实际语义是"production-only 显示,**dev 模式下隐藏**"。看到 `prod` 容易反向理解。
-
-**候选方向**:
-- `visibility: prod-only` —— 直白点出"可见性"维度
-- `hidden_in: dev` —— 反向描述,直接说"在哪隐藏"
-- `dev: hidden` —— 同义,更短
-
-⚠️ 未决:候选间的取舍、是否同时打开 `staging` 等可扩展空间、迁移路径。
-
-### 目录入口页约定
-
-**问题**:目前 `<dir>/sub/index.md` 是 lint 白名单,且 [`_meta.yaml` 文档](/guide/authoring/meta-yaml.md)与 SKILL.md 都专门写一段警告"不要在父级 pages 写 `sub:`,会被错误解析为 `<dir>/sub.md`"。是长期已知的 footgun。
-
-**`children:` 改造后的天然解法**:dir 条目就是 `{name: sub}`,parser 知道这是子目录(不会去找 `sub.md`),footgun 消失。
-
-⚠️ 未决:是否要求 `<dir>/sub/index.md` 也在子目录自己的 `children:` 里**显式登记**(去掉自发现豁免),还是延续白名单。前者更"显式即可见",后者更零配置。
-
-### 未在父级 `children:` 登记的子目录
-
-**问题**:子目录有 `_meta.yaml` 但父级 `children:` 没列出它,该不该出现?
-
-**两种方向**:
-- 保留自发现:出现在末尾(已登记项之后,按目录名字典序),保留 zdoc 零配置基调
-- 严格登记:不出现,跟 file 必须登记的语义一致
-
-⚠️ 未决,跟上一条相关联。
+> _目前无待评估条目。新加条目挂 ⚠️ 表示上层依赖待补。_
 
 ## 明确不做
 
@@ -136,7 +168,10 @@ children:
 ### zdoc 自身
 
 - [ ] `docs/` 下所有 `_meta.yaml` 改成 `children:` 形式（`zdoc fix --recipe=pages-to-children --apply`，待 v2 开发期实现 recipe）
+- [ ] `docs/` 下所有 `env: prod` 改成 `visibility: prod-only`（`zdoc fix --recipe=env-to-visibility --apply`，待 v2 开发期实现 recipe）
 - [ ] [`docs/guide/authoring/meta-yaml.md`](/guide/authoring/meta-yaml.md) 重写,反映新 schema
+- [ ] [`docs/guide/authoring/page-fields.md`](/guide/authoring/page-fields.md) 的 `env` 字段说明改成 `visibility`
+- [ ] [`docs/glossary.md`](/glossary.md) 中 `env: prod` 词条改成 `visibility: prod-only`(或加重定向)
 - [ ] `skills/zdoc/SKILL.md` 更新规则段(目录入口页 footgun 段落,如 schema 改造后失效则整段删)
 - [ ] CHANGELOG / release notes 列出 breaking changes 与迁移步骤
 - [ ] `README.md` / `README.zh-CN.md` 升级示例片段
