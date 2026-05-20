@@ -8,14 +8,31 @@ import { fileURLToPath } from 'node:url';
 import type { LayoutServerLoad } from './$types';
 
 function readAppVersion(): string {
+	// bin/cli.ts sets ZDOC_VERSION from package.json at startup. After
+	// SvelteKit build, __dirname resolves under .svelte-kit/output/server/...
+	// where no package.json lives, so the env var is the only reliable source
+	// during a real `zdoc` run. Filesystem lookup is kept as a dev/standalone
+	// fallback (e.g. `pnpm dev` or library-mode imports).
+	if (process.env.ZDOC_VERSION) return process.env.ZDOC_VERSION;
 	try {
 		const __dirname = fileURLToPath(new URL('.', import.meta.url));
-		const pkgPath = join(__dirname, '..', 'package.json');
-		const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-		return pkg.version;
+		// Walk up until we find a package.json with @o7z/zdoc — handles both
+		// the dev tree (src/routes/...) and any future build layout shift.
+		let dir = __dirname;
+		for (let i = 0; i < 6; i++) {
+			const pkgPath = join(dir, 'package.json');
+			try {
+				const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+				if (pkg.name === '@o7z/zdoc') return pkg.version;
+			} catch {
+				/* try parent */
+			}
+			dir = join(dir, '..');
+		}
 	} catch {
-		return '0.0.0';
+		/* fall through */
 	}
+	return '0.0.0';
 }
 
 function readCollapsedGroups(raw: string | undefined): string[] {
